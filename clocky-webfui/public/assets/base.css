@@ -1,0 +1,9 @@
+body { background-color:grey; }
+path.millis1 { stroke-width:1; stroke:pink; fill:brown; }
+path.millis2 { stroke:brown; fill:pink; }
+path.seconds1 { stroke:pink; fill:brown; }
+path.seconds2 { stroke:brown; fill:pink; }
+path.minutes1 { stroke:pink; fill:brown; }
+path.minutes2 { stroke:brown; fill:pink; }
+path.hours1 { stroke:pink; fill:brown; }
+path.hours2 { stroke:brown; fill:pink; }
