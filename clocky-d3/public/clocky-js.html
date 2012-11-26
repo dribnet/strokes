@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>D3 Test</title>
+        <style type="text/css">
+
+body { background-color:grey; }
+path.millis1 { stroke-width:1; stroke:pink; fill:brown; }
+path.millis2 { stroke:brown; fill:pink; }
+path.seconds1 { stroke:pink; fill:brown; }
+path.seconds2 { stroke:brown; fill:pink; }
+path.minutes1 { stroke:pink; fill:brown; }
+path.minutes2 { stroke:brown; fill:pink; }
+path.hours1 { stroke:pink; fill:brown; }
+path.hours2 { stroke:brown; fill:pink; }
+
+        </style>
+        <script type="text/javascript" src="d3/d3.v2.js"></script>
+    </head>
+    <body>
+      <div id="clocky">
+      <!-- this is where the magic happens -->
+      </div>
+        <script type="text/javascript">
+
+            var radii = {'hours': 275, 'minutes': 200, 'seconds': 110, 'millis': 30};
+
+            var arc = d3.svg.arc()
+                .startAngle(function(d) { return d.value * 2 * Math.PI / 100; })
+                .endAngle(function(d) { return (d.value+50) * 2 * Math.PI / 100; })
+                .innerRadius(0)
+                .outerRadius(function(d) { return radii[d.key] });
+
+            var root = d3.select("#clocky").append("svg")
+                .attr("width", 600)
+                .attr("height", 600)
+                .append("g")
+                .attr("transform", "translate(300,300)rotate(-90)");
+
+            var curClockData = function() {
+                var d = new Date;
+                var hours = (d.getHours() % 12) * 100.0 / 12;
+                var minutes = d.getMinutes() * 100.0 / 60;
+                var seconds = d.getSeconds() * 100.0 / 60;
+                var millis = d.getMilliseconds() * 100.0 / 1000;
+                return [
+                  {'value': hours,  'key': 'hours', 'which': 1},
+                  {'value': (hours+50),  'key': 'hours', 'which': 2},
+                  {'value': minutes,  'key': 'minutes', 'which': 1},
+                  {'value': (minutes+50),  'key': 'minutes', 'which': 2},
+                  {'value': seconds,  'key': 'seconds', 'which': 1},
+                  {'value': (seconds+50),  'key': 'seconds', 'which': 2},
+                  {'value': millis,  'key': 'millis', 'which': 1},
+                  {'value': (millis+50),  'key': 'millis', 'which': 2},
+                ]
+            }
+
+            var rings = root.selectAll("g")
+                .data(curClockData);
+
+            rings.enter().append("g")
+                .append("path");
+
+            // Update arcs.
+            d3.timer(function() {
+                var rings = root.selectAll("g")
+                    .data(curClockData);
+
+                rings.select("path")
+                    .attr("class", function(d) { return d.key + d.which; })
+                    .attr("d", arc);
+            });
+        </script>
+    </body>
+</html>
