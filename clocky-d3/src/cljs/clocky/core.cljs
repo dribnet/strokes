@@ -1,7 +1,5 @@
-(ns clocky.core)
-
-(def d3 js/d3)
-(def Tau (* 2 Math/PI))
+(ns clocky.core
+  (:use [d3.core :only [d3 Tau]]))
 
 (def radii
   "radius of each concentric circle"
@@ -22,16 +20,14 @@
         minutes (/ (* (.getMinutes d) 100) 60)
         seconds (/ (* (.getSeconds d) 100) 60)
         millis  (/ (* (.getMilliseconds d) 100) 1000)]
-      ; TODO: extend d3 to understand seq
-      (apply array 
-        [ {:value hours, :key "hours", :which 1},
-          {:value (+ hours 50), :key "hours", :which 2},
-          {:value minutes, :key "minutes", :which 1},
-          {:value (+ minutes 50), :key "minutes", :which 2},
-          {:value seconds, :key "seconds", :which 1},
-          {:value (+ seconds 50), :key "seconds", :which 2},
-          {:value millis, :key "millis", :which 1},
-          {:value (+ millis 50), :key "millis", :which 2} ])))
+    [ {:value hours, :key "hours", :which 1},
+      {:value (+ hours 50), :key "hours", :which 2},
+      {:value minutes, :key "minutes", :which 1},
+      {:value (+ minutes 50), :key "minutes", :which 2},
+      {:value seconds, :key "seconds", :which 1},
+      {:value (+ seconds 50), :key "seconds", :which 2},
+      {:value millis, :key "millis", :which 1},
+      {:value (+ millis 50), :key "millis", :which 2} ]))
 
 (defn ^:export launch []
   "call this to create top level svg and initiate animation"
