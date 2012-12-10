@@ -36,7 +36,7 @@
               (.attr "width" 600)
               (.attr "height" 600)
               (.append "g")
-              (.attr "transform" "translate(300,300)rotate(-90)"))
+              (.attr "transform" "translate(300,300)"))
         rings
           (-> root (.selectAll "g") (.data curClockData))]
 
