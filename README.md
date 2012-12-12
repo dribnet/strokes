@@ -1,6 +1,8 @@
-# clocky
+# strokes
 
-d3 svg animation.
+Nothing to see here, move along.
+
+(OK: you could do some archeology by visiting [the upstream clocky repo](https://github.com/dribnet/clocky)...)
 
 Try:
 
