@@ -1,4 +1,4 @@
-(ns d3.core
+(ns strokes.core
   (:use [cljs.reader :only [read-string]]))
 
 (def d3 js/d3)

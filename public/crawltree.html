@@ -81,7 +81,7 @@ var vis = d3.select("body").insert("svg:svg", "h2")
   .append("svg:g")
     .attr("transform", "translate(" + (w - r) / 2 + "," + (h - r) / 2 + ")");
 
-d3.json("flare2.json", function(data) {
+d3.json("flare.json", function(data) {
   node = root = data;
 
   var nodes = pack.nodes(root);
@@ -132,6 +132,6 @@ function zoom(d, i) {
 }
 
     </script>
-  <script type="text/javascript" src="out/clocky.js"></script>
+  <script type="text/javascript" src="out/strokes.js"></script>
   </body>
 </html>

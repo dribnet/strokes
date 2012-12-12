@@ -1,5 +1,5 @@
 (ns crawltree.core
-  (:use [d3.core :only [d3]]))
+  (:use [strokes.core :only [d3]]))
 
 (def w 1280)
 (def h 800)
@@ -13,15 +13,19 @@
 
 (.log js/console "----")
 
-; (def pack-edn
+(def pack-edn
+  (-> d3 .-layout .pack 
+    (.children #(apply array (:children %)))
+     ; (.children (fn [x] 
+     ;      (apply array (:children x))
+     ;  ))
+    (.size (array r r))
+    (.value #(:size %))))
+
+; (def pack
 ;   (-> d3 .-layout .pack
 ;     (.size (array r r))
-;     (.value #(:size %))))
-
-(def pack
-  (-> d3 .-layout .pack
-    (.size (array r r))
-    (.value #(.-size %))))
+;     (.value #(.-size %))))
 
 (.log js/console "----")
 
@@ -32,57 +36,92 @@
     (.append "svg:g")
     (.attr "transform" (str "translate(" (/ (- w r) 2) "," (/ (- h r) 2) ")"))))
 
-; (-> d3 (.edn "flare.edn" 
+; (defn js->clj
+;   "Recursively transforms JavaScript arrays into ClojureScript
+;   vectors, and JavaScript objects into ClojureScript maps.  With
+;   option ':keywordize-keys true' will convert object fields from
+;   strings to keywords."
+;   [x & options]
+;   (let [{:keys [keywordize-keys]} options
+;         keyfn (if keywordize-keys keyword str)
+;         f (fn thisfn [x]
+;             (cond
+;              (seq? x) (doall (map thisfn x))
+;              (coll? x) (into (empty x) (map thisfn x))
+;              (goog.isArray x) (vec (map thisfn x))
+;              (identical? (type x) js/Object) (into {} (for [k (js-keys x)]
+;                                                         [(keyfn k)
+;                                                          (thisfn (aget x k))]))
+;              :else x))]
+;     (f x)))
+
+; ; TODO: filter things in an empty {} like __hash, cnt, has_nil_QMARK_, etc
+; (defn enfatten [x]
+;   (into x (for [k (js-keys x)]
+;     [(keyword k)
+;      (aget x k)])))
+
+(defn enfatten [x]
+  (apply array (map #(into %
+    {:x (.-x %)
+     :y (.-y %)
+     :r (.-r %)}) x)))
+
+(-> d3 (.edn "flare.edn" 
+  (fn [data]
+    (let [zroot data
+          nodes1 ((.-nodes pack-edn) zroot)
+          nodes (enfatten nodes1)]
+
+  ; (.log js/console "---aaa---")
+  ; (.log js/console nodes)
+  ; (.log js/console (str nodes))
+  ; (.log js/console "---bbb---")
+      (-> vis (.selectAll "circle")
+        (.data nodes)
+        (.enter) (.append "svg:circle")
+        (.attr "class" "parent")
+        (.attr "class", #(if (:children %) "parent" "child"))
+        (.attr "cx" #(:x %))
+        (.attr "cy" #(:y %))
+        (.attr "r" #(:r %)))
+
+      (-> vis (.selectAll "text")
+        (.data nodes)
+        (.enter) (.append "svg:text")
+        (.attr "class", #(if (:children %) "parent" "child"))
+        (.attr "x" #(:x %))
+        (.attr "y" #(:y %))
+        (.attr "dy" ".35em")
+        (.attr "text-anchor" "middle")
+        (.style "opacity" #(if (> (:r %) 20) 1 0))
+        (.text #(:name %)))))))
+
+; (-> d3 (.json "flare.json"
 ;   (fn [data]
 ;     (.log js/console data)
 ;     (let [zroot data
-;           nodes ((.-nodes pack-edn) zroot)]
+;           nodes ((.-nodes pack) zroot)]
 
-;        (.log js/console nodes)
+;       (.log js/console nodes)
 ;       (-> vis (.selectAll "circle")
 ;         (.data nodes)
 ;         (.enter) (.append "svg:circle")
 ;         (.attr "class" "parent")
-;         (.attr "cx" #(:x %))
-;         (.attr "cy" #(:y %))
-;         (.attr "r" #(:r %)))
+;         (.attr "cx" #(.-x %))
+;         (.attr "cy" #(.-y %))
+;         (.attr "r" #(.-r %)))
 
 ;       (-> vis (.selectAll "text")
 ;         (.data nodes)
 ;         (.enter) (.append "svg:text")
 ;         (.attr "class" "parent")
-;         (.attr "x" #(:x %))
-;         (.attr "y" #(:y %))
+;         (.attr "x" #(.-x %))
+;         (.attr "y" #(.-y %))
 ;         (.attr "dy" ".35em")
 ;         (.attr "text-anchor" "middle")
-;         (.style "opacity" #(if (> (:r %) 20) 1 0))
-;         (.text #(:name %)))))))
-
-(-> d3 (.json "flare.json"
-  (fn [data]
-    (.log js/console data)
-    (let [zroot data
-          nodes ((.-nodes pack) zroot)]
-
-      (.log js/console nodes)
-      (-> vis (.selectAll "circle")
-        (.data nodes)
-        (.enter) (.append "svg:circle")
-        (.attr "class" "parent")
-        (.attr "cx" #(.-x %))
-        (.attr "cy" #(.-y %))
-        (.attr "r" #(.-r %)))
-
-      (-> vis (.selectAll "text")
-        (.data nodes)
-        (.enter) (.append "svg:text")
-        (.attr "class" "parent")
-        (.attr "x" #(.-x %))
-        (.attr "y" #(.-y %))
-        (.attr "dy" ".35em")
-        (.attr "text-anchor" "middle")
-        (.style "opacity" #(if (> (.-r %) 20) 1 0))
-        (.text #(.-name %)))))))
+;         (.style "opacity" #(if (> (.-r %) 20) 1 0))
+;         (.text #(.-name %)))))))
 
 
 (defn ^:export zoom [d i]

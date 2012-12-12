@@ -1,5 +1,5 @@
-(defproject clocky "0.0.1-SNAPSHOT"
-  :description "clocky: c2 animating svg"
+(defproject strokes "0.0.1-SNAPSHOT"
+  :description "strokes: d3 from clojurescript"
   :dependencies [[org.clojure/clojure "1.4.0"]]
   :min-lein-version "2.0.0"
   :source-paths ["src/clj"]
@@ -10,7 +10,7 @@
     :builds [{
       :source-path "src/cljs"
       :compiler {
-        :output-to "public/out/clocky.js"
+        :output-to "public/out/strokes.js"
         :optimizations :whitespace
         :pretty-print true 
         ;:optimizations :advanced

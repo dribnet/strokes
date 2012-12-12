@@ -1,5 +1,5 @@
 (ns clocky.core
-  (:use [d3.core :only [d3 Tau]]))
+  (:use [strokes.core :only [d3 Tau]]))
 
 (def radii
   "radius of each concentric circle"
