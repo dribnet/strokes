@@ -24,14 +24,16 @@
 
 (-> d3 .-edn (set! d3-edn)) 
 
-;; example of a fetch callback in js
-; d3.text = function(url, mime, callback) {
-;   function ready(req) {
-;     callback(req && req.responseText);
-;   }
-;   if (arguments.length < 3) {
-;     callback = mime;
-;     mime = null;
-;   }
-;   d3.xhr(url, mime, ready);
-; };
+(defn add-stragglers [x]
+  "adds elements to map x that have been stuck onto the js object x"
+  (let [empty-map {}
+        new-keys (remove (set (js-keys empty-map)) (js-keys x))]
+        ;main-keys (remove #(re-matches #"^:cljs\$.*" (str %)) new-keys)] <- idea for future?
+    (into x
+        (for [k new-keys]
+          [(keyword k) (aget x k)]))))
+
+(defn array-add-stragglers [a]
+  "unpack an array of maps, add stragglers, and repack into array"
+  (apply array (map add-stragglers a)))
+
