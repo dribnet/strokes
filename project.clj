@@ -10,8 +10,9 @@
     :builds [{
       :source-path "src/cljs"
       :compiler {
-        :output-to "public/out/strokes.js"
+        :output-to "public/out/strokes-main.js"
         :optimizations :whitespace
         :pretty-print true 
         ;:optimizations :advanced
-        }}]})
+        }
+      :jar true}]})
