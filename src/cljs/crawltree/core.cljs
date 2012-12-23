@@ -17,7 +17,7 @@
     (.size (array r r))
     (.value #(:size %))))
 
-(def vis
+(defn genviz []
   (-> d3 (.select "body") (.insert "svg:svg" "h2")
     (.attr "width" w)
     (.attr "height" h)
@@ -29,6 +29,7 @@
     (fn [data]
       (let [zroot data
             jsnodes ((.-nodes pack) zroot)
+            vis (genviz)
             nodes (array-add-stragglers jsnodes)]
 
         ; (.log js/console "---aaa---")
@@ -55,21 +56,22 @@
           (.style "opacity" #(if (> (:r %) 20) 1 0))
           (.text #(:name %))))))))
 
-(defn ^:export zoom [d i]
-  (let [k (/ (/ r (.-r d)) 2)
-        t (-> vis (.transition) (.duration 
-            (if (-> d3 .-event .-altKey) 7500 750)))]
+; need an atom for the genviz?
+; (defn ^:export zoom [d i]
+;   (let [k (/ (/ r (.-r d)) 2)
+;         t (-> vis (.transition) (.duration 
+;             (if (-> d3 .-event .-altKey) 7500 750)))]
 
-    (.domain x (array [(- (.-x d) (.-r d)), (+ (.-x d) (.-r d))]))
-    (.domain y (array [(- (.-y d) (.-r d)), (+ (.-y d) (.-r d))]))
+;     (.domain x (array [(- (.-x d) (.-r d)), (+ (.-x d) (.-r d))]))
+;     (.domain y (array [(- (.-y d) (.-r d)), (+ (.-y d) (.-r d))]))
 
-    (-> t (.selectAll "circle")
-      (.attr "cx" #(x (.-x %)))
-      (.attr "cy" #(y (.-y %)))
-      (.attr "r" #(* k (.-r %))))
+;     (-> t (.selectAll "circle")
+;       (.attr "cx" #(x (.-x %)))
+;       (.attr "cy" #(y (.-y %)))
+;       (.attr "r" #(* k (.-r %))))
 
-    (-> t (.selectAll "text")
-      (.attr "x" #(x (.-x %)))
-      (.attr "y" #(y (.-y %)))
-      (.attr "opacity" #(if (> (* k (.-r %)) 20) 1 0)))))
+;     (-> t (.selectAll "text")
+;       (.attr "x" #(x (.-x %)))
+;       (.attr "y" #(y (.-y %)))
+;       (.attr "opacity" #(if (> (* k (.-r %)) 20) 1 0)))))
 
