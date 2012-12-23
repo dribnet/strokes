@@ -12,7 +12,7 @@
 ; this holds on to the mutable state of the vertex array
 (def vert-atom
   (atom
-    (for [x (range 100)]
+    (for [x (range 5)]
       [(randomX) (randomY)])))
 
 ; drefs and converts the vector of vector to an array of arrays for d3 consumption
@@ -22,12 +22,35 @@
 ; forward declaration of redraw function, which sadly can't be called 'redraw'
 (def redrawhull)
 
+; http://stackoverflow.com/questions/10157447/how-do-i-create-a-json-in-clojurescript
+(defn clj->js
+  "Recursively transforms ClojureScript maps into Javascript objects,
+   other ClojureScript colls into JavaScript arrays, and ClojureScript
+   keywords into JavaScript strings."
+  [x]
+  (cond
+    (string? x) x
+    (keyword? x) (name x)
+    (map? x) (.strobj (reduce (fn [m [k v]]
+               (assoc m (clj->js k) (clj->js v))) {} x))
+    (coll? x) (apply array (map clj->js x))
+    :else x))
+
 (def svg
   (-> d3 (.select "body") (.append "svg")
     (.attr "width" width)
     (.attr "height" height)
-;    (.on "click" #(.log js/console (.mouse d3 js/this)))
-    (.on "click" #(do (swap! vert-atom conj [100 100]) (redrawhull)))
+    (.on "mousemove" (fn []
+      (this-as t (do
+        (.log js/console (str @vert-atom))
+        (swap! vert-atom #(conj (rest %) (js->clj (.mouse d3 t))))
+        (redrawhull)
+        ))))
+    (.on "click" (fn [] 
+      (this-as t (do 
+        (swap! vert-atom conj (.mouse d3 t))
+        (redrawhull)))))
+;    (.on "click" #(do (swap! vert-atom conj [100 100]) (redrawhull)))
     ))
 
 ; draw a border
