@@ -6,8 +6,6 @@
 (def height 500)
 (def centerpoint [(/ width 2) (/ height 2)])
 
-; RandThought: Why can't .random return .-random? (autopopulate)
-
 ; two functions that return random normal distributions
 (def randomX (-> d3 .-random (.normal (/ width 2) 60)))
 (def randomY (-> d3 .-random (.normal (/ height 2) 60)))
@@ -20,17 +18,6 @@
       (for [x (range 20)]
         [(randomX) (randomY)])
       centerpoint)))
-
-; derefs and converts the vector of vector to an array of arrays for d3 consumption
-(defn vert-array []
-  (apply array @vert-atom))
-
-; js repl experiments
-(defn raw-vector[] 
-  [1 2 3])
-
-(defn raw-seq []
-  (seq [1 2 3]))
 
 ; create root svg element
 (defn gen-svg []
@@ -51,7 +38,7 @@
 
 ; redraw hull and points. called after any changes to vert-atom
 (defn redraw-hull[hull circle]
-  (let [verts (vert-array)]
+  (let [verts @vert-atom]
     (-> (.datum hull (-> d3 .-geom (.hull verts)))
         (.attr "d" #(str "M" (join "L" %) "Z")))
     (swap! circle #(.data % verts))
