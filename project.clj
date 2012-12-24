@@ -11,8 +11,8 @@
       :source-path "src/cljs"
       :compiler {
         :output-to "public/out/strokes.js"
-        :optimizations :whitespace
-        :pretty-print true 
-        ;:optimizations :advanced
+        ;:optimizations :whitespace
+        ;:pretty-print true 
+        :optimizations :simple
         }
       :jar true}]})
