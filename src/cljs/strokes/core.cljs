@@ -1,5 +1,6 @@
 (ns strokes.core
-  (:use [cljs.reader :only [read-string]]))
+  (:use [clojure.string :only [join]]
+        [cljs.reader :only [read-string]]))
 
 (def d3 js/d3)
 (def Tau (* 2 Math/PI))
@@ -37,6 +38,14 @@
   "unpack an array of maps, add stragglers, and repack into array"
   (apply array (map add-stragglers a)))
 
+; patch a vector with accessors length
+; js example: arr.__defineGetter__(0, function() { return 0; });
+(defn patch-vector [v]
+  (.__defineGetter__ v "length" #(identity 2))
+  (.__defineGetter__ v 0 #(nth v 0 nil))
+  (.__defineGetter__ v 1 #(nth v 1 nil))
+  (-> v .-toString (set! #(clojure.string/join ", " v)))
+  v)
 
 ; note: this goal is not to use this ... but we can peek at it for inspiration :)
 ; http://stackoverflow.com/questions/10157447/how-do-i-create-a-json-in-clojurescript
