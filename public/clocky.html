@@ -1,16 +1,27 @@
-<html>
-<head>
-  <title>Clocky</title>
-  <link rel="stylesheet" href="assets/base.css">
-</head>
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Clocky</title>
+<style>
+
+body { background-color:grey; }
+path.millis1 { stroke-width:1; stroke:pink; fill:brown; }
+path.millis2 { stroke:brown; fill:pink; }
+path.seconds1 { stroke:pink; fill:brown; }
+path.seconds2 { stroke:brown; fill:pink; }
+path.minutes1 { stroke:pink; fill:brown; }
+path.minutes2 { stroke:brown; fill:pink; }
+path.hours1 { stroke:pink; fill:brown; }
+path.hours2 { stroke:brown; fill:pink; }
+
+</style>
 <body>
-  <svg id="clocky">
-  <!-- this is where the magic happens -->
-  </svg>
-  <script type="text/javascript" src="d3/d3.v2.js"></script>
-  <script type="text/javascript" src="d3/d3.patches.js"></script>
-  <script type="text/javascript" src="out/strokes-main.js"></script>
-  <script type="text/javascript"> 
+
+<svg id="clocky">
+<!-- this is where the magic happens -->
+</svg>
+
+<script type="text/javascript" src="d3/d3.v3.js"></script>
+<script type="text/javascript" src="out/strokes.js"></script>
+<script type="text/javascript"> 
     strokes.examples.clocky.launch(); 
-  </script>
-</body> </html>
+</script>

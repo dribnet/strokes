@@ -25,16 +25,16 @@
     (.attr "width" width)
     (.attr "height" height)))
 
+; create hull element
+(defn gen-hull [svg]
+  (-> svg (.append "path")
+      (.attr "class" "hull")))
+
 ; draw a border
 (defn draw-border [svg]
   (-> svg (.append "rect")
       (.attr "width" width)
       (.attr "height" height)))
-
-; create hull element
-(defn gen-hull [svg]
-  (-> svg (.append "path")
-      (.attr "class" "hull")))
 
 ; redraw hull and points. called after any changes to vert-atom
 (defn redraw-hull[hull circle]
@@ -47,7 +47,7 @@
     (-> @circle
       (.attr "transform" #(str "translate(" % ")")))))
 
-; memo: http://en.wikipedia.org/wiki/DOM_events
+; useful reference: http://en.wikipedia.org/wiki/DOM_events
 (defn add-mouse-callbacks [svg hull circle]
   (-> svg
     ; with mousemove, replace last element with mouse position
