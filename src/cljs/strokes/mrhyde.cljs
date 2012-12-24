@@ -8,6 +8,7 @@
   (.__defineGetter__ p "length" #(this-as t (count t)))
   (dotimes [n 100] 
     (.__defineGetter__ p n #(this-as t (nth t n js/undefined))))
+  (-> p .-toCljString (set! (-> p .-toString)))
   (-> p .-toString (set! #(this-as t (clojure.string/join ", " t)))))
 
 ; there must be a smarter way to do this, but for now i'll forge ahead

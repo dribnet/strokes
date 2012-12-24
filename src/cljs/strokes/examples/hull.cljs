@@ -52,12 +52,13 @@
   (-> svg
     ; with mousemove, replace last element with mouse position
     (.on "mousemove" (fn [] 
-      (this-as t (let [pt (js->clj (.mouse d3 t))]
+      ; (this-as t (.log js/console (.mouse d3 t)))))
+      (this-as t (let [pt (.mouse d3 t)]
         (swap! vert-atom #(conj (rest %) pt))
         (redraw-hull hull circle)))))
     ; with click, replace last element with mouse posistion x2
     (.on "click" (fn [] 
-      (this-as t (let [pt (js->clj (.mouse d3 t))]
+      (this-as t (let [pt (.mouse d3 t)]
         (swap! vert-atom #(conj (rest %) pt pt))
         (redraw-hull hull circle)))))
     ; when exiting, replace last element with centerpoint

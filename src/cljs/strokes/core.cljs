@@ -5,15 +5,20 @@
 (def d3 js/d3)
 (def Tau (* 2 Math/PI))
 
-; create and install data selection filter
-(defn- datafilter [x]
-  ;(.log js/console (str "type is: " (type x)))
-  (if (and (re-find #"^function" (type x))
-           (not (re-find #"^function Array()" (type x))))
-    (fn [] (apply array (x)))
-    (apply array x)))
+; patch the return value of d3.mouse to provide clj values
+(let [orig-d3-mouse-fn (.-mouse d3)]
+  (-> d3 .-mouse (set! (fn [t] js->clj (orig-d3-mouse-fn t)))))
 
-(-> d3 .-selection .-prototype .-dataToArray (set! datafilter)) 
+; evidently, no longer needed
+; create and install data selection filter
+; (defn- datafilter [x]
+;   ;(.log js/console (str "type is: " (type x)))
+;   (if (and (re-find #"^function" (type x))
+;            (not (re-find #"^function Array()" (type x))))
+;     (fn [] (apply array (x)))
+;     (apply array x)))
+
+; (-> d3 .-selection .-prototype .-dataToArray (set! datafilter)) 
 
 (defn- d3-edn
   ([url callback]
