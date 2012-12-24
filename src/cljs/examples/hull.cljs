@@ -22,36 +22,29 @@
 ; forward declaration of redraw function, which sadly can't be called 'redraw'
 (def redrawhull)
 
-; http://stackoverflow.com/questions/10157447/how-do-i-create-a-json-in-clojurescript
-(defn clj->js
-  "Recursively transforms ClojureScript maps into Javascript objects,
-   other ClojureScript colls into JavaScript arrays, and ClojureScript
-   keywords into JavaScript strings."
-  [x]
-  (cond
-    (string? x) x
-    (keyword? x) (name x)
-    (map? x) (.strobj (reduce (fn [m [k v]]
-               (assoc m (clj->js k) (clj->js v))) {} x))
-    (coll? x) (apply array (map clj->js x))
-    :else x))
-
 (def svg
   (-> d3 (.select "body") (.append "svg")
     (.attr "width" width)
     (.attr "height" height)
-    (.on "mousemove" (fn []
-      (this-as t (do
-        (.log js/console (str @vert-atom))
-        (swap! vert-atom #(conj (rest %) (js->clj (.mouse d3 t))))
-        (redrawhull)
-        ))))
-    (.on "click" (fn [] 
-      (this-as t (do 
-        (swap! vert-atom conj (.mouse d3 t))
+    ; with mousemove, replace last element with mouse position
+    (.on "mousemove" (fn [] 
+      (this-as t (let [pt (js->clj (.mouse d3 t))]
+        (swap! vert-atom #(conj (rest %) pt))
         (redrawhull)))))
-;    (.on "click" #(do (swap! vert-atom conj [100 100]) (redrawhull)))
-    ))
+    ; with click, replace last element with mouse posistion x2
+    (.on "click" (fn [] 
+      (this-as t (let [pt (js->clj (.mouse d3 t))]
+        (swap! vert-atom #(conj (rest %) pt pt))
+        (redrawhull)))))
+    ;?(.on "mouseexit" #(.log js/console "mouseexit happened"))
+    ;?(.on "mouseenter" #(.log js/console "mouseenter happened"))
+    ;(.on "mouseexit" (fn [] (swap! vert-atom #(conj (rest %) [(/ width 2) (/ height 2)]))))
+    ;(.on "mousewheel" #(.log js/console "mousewheel happened"))
+    ;(.on "mouseup" #(.log js/console "mouseup happened"))
+    ;(.on "click" #(.log js/console "click happened"))
+    ;(.on "dblclick" #(.log js/console "dblclick happened"))
+    ;(.on "mouseover" #(.log js/console "mouseover happened"))
+  ))
 
 ; draw a border
 (-> svg (.append "rect")
@@ -78,6 +71,6 @@
 
 (defn ^:export launch []
   (redrawhull)
-  (.log js/console (vert-array))
+  ;(.log js/console (vert-array))
   ; (redrawhull)
   true)

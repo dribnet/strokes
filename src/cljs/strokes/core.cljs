@@ -37,3 +37,20 @@
   "unpack an array of maps, add stragglers, and repack into array"
   (apply array (map add-stragglers a)))
 
+
+; note: this goal is not to use this ... but we can peek at it for inspiration :)
+; http://stackoverflow.com/questions/10157447/how-do-i-create-a-json-in-clojurescript
+; (defn clj->js
+;   "Recursively transforms ClojureScript maps into Javascript objects,
+;    other ClojureScript colls into JavaScript arrays, and ClojureScript
+;    keywords into JavaScript strings."
+;   [x]
+;   (cond
+;     (string? x) x
+;     (keyword? x) (name x)
+;     (map? x) (.strobj (reduce (fn [m [k v]]
+;                (assoc m (clj->js k) (clj->js v))) {} x))
+;     (coll? x) (apply array (map clj->js x))
+;     :else x))
+
+
