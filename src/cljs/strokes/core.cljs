@@ -41,25 +41,8 @@
 ; patch a vector with accessors length
 ; js example: arr.__defineGetter__(0, function() { return 0; });
 (defn patch-vector [v]
-  (.__defineGetter__ v "length" #(identity 2))
+  (.__defineGetter__ v "length" #(count v))
   (.__defineGetter__ v 0 #(nth v 0 nil))
   (.__defineGetter__ v 1 #(nth v 1 nil))
   (-> v .-toString (set! #(clojure.string/join ", " v)))
   v)
-
-; note: this goal is not to use this ... but we can peek at it for inspiration :)
-; http://stackoverflow.com/questions/10157447/how-do-i-create-a-json-in-clojurescript
-; (defn clj->js
-;   "Recursively transforms ClojureScript maps into Javascript objects,
-;    other ClojureScript colls into JavaScript arrays, and ClojureScript
-;    keywords into JavaScript strings."
-;   [x]
-;   (cond
-;     (string? x) x
-;     (keyword? x) (name x)
-;     (map? x) (.strobj (reduce (fn [m [k v]]
-;                (assoc m (clj->js k) (clj->js v))) {} x))
-;     (coll? x) (apply array (map clj->js x))
-;     :else x))
-
-

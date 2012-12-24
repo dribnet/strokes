@@ -1,10 +1,10 @@
 (ns strokes.examples.hull
   (:use [clojure.string :only [join]]
-        [strokes.core :only [d3 Tau patch-vector]]))
+        [strokes.core :only [d3]]))
 
 (def width 960)
 (def height 500)
-(def centerpoint (patch-vector [(/ width 2) (/ height 2)]))
+(def centerpoint [(/ width 2) (/ height 2)])
 
 ; RandThought: Why can't .random return .-random? (autopopulate)
 
@@ -18,12 +18,19 @@
     ; init to 20 random points with the centerpoint at the end
     (conj
       (for [x (range 20)]
-        (patch-vector [(randomX) (randomY)]))
+        [(randomX) (randomY)])
       centerpoint)))
 
 ; derefs and converts the vector of vector to an array of arrays for d3 consumption
 (defn vert-array []
   (apply array @vert-atom))
+
+; js repl experiments
+(defn raw-vector[] 
+  [1 2 3])
+
+(defn raw-seq []
+  (seq [1 2 3]))
 
 ; create root svg element
 (defn gen-svg []
@@ -58,12 +65,12 @@
   (-> svg
     ; with mousemove, replace last element with mouse position
     (.on "mousemove" (fn [] 
-      (this-as t (let [pt (patch-vector (js->clj (.mouse d3 t)))]
+      (this-as t (let [pt (js->clj (.mouse d3 t))]
         (swap! vert-atom #(conj (rest %) pt))
         (redraw-hull hull circle)))))
     ; with click, replace last element with mouse posistion x2
     (.on "click" (fn [] 
-      (this-as t (let [pt (patch-vector (js->clj (.mouse d3 t)))]
+      (this-as t (let [pt (js->clj (.mouse d3 t))]
         (swap! vert-atom #(conj (rest %) pt pt))
         (redraw-hull hull circle)))))
     ; when exiting, replace last element with centerpoint
