@@ -1,4 +1,4 @@
-(ns examples.clocky
+(ns strokes.examples.clocky
   (:use [strokes.core :only [d3 Tau]]))
 
 (def radii

@@ -1,4 +1,4 @@
-(ns examples.hull
+(ns strokes.examples.hull
   (:use [clojure.string :only [join]]
         [strokes.core :only [d3 Tau]]))
 
