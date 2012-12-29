@@ -8,12 +8,19 @@
 ;   (.log js/console (str " :type is: " (type proto)))
 ;   )
 
-; a replacement for the foreach call
+; a replacement for the map call
 ; thanks Arthur Ulfeldt: http://stackoverflow.com/questions/1651351/clojure-call-a-function-for-each-element-in-a-vector-with-it-index
-(defn eachish [f]
+(defn mapish [f]
   (this-as ct
     (doall (map 
-      #(.call f js/undefined % %2 ct) (seq ct) (iterate inc 0))))
+      #(.call f js/undefined % %2 ct) (seq ct) (iterate inc 0)))))
+
+; a replacement for the foreach call (which is map that returns null)
+; note - eachish is supposed to be able to mutate the original array,
+; but that shouldn't matter in the persistent world we are creating
+(defn eachish [f]
+  ; call mapish with the same 'this'
+  (this-as ct (.call mapish ct f))
   nil)
 
 (defn patch-prototype-as-array [p]
@@ -24,8 +31,9 @@
     (.__defineGetter__ p n #(this-as t (nth t n js/undefined))))
   ; (-> p .-bareConstructor (set! (-> p .-constructor)))
   ; (-> p .-constructor (set! (fn [& args] (this-as t (check-headroom t p args)))))
-  ; if we are acting like an array, we'll need in impl of forEach
+  ; if we are acting like an array, we'll need in impl of forEach and map
   (-> p .-forEach (set! eachish))
+  (-> p .-map (set! mapish))
   ; and we should print like a native string. (& squirrel the native one away)
   (-> p .-toCljString (set! (-> p .-toString)))
   (-> p .-toString (set! #(this-as t (clojure.string/join ", " t)))))
