@@ -45,6 +45,3 @@
   (doseq [k (keys m)]
       (.__defineGetter__ m (name k) #(get m k)))
   m)
-
-; this should probably be in an init call or something
-(patch-known-arrayish-types)

@@ -1,5 +1,6 @@
 (ns strokes.core
-  (:use [clojure.string :only [join]]
+  (:use [strokes.mrhyde :only [patch-known-arrayish-types]]
+        [clojure.string :only [join]]
         [cljs.reader :only [read-string]]))
 
 (def d3 js/d3)
@@ -8,6 +9,13 @@
 ; patch the return value of d3.mouse to provide clj values
 (let [orig-d3-mouse-fn (.-mouse d3)]
   (-> d3 .-mouse (set! (fn [t] js->clj (orig-d3-mouse-fn t)))))
+
+; filter d3.selection.attr inputs: v might be keyword function
+(let [orig-d3-proto-attr (-> d3 .-selection .-prototype .-attr)]
+  (-> d3 .-selection .-prototype .-attr
+    (set! (fn [n,v]
+      (let [vf (if (keyword? v) #(v %) v)]
+        (this-as ct (.call orig-d3-proto-attr ct n vf)))))))
 
 ; evidently, no longer needed
 ; create and install data selection filter
@@ -51,3 +59,6 @@
   (.__defineGetter__ v 1 #(nth v 1 nil))
   (-> v .-toString (set! #(clojure.string/join ", " v)))
   v)
+
+; this should probably be in an init call or something
+(patch-known-arrayish-types)
