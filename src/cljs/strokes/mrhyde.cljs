@@ -45,3 +45,8 @@
   (doseq [k (keys m)]
       (.__defineGetter__ m (name k) #(get m k)))
   m)
+
+; patch a (1 arity) js function to return a clj-ish value
+(defn patch-fn1-return-value [o field-name]
+  (let [orig-fn (aget o field-name)]
+    (aset o field-name (fn [x] (js->clj (orig-fn x))))))

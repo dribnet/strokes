@@ -1,14 +1,10 @@
 (ns strokes.core
-  (:use [strokes.mrhyde :only [patch-known-arrayish-types]]
+  (:use [strokes.mrhyde :only [patch-known-arrayish-types patch-fn1-return-value]]
         [clojure.string :only [join]]
         [cljs.reader :only [read-string]]))
 
 (def d3 js/d3)
 (def Tau (* 2 Math/PI))
-
-; patch the return value of d3.mouse to provide clj values
-(let [orig-d3-mouse-fn (.-mouse d3)]
-  (-> d3 .-mouse (set! (fn [t] js->clj (orig-d3-mouse-fn t)))))
 
 ; filter d3.selection.attr inputs: v might be keyword function
 (let [orig-d3-proto-attr (-> d3 .-selection .-prototype .-attr)]
@@ -39,6 +35,10 @@
 (defn array-add-stragglers [a]
   "unpack an array of maps, add stragglers, and repack into array"
   (apply array (map add-stragglers a)))
+
+; patch the return value of d3.mouse to provide clj values
+(defn patch-mouse []
+  (patch-fn1-return-value d3 "mouse"))
 
 ; this should probably be in an init call or something
 (patch-known-arrayish-types)

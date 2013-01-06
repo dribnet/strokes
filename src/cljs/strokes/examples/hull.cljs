@@ -1,6 +1,6 @@
 (ns strokes.examples.hull
   (:use [clojure.string :only [join]]
-        [strokes.core :only [d3]]))
+        [strokes.core :only [d3 patch-mouse]]))
 
 (def width 960)
 (def height 500)
@@ -52,7 +52,7 @@
   (-> svg
     ; with mousemove, replace last element with mouse position
     (.on "mousemove" (fn [] 
-      ; (this-as t (.log js/console (.mouse d3 t)))))
+      ;(this-as t (.log js/console (.mouse d3 t)))
       (this-as t (let [pt (.mouse d3 t)]
         (swap! vert-atom #(conj (rest %) pt))
         (redraw-hull hull circle)))))
@@ -69,6 +69,7 @@
 ; external hook to launch this demo
 (defn ^:export launch []
   ;(.log js/console (vert-array))
+  (patch-mouse)
   (let [svg (gen-svg)
         hull (gen-hull svg)
         circle (atom (.selectAll svg "circle"))]
