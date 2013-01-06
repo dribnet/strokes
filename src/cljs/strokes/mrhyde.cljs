@@ -1,4 +1,4 @@
-; providing clojure data has a split personality: don't be afraid to let it all out
+; providing clojure data a split personality: don't be afraid to let it all out
 (ns strokes.mrhyde
   (:use [clojure.string :only [join]]
         [cljs.reader :only [read-string]]))

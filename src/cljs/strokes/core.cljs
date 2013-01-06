@@ -17,17 +17,6 @@
       (let [vf (if (keyword? v) #(v %) v)]
         (this-as ct (.call orig-d3-proto-attr ct n vf)))))))
 
-; evidently, no longer needed
-; create and install data selection filter
-; (defn- datafilter [x]
-;   ;(.log js/console (str "type is: " (type x)))
-;   (if (and (re-find #"^function" (type x))
-;            (not (re-find #"^function Array()" (type x))))
-;     (fn [] (apply array (x)))
-;     (apply array x)))
-
-; (-> d3 .-selection .-prototype .-dataToArray (set! datafilter)) 
-
 (defn- d3-edn
   ([url callback]
     (d3-edn url nil callback))
@@ -50,15 +39,6 @@
 (defn array-add-stragglers [a]
   "unpack an array of maps, add stragglers, and repack into array"
   (apply array (map add-stragglers a)))
-
-; patch a vector with accessors length
-; js example: arr.__defineGetter__(0, function() { return 0; });
-(defn patch-vector [v]
-  (.__defineGetter__ v "length" #(count v))
-  (.__defineGetter__ v 0 #(nth v 0 nil))
-  (.__defineGetter__ v 1 #(nth v 1 nil))
-  (-> v .-toString (set! #(clojure.string/join ", " v)))
-  v)
 
 ; this should probably be in an init call or something
 (patch-known-arrayish-types)
