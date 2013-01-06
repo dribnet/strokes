@@ -1,18 +1,24 @@
 (ns strokes.core
-  (:use [strokes.mrhyde :only [patch-known-arrayish-types patch-fn1-return-value]]
+  (:use [strokes.mrhyde :only [patch-known-arrayish-types 
+                               patch-fn1-return-value
+                               patch-args-keyword-to-fn2]]
         [clojure.string :only [join]]
         [cljs.reader :only [read-string]]))
 
 (def d3 js/d3)
-(def Tau (* 2 Math/PI))
 
+; patch the return value of d3.mouse to provide clj values
+(defn patch-mouse []
+  (patch-fn1-return-value d3 "mouse"))
+
+; these global calls should maybe be in an init call or something
+
+; patch all seqs to also be read-only arrays for javascript interop
+(patch-known-arrayish-types)
 ; filter d3.selection.attr inputs: v might be keyword function
-(let [orig-d3-proto-attr (-> d3 .-selection .-prototype .-attr)]
-  (-> d3 .-selection .-prototype .-attr
-    (set! (fn [n,v]
-      (let [vf (if (keyword? v) #(v %) v)]
-        (this-as ct (.call orig-d3-proto-attr ct n vf)))))))
+(patch-args-keyword-to-fn2 (-> d3 .-selection .-prototype) "attr")
 
+; add a new d3.edn call to pull edn data over the network (like d3.csv and d3.json)
 (defn- d3-edn
   ([url callback]
     (d3-edn url nil callback))
@@ -22,6 +28,8 @@
       (.xhr d3 url mime ready))))
 
 (-> d3 .-edn (set! d3-edn)) 
+
+; stragglers is still a work in progress...
 
 (defn add-stragglers [x]
   "adds elements to map x that have been stuck onto the js object x"
@@ -35,10 +43,3 @@
 (defn array-add-stragglers [a]
   "unpack an array of maps, add stragglers, and repack into array"
   (apply array (map add-stragglers a)))
-
-; patch the return value of d3.mouse to provide clj values
-(defn patch-mouse []
-  (patch-fn1-return-value d3 "mouse"))
-
-; this should probably be in an init call or something
-(patch-known-arrayish-types)

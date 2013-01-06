@@ -1,5 +1,7 @@
 (ns strokes.examples.clocky
-  (:use [strokes.core :only [d3 Tau]]))
+  (:use [strokes.core :only [d3]]))
+
+(def Tau (* 2 Math/PI))
 
 (def radii
   "radius of each concentric circle"

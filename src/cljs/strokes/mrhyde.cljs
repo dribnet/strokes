@@ -50,3 +50,12 @@
 (defn patch-fn1-return-value [o field-name]
   (let [orig-fn (aget o field-name)]
     (aset o field-name (fn [x] (js->clj (orig-fn x))))))
+
+; patch a (2 arity) js function convert any keyword args to functions
+(defn patch-args-keyword-to-fn2 [o field-name]
+  (let [orig-fn (aget o field-name)]
+    (aset o field-name
+      (fn [x1,x2]
+        (let [y1 (if (keyword? x1) #(x1 %) x1)
+              y2 (if (keyword? x2) #(x2 %) x2)]
+          (this-as ct (.call orig-fn ct y1 y2)))))))
