@@ -15,8 +15,32 @@
   (this-as ct (.call mapish ct f))
   nil)
 
+; http://stackoverflow.com/questions/7015693/how-to-set-the-prototype-of-a-javascript-object-that-has-already-been-instantiat
+; http://stackoverflow.com/questions/12035061/call-javascript-function-whenever-object-is-created
+; http://javascriptweblog.wordpress.com/2010/11/15/extending-objects-with-javascript-getters/
+(defn patch-core-seq-type [s]
+  (.log js/console (str "patching call for " s))
+  (let [orig-fn (aget js/cljs.core s)
+        okeys (js-keys orig-fn)
+        new-fn  (fn [a b c d e f]
+                  (.log js/console (str "calling call for " s))
+                  ; http://stackoverflow.com/questions/3650892/what-does-the-new-keyword-do-under-the-hood
+                  (this-as ct (do
+                    (.log js/console (str "proto: " (aget orig-fn "prototype")))
+                    (let [that (.create js/Object (aget orig-fn "prototype"))
+                          other (.call orig-fn that a b c d e f)]
+                      (.log js/console (str "done call for " s))
+                      ; return new thing
+                      other))))]
+    ; set all properties of the new-fn based on the old one
+    (doseq [k okeys]
+      (.log js/console (str "remapping " k))
+      ;(.__defineGetter__ new-fn k #(aget orig-fn k)))
+      (aset new-fn k (aget orig-fn k)))
+    (aset js/cljs.core s new-fn)))
+
 ; Add functionality to cljs seq prototype to make it more like a js array
-(defn patch-prototype-as-array [p]
+(defn patch-prototype-as-array [p o]
   ; array length call
   (.__defineGetter__ p "length" #(this-as t (count t)))
   ; access by index... we obviously need a smarter upper bound here
@@ -31,13 +55,14 @@
 
 ; there must be a smarter way to do this, but for now i'll forge ahead
 (defn patch-known-arrayish-types []
-  (doseq [p [cljs.core.PersistentVector.prototype
-      cljs.core.LazySeq.prototype
-      cljs.core.IndexedSeq.prototype
-      cljs.core.Cons.prototype
-      cljs.core.Range.prototype
-      cljs.core.ChunkedSeq.prototype]]
-     (patch-prototype-as-array p)))
+  ;(patch-core-seq-type "PersistentVector")
+  (doseq [p [cljs.core.PersistentVector
+             cljs.core.LazySeq
+             cljs.core.IndexedSeq
+             cljs.core.Cons
+             cljs.core.Range
+             cljs.core.ChunkedSeq]]
+     (patch-prototype-as-array (aget p "prototype") p)))
 
 ; ideally this would be hooked into the mapish-types constructor
 (defn patch-map [m]
