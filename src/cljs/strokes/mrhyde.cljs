@@ -15,6 +15,14 @@
   (this-as ct (.call mapish ct f))
   nil)
 
+; this can be called standalone or auto-run from cljs map initialzation
+(defn patch-map [m]
+  ; (.log js/console (str "keys: " (keys m)))
+  (doseq [k (keys m)]
+      (.__defineGetter__ m (name k) #(get m k)))
+  m)
+
+
 (def MAXLEN 10000)
 
 (defn patch-seq-object [o]
@@ -24,22 +32,20 @@
   ;     (.__defineGetter__ o (str (+ n 16)) #(this-as t (nth t (+ n 16) js/undefined)))))
   nil)
 
+(defn patch-map-object [o]
+  ;(.log js/console (str (keys o)))
+  (patch-map o)
+  nil)
+
 ; http://stackoverflow.com/questions/7015693/how-to-set-the-prototype-of-a-javascript-object-that-has-already-been-instantiat
 ; http://stackoverflow.com/questions/12035061/call-javascript-function-whenever-object-is-created
 ; http://javascriptweblog.wordpress.com/2010/11/15/extending-objects-with-javascript-getters/
 ; golden -> http://stackoverflow.com/a/8843181/1010653
 (defn patch-core-seq-type [s]
-  (.log js/console (str "patching call for " s))
+  (.log js/console (str "patching seq type " s))
   ; (-> js/gdebug (set! (aget js/cljs.core s)))
   (let [orig-fn (aget js/cljs.core s)
         orig-keys (js-keys orig-fn)
-        ; new-fn  (fn [a b c d e f]
-        ;           (orig-fn. a b c d e f))]
-
-        ; new-fn  (fn [a b c d e f]
-        ;           (let [binder (js/Function.prototype.bind.call orig-fn nil a b c d e f)]
-        ;             (new binder)))]
-
         new-fn  (fn [& args]
                   (let [nargs (cons nil args)
                         binder (js/Function.prototype.bind.apply orig-fn nargs)
@@ -49,7 +55,25 @@
 
     ; set all properties of the new-fn based on the old one
     (doseq [k orig-keys]
-      (.log js/console (str "remapping " k))
+      ;(.log js/console (str "remapping " k))
+      ;(.__defineGetter__ new-fn k #(aget orig-fn k)))
+      (aset new-fn k (aget orig-fn k)))
+    (aset js/cljs.core s new-fn)))
+
+(defn patch-core-map-type [s]
+  (.log js/console (str "patching map type " s))
+  (let [orig-fn (aget js/cljs.core s)
+        orig-keys (js-keys orig-fn)
+        new-fn  (fn [& args]
+                  (let [nargs (cons nil args)
+                        binder (js/Function.prototype.bind.apply orig-fn nargs)
+                        that  (new binder)]
+                    (patch-map-object that)
+                    that))]
+
+    ; set all properties of the new-fn based on the old one
+    (doseq [k orig-keys]
+      ;(.log js/console (str "remapping " k))
       ;(.__defineGetter__ new-fn k #(aget orig-fn k)))
       (aset new-fn k (aget orig-fn k)))
     (aset js/cljs.core s new-fn)))
@@ -79,12 +103,8 @@
      (patch-prototype-as-array (aget p "prototype") p))
   (patch-core-seq-type "PersistentVector"))
 
-; ideally this would be hooked into the mapish-types constructor
-(defn patch-map [m]
-  ; (.log js/console (str "keys: " (keys m)))
-  (doseq [k (keys m)]
-      (.__defineGetter__ m (name k) #(get m k)))
-  m)
+(defn patch-known-mappish-types [] 
+  (patch-core-map-type "ObjMap"))
 
 ; patch a (1 arity) js function to return a clj-ish value
 (defn patch-fn1-return-value [o field-name]

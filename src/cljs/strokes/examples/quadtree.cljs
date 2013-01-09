@@ -15,7 +15,7 @@
 ; generate some random data for the quadtree
 (defn gen-data []
   (for [x (range 2500)]
-    (patch-map {:x (rand width), :y (rand height)})))
+    {:x (rand width), :y (rand height)}))
 
 ; gets a seq of all nodes. (the quadtree.visit api seems to beg for this side effecty impl)
 (defn nodes [quadtree]

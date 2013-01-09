@@ -1,5 +1,6 @@
 (ns strokes.core
   (:use [strokes.mrhyde :only [patch-known-arrayish-types 
+                               patch-known-mappish-types 
                                patch-fn1-return-value
                                patch-args-keyword-to-fn2]]
         [clojure.string :only [join]]
@@ -15,6 +16,8 @@
 
 ; patch all seqs to also be read-only arrays for javascript interop
 (patch-known-arrayish-types)
+; patch maps to include key based accessors on js object
+(patch-known-mappish-types)
 ; filter d3.selection.attr inputs: v might be keyword function
 (patch-args-keyword-to-fn2 (-> d3 .-selection .-prototype) "attr")
 
