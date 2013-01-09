@@ -23,7 +23,7 @@
   m)
 
 
-(def MAXLEN 10000)
+(def MAXLEN 5000)
 
 (defn patch-seq-object [o]
   ; this works but is now redundant
@@ -81,9 +81,9 @@
 ; Add functionality to cljs seq prototype to make it more like a js array
 (defn patch-prototype-as-array [p o]
   ; array length call
-  (.__defineGetter__ p "length" #(this-as t (count t)))
+  (.__defineGetter__ p "length" #(this-as t (count (take MAXLEN t))))
   ; access by index... we obviously need a smarter upper bound here
-  (dotimes [n 5000] 
+  (dotimes [n MAXLEN]
     (.__defineGetter__ p n #(this-as t (nth t n js/undefined))))
   ; if we are acting like an array, we'll need in impl of forEach and map
   (-> p .-forEach (set! eachish))
