@@ -8,11 +8,26 @@
   "http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/997/256/{z}/{x}/{y}.png")
 
 (defn ^:export launch []
-  (let [mappy (-> L (.map "mappy") (.setView [51.505 -0.09] 13))]
+  (let [mappy (-> L (.map "mappy") 
+                    (.setView [34.0086, -118.4986] 12))]
 
     (-> L (.tileLayer tile-url {
-        :maxZoom 18
-        :attribution "Map data &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"http://cloudmade.com\">CloudMade</a>"
-      }) (.addTo mappy))))
+              :maxZoom 18
+              :attribution "Map data &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"http://cloudmade.com\">CloudMade</a>"
+            }) 
+          (.addTo mappy))
+
+    (-> L (.marker [34.0086, -118.4986]) 
+          (.addTo mappy)
+          (.bindPopup "<b>Hello world!</b><br />I am a popup.")
+          (.openPopup))
+
+    (-> L (.circle [34.0286, -118.5486] 1000 {
+              :color "red"
+              :fillColor "#f03"
+              :fillOpacity "0.5"
+            })
+          (.addTo mappy)
+          (.bindPopup "I am a circle."))))
 
 ))
