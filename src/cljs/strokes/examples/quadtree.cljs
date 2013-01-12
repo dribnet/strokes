@@ -3,6 +3,9 @@
         [strokes.core :only [d3]]
         [mrhyde.core :only [patch-map]]))
 
+; this is unfortunate and temporary until i split things out
+(if d3 (do
+
 (def width 960)
 (def height 500)
 
@@ -101,3 +104,6 @@
         (.call brush))
 
     (brushed)))
+
+))
+

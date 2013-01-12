@@ -2,6 +2,9 @@
   (:use [clojure.string :only [join]]
         [strokes.core :only [d3 patch-mouse]]))
 
+; this is unfortunate and temporary until i split things out
+(if d3 (do
+
 (def width 960)
 (def height 500)
 (def centerpoint [(/ width 2) (/ height 2)])
@@ -76,3 +79,5 @@
     (draw-border svg)
     (add-mouse-callbacks svg hull circle)
     (redraw-hull hull circle)))
+
+))

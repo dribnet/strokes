@@ -92,19 +92,26 @@
   (-> p .-toCljString (set! (-> p .-toString)))
   (-> p .-toString (set! #(this-as t (clojure.string/join ", " t)))))
 
+(def have-patched-arrayish-flag (atom false))
+(def have-patched-mappish-flag (atom false))
+
 ; there must be a smarter way to do this, but for now i'll forge ahead
 (defn patch-known-arrayish-types []
-  (doseq [p [cljs.core.PersistentVector
-             cljs.core.LazySeq
-             cljs.core.IndexedSeq
-             cljs.core.Cons
-             cljs.core.Range
-             cljs.core.ChunkedSeq]]
-     (patch-prototype-as-array (aget p "prototype") p))
-  (patch-core-seq-type "PersistentVector"))
+  (if (not @have-patched-arrayish-flag) (do
+    (reset! have-patched-arrayish-flag true)
+    (doseq [p [cljs.core.PersistentVector
+               cljs.core.LazySeq
+               cljs.core.IndexedSeq
+               cljs.core.Cons
+               cljs.core.Range
+               cljs.core.ChunkedSeq]]
+       (patch-prototype-as-array (aget p "prototype") p))
+    (patch-core-seq-type "PersistentVector"))))
 
 (defn patch-known-mappish-types [] 
-  (patch-core-map-type "ObjMap"))
+  (if (not @have-patched-mappish-flag) (do
+    (reset! have-patched-mappish-flag true)
+    (patch-core-map-type "ObjMap"))))
 
 ; patch a (1 arity) js function to return a clj-ish value
 (defn patch-fn1-return-value [o field-name]
@@ -119,3 +126,13 @@
         (let [y1 (if (keyword? x1) #(x1 %) x1)
               y2 (if (keyword? x2) #(x2 %) x2)]
           (this-as ct (.call orig-fn ct y1 y2)))))))
+
+; patch a js function, converting any seqs to js arrays
+(defn patch-args-seq-to-array [o field-name]
+  (let [orig-fn (aget o field-name)]
+    (aset o field-name
+      (fn [& args]
+        ; (.log js/console (str "patching: " (count args)))
+        (let [nargs (map #(if (sequential? %) (apply array %) %) args)]
+          ; (.log js/console (str "patched: " (type (nth nargs 0))))
+          (this-as ct (.apply orig-fn ct nargs)))))))

@@ -6,20 +6,11 @@
         [clojure.string :only [join]]
         [cljs.reader :only [read-string]]))
 
-(def d3 js/d3)
+(def d3 (this-as ct (aget ct "d3")))
 
 ; patch the return value of d3.mouse to provide clj values
 (defn patch-mouse []
   (patch-fn1-return-value d3 "mouse"))
-
-; these global calls should maybe be in an init call or something
-
-; patch all seqs to also be read-only arrays for javascript interop
-(patch-known-arrayish-types)
-; patch maps to include key based accessors on js object
-(patch-known-mappish-types)
-; filter d3.selection.attr inputs: v might be keyword function
-(patch-args-keyword-to-fn2 (-> d3 .-selection .-prototype) "attr")
 
 ; add a new d3.edn call to pull edn data over the network (like d3.csv and d3.json)
 (defn- d3-edn
@@ -30,7 +21,16 @@
       (.log js/console (str "loading: " url))
       (.xhr d3 url mime ready))))
 
-(-> d3 .-edn (set! d3-edn)) 
+(if d3 (do
+  ; patch all seqs to also be read-only arrays for javascript interop
+  (patch-known-arrayish-types)
+  ; patch maps to include key based accessors on js object
+  (patch-known-mappish-types)
+  ; filter d3.selection.attr inputs: v might be keyword function
+  (patch-args-keyword-to-fn2 (-> d3 .-selection .-prototype) "attr")
+
+  (-> d3 .-edn (set! d3-edn)) 
+))
 
 ; stragglers is still a work in progress...
 

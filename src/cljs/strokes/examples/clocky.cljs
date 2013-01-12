@@ -1,6 +1,9 @@
 (ns strokes.examples.clocky
   (:use [strokes.core :only [d3]]))
 
+; this is unfortunate and temporary until i split things out
+(if d3 (do
+
 (def Tau (* 2 Math/PI))
 
 (def radii
@@ -55,3 +58,4 @@
         ; our work is never done
         false))))
 
+))
