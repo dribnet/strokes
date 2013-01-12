@@ -1,5 +1,5 @@
 (ns strokes.core
-  (:use [strokes.mrhyde :only [patch-known-arrayish-types 
+  (:use [mrhyde.core :only [patch-known-arrayish-types 
                                patch-known-mappish-types 
                                patch-fn1-return-value
                                patch-args-keyword-to-fn2]]

@@ -1,5 +1,5 @@
 ; providing clojure data a split personality: don't be afraid to let it all out
-(ns strokes.mrhyde
+(ns mrhyde.core
   (:use [clojure.string :only [join]]
         [cljs.reader :only [read-string]]))
 

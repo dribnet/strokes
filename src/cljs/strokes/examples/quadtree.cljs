@@ -1,7 +1,7 @@
 (ns strokes.examples.quadtree
   (:use [clojure.string :only [join]]
         [strokes.core :only [d3]]
-        [strokes.mrhyde :only [patch-map]]))
+        [mrhyde.core :only [patch-map]]))
 
 (def width 960)
 (def height 500)
