@@ -1,7 +1,8 @@
 (ns blade.core
   (:use [mrhyde.core :only [patch-known-arrayish-types 
-                               patch-known-mappish-types 
-                               patch-args-seq-to-array]]
+                            patch-known-mappish-types 
+                            patch-js-with-key-lookup
+                            patch-args-seq-to-array]]
         [clojure.string :only [join]]
         [cljs.reader :only [read-string]]))
 
@@ -12,6 +13,9 @@
   (patch-known-arrayish-types)
   ; patch maps to include key based accessors on js object
   (patch-known-mappish-types)
+
+  ; experimental - all objects can lookup by key (allows obj destructuring, etc)
+  (patch-js-with-key-lookup)
 
   ; filter L.latLng inputs: need to force seqs to arrays
   ; (called indirectly many places, including map.setView)

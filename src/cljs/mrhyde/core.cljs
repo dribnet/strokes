@@ -22,6 +22,26 @@
       (.__defineGetter__ m (name k) #(get m k)))
   m)
 
+(defn- strkey [x]
+  (if (keyword? x)
+    (name x)
+    x))
+
+(def have-patched-js-with-key-lookup (atom false))
+
+(defn patch-js-with-key-lookup []
+  (if (not @have-patched-js-with-key-lookup) (do
+    (reset! have-patched-js-with-key-lookup true)
+    (extend-type object
+      ILookup
+      (-lookup
+        ([o k]
+           (aget o (strkey k)))
+        ([o k not-found]
+          (let [s (strkey k)]
+            (if (goog.object.containsKey o s)
+              (aget o s) 
+              not-found))))))))
 
 (def MAXLEN 5000)
 
@@ -37,12 +57,9 @@
   (patch-map o)
   nil)
 
-; http://stackoverflow.com/questions/7015693/how-to-set-the-prototype-of-a-javascript-object-that-has-already-been-instantiat
-; http://stackoverflow.com/questions/12035061/call-javascript-function-whenever-object-is-created
-; http://javascriptweblog.wordpress.com/2010/11/15/extending-objects-with-javascript-getters/
-; golden -> http://stackoverflow.com/a/8843181/1010653
+; of note -> http://stackoverflow.com/a/8843181/1010653
 (defn patch-core-seq-type [s]
-  (.log js/console (str "patching seq type " s))
+  ; (.log js/console (str "patching seq type " s))
   ; (-> js/gdebug (set! (aget js/cljs.core s)))
   (let [orig-fn (aget js/cljs.core s)
         orig-keys (js-keys orig-fn)
@@ -61,7 +78,7 @@
     (aset js/cljs.core s new-fn)))
 
 (defn patch-core-map-type [s]
-  (.log js/console (str "patching map type " s))
+  ; (.log js/console (str "patching map type " s))
   (let [orig-fn (aget js/cljs.core s)
         orig-keys (js-keys orig-fn)
         new-fn  (fn [& args]
