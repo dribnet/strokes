@@ -2,7 +2,8 @@
   (:use [mrhyde.core :only [patch-known-arrayish-types 
                             patch-known-mappish-types 
                             patch-js-with-key-lookup
-                            patch-args-seq-to-array]]
+                            patch-args-seq-to-array
+                            patch-args-clj-to-js]]
         [clojure.string :only [join]]
         [cljs.reader :only [read-string]]))
 
@@ -20,4 +21,6 @@
   ; filter L.latLng inputs: need to force seqs to arrays
   ; (called indirectly many places, including map.setView)
   (patch-args-seq-to-array L "latLng")
+
+  (patch-args-clj-to-js (-> L .-control) "layers")  
 ))

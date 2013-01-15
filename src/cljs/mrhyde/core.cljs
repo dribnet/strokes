@@ -153,3 +153,14 @@
         (let [nargs (map #(if (sequential? %) (apply array %) %) args)]
           ; (.log js/console (str "patched: " (type (nth nargs 0))))
           (this-as ct (.apply orig-fn ct nargs)))))))
+
+; this hammer is too big.
+; patch a js function, converting args from clj to js
+(defn patch-args-clj-to-js [o field-name]
+  (let [orig-fn (aget o field-name)]
+    (aset o field-name
+      (fn [& args]
+        ; (.log js/console (str "patching: " (count args)))
+        (let [nargs (map clj->js args)]
+          ; (.log js/console (str "patched: " (type (nth nargs 0))))
+          (this-as ct (.apply orig-fn ct nargs)))))))
