@@ -1,8 +1,8 @@
-(ns strokes.core
-  (:use [mrhyde.core :only [patch-known-arrayish-types 
-                               patch-known-mappish-types 
-                               patch-fn1-return-value
-                               patch-args-keyword-to-fn2]]
+(ns strokes
+  (:use [mrhyde :only [patch-known-arrayish-types 
+                       patch-known-mappish-types 
+                       patch-fn1-return-value
+                       patch-args-keyword-to-fn2]]
         [clojure.string :only [join]]
         [cljs.reader :only [read-string]]))
 

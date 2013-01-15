@@ -1,10 +1,10 @@
 (ns strokes.examples.quadtree
   (:use [clojure.string :only [join]]
-        [strokes.core :only [d3]]
-        [mrhyde.core :only [patch-map]]))
+        [strokes :only [d3]]
+        [mrhyde :only [patch-map]]))
 
-; this is unfortunate and temporary until i split things out
-(if d3 (do
+; demo-guard - this is only needed because the demo is packaged with the library
+(if (and d3 (this-as ct (aget ct "strokes_demo")) (= js/strokes_demo "quadtree")) (do
 
 (def width 960)
 (def height 500)
@@ -72,38 +72,35 @@
     (.on "brush" brushed)
     (.extent [[100, 100], [200, 200]])))
 
-; external hook to launch this demo
-(defn ^:export launch []
-  ;(.log js/console (vert-array))
-  (let [svg (gen-svg)
-        data (gen-data)]
+;(.log js/console (vert-array))
+(let [svg (gen-svg)
+      data (gen-data)]
 
-    (reset! quadtree 
-      (-> d3 .-geom 
-        (.quadtree data -1 -1 (+ width 1) (+ height 1))))
+  (reset! quadtree 
+    (-> d3 .-geom 
+      (.quadtree data -1 -1 (+ width 1) (+ height 1))))
 
-    (-> svg (.selectAll ".node")
-        (.data (nodes @quadtree))
-      (.enter) (.append "rect")
-        (.attr "class" "node")
-        (.attr "x" :x)
-        (.attr "y" :y)
-        (.attr "width" :width)
-        (.attr "height" :height))
+  (-> svg (.selectAll ".node")
+      (.data (nodes @quadtree))
+    (.enter) (.append "rect")
+      (.attr "class" "node")
+      (.attr "x" :x)
+      (.attr "y" :y)
+      (.attr "width" :width)
+      (.attr "height" :height))
 
-    (reset! point (-> svg (.selectAll ".point")
-        (.data data)
-      (.enter) (.append "circle")
-        (.attr "class" "point")
-        (.attr "cx" :x)
-        (.attr "cy" :y)
-        (.attr "r" 4)))
+  (reset! point (-> svg (.selectAll ".point")
+      (.data data)
+    (.enter) (.append "circle")
+      (.attr "class" "point")
+      (.attr "cx" :x)
+      (.attr "cy" :y)
+      (.attr "r" 4)))
 
-    (-> svg (.append "g")
-        (.attr "class" "brush")
-        (.call brush))
+  (-> svg (.append "g")
+      (.attr "class" "brush")
+      (.call brush))
 
-    (brushed)))
+  (brushed))
 
-))
-
+)) ; end demo-guard

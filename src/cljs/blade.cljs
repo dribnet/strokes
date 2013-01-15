@@ -1,9 +1,9 @@
-(ns blade.core
-  (:use [mrhyde.core :only [patch-known-arrayish-types 
-                            patch-known-mappish-types 
-                            patch-js-with-key-lookup
-                            patch-args-seq-to-array
-                            patch-args-clj-to-js]]
+(ns blade
+  (:use [mrhyde :only [patch-known-arrayish-types 
+                       patch-known-mappish-types 
+                       patch-js-with-key-lookup
+                       patch-args-seq-to-array
+                       patch-args-clj-to-js]]
         [clojure.string :only [join]]
         [cljs.reader :only [read-string]]))
 

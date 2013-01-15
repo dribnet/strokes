@@ -1,8 +1,10 @@
 (ns strokes.examples.clocky
-  (:use [strokes.core :only [d3]]))
+  (:use [strokes :only [d3]]))
 
-; this is unfortunate and temporary until i split things out
-(if d3 (do
+
+; demo-guard - this is only needed because the demo is packaged with the library
+(if (and d3 (this-as ct (aget ct "strokes_demo")) (= js/strokes_demo "clocky")) (do
+
 
 (def Tau (* 2 Math/PI))
 
@@ -34,28 +36,27 @@
       {:value millis, :key "millis", :which 1},
       {:value (+ millis 50), :key "millis", :which 2} ]))
 
-(defn ^:export launch []
-  "call this to create top level svg and initiate animation"
-  (let [root 
-          (-> d3 (.select "#clocky") (.append "svg")
-              (.attr "width" 600)
-              (.attr "height" 600)
-              (.append "g")
-              (.attr "transform" "translate(300,300)"))
-        rings
-          (-> root (.selectAll "g") (.data curClockData))]
+(let [root 
+        (-> d3 (.select "#clocky") (.append "svg")
+            (.attr "width" 600)
+            (.attr "height" 600)
+            (.append "g")
+            (.attr "transform" "translate(300,300)"))
+      rings
+        (-> root (.selectAll "g") (.data curClockData))]
 
-      ; side effect = a path for each data element returned from curClockData
-      (-> (.enter rings) (.append "g") (.append "path"))
+    ; side effect = a path for each data element returned from curClockData
+    (-> (.enter rings) (.append "g") (.append "path"))
 
-      ; this timer loops forever, rebinding via curClockData
-      (.timer d3 (fn []
-        ;(.log js/console root)
-        (-> root (.selectAll "g") (.data curClockData)
-            (.select "path")
-            (.attr "class" #(str (:key %) (:which %)))
-            (.attr "d", arc))
-        ; our work is never done
-        false))))
+    ; this timer loops forever, rebinding via curClockData
+    (.timer d3 (fn []
+      ;(.log js/console root)
+      (-> root (.selectAll "g") (.data curClockData)
+          (.select "path")
+          (.attr "class" #(str (:key %) (:which %)))
+          (.attr "d", arc))
+      ; our work is never done
+      false)))
 
-))
+
+)) ; end demo-guard

@@ -1,9 +1,11 @@
 (ns strokes.examples.hull
   (:use [clojure.string :only [join]]
-        [strokes.core :only [d3 patch-mouse]]))
+        [strokes :only [d3 patch-mouse]]))
 
-; this is unfortunate and temporary until i split things out
-(if d3 (do
+
+; demo-guard - this is only needed because the demo is packaged with the library
+(if (and d3 (this-as ct (aget ct "strokes_demo")) (= js/strokes_demo "hull")) (do
+
 
 (def width 960)
 (def height 500)
@@ -69,15 +71,13 @@
       (swap! vert-atom #(conj (rest %) centerpoint))
       (redraw-hull hull circle)))))
 
-; external hook to launch this demo
-(defn ^:export launch []
-  ;(.log js/console (vert-array))
-  (patch-mouse)
-  (let [svg (gen-svg)
-        hull (gen-hull svg)
-        circle (atom (.selectAll svg "circle"))]
-    (draw-border svg)
-    (add-mouse-callbacks svg hull circle)
-    (redraw-hull hull circle)))
+;(.log js/console (vert-array))
+(patch-mouse)
+(let [svg (gen-svg)
+      hull (gen-hull svg)
+      circle (atom (.selectAll svg "circle"))]
+  (draw-border svg)
+  (add-mouse-callbacks svg hull circle)
+  (redraw-hull hull circle))
 
-))
+)) ; end demo-guard

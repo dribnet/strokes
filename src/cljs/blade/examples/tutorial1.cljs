@@ -1,44 +1,46 @@
 (ns blade.examples.tutorial1
-  (:use [blade.core :only [L]]))
+  (:use [blade :only [L]]))
 
-; this is unfortunate and temporary until i split things out
-(if L (do
+
+; demo-guard - this is only needed because the demo is packaged with the library
+(if (and L (this-as ct (aget ct "blade_demo")) (= js/blade_demo "tutorial1")) (do
+
 
 (def tile-url
   "http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/997/256/{z}/{x}/{y}.png")
 
-(defn ^:export launch []
-  (let [mappy (-> L (.map "mappy") 
-                    (.setView [34.0086, -118.4986] 12))]
+(let [mappy (-> L (.map "mappy") 
+                  (.setView [34.0086, -118.4986] 12))]
 
-    (-> L (.tileLayer tile-url {
-              :maxZoom 18
-              :attribution "Map data &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"http://cloudmade.com\">CloudMade</a>"})
-          (.addTo mappy))
+  (-> L (.tileLayer tile-url {
+            :maxZoom 18
+            :attribution "Map data &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"http://cloudmade.com\">CloudMade</a>"})
+        (.addTo mappy))
 
-    (-> L (.marker [34.0086, -118.4986]) 
-          (.addTo mappy)
-          (.bindPopup "<b>Hello world!</b><br />I am a popup.")
-          (.openPopup))
+  (-> L (.marker [34.0086, -118.4986]) 
+        (.addTo mappy)
+        (.bindPopup "<b>Hello world!</b><br />I am a popup.")
+        (.openPopup))
 
-    (-> L (.circle [34.0286, -118.5486] 1000 {
-              :color "red"
-              :fillColor "#f03"
-              :fillOpacity "0.5"})
-          (.addTo mappy)
-          (.bindPopup "I am a circle."))
+  (-> L (.circle [34.0286, -118.5486] 1000 {
+            :color "red"
+            :fillColor "#f03"
+            :fillOpacity "0.5"})
+        (.addTo mappy)
+        (.bindPopup "I am a circle."))
 
-    (-> L (.polygon [
-            [33.979, -118.48]
-            [33.973, -118.46]
-            [33.98, -118.447]])
-          (.addTo mappy)
-          (.bindPopup "I am a <del>polygon</del> triangle"))
+  (-> L (.polygon [
+          [33.979, -118.48]
+          [33.973, -118.46]
+          [33.98, -118.447]])
+        (.addTo mappy)
+        (.bindPopup "I am a <del>polygon</del> triangle"))
 
-    (let [popup (-> L .popup)]
-      (.on mappy "click" (fn [{:keys [latlng]} e]
-      (-> popup (.setLatLng latlng)
-                (.setContent (str "You clicked the map at " latlng))
-                (.openOn mappy)))))))
+  (let [popup (-> L .popup)]
+    (.on mappy "click" (fn [{:keys [latlng]} e]
+    (-> popup (.setLatLng latlng)
+              (.setContent (str "You clicked the map at " latlng))
+              (.openOn mappy))))))
 
-))
+
+)) ; end demo-guard
