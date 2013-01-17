@@ -18,9 +18,12 @@
   ; experimental - all objects can lookup by key (allows obj destructuring, etc)
   (patch-js-with-key-lookup)
 
-  ; filter L.latLng inputs: need to force seqs to arrays
+  ; filter L.latLng inputs: need to force single arg seqs to array
   ; (called indirectly many places, including map.setView)
-  (patch-args-seq-to-array L "latLng")
+  (patch-args-seq-to-array L "latLng" 0)
 
-  (patch-args-clj-to-js (-> L .-control) "layers")  
+  (patch-args-clj-to-js (-> L .-control) "layers" 0 1)  
+
+  (patch-args-clj-to-js L "setOptions" 1)  
 ))
+

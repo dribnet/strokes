@@ -130,37 +130,86 @@
     (reset! have-patched-mappish-flag true)
     (patch-core-map-type "ObjMap"))))
 
-; patch a (1 arity) js function to return a clj-ish value
-(defn patch-fn1-return-value [o field-name]
-  (let [orig-fn (aget o field-name)]
-    (aset o field-name (fn [x] (js->clj (orig-fn x))))))
+; The following helpers patch individual js functions
 
-; patch a (2 arity) js function convert any keyword args to functions
-(defn patch-args-keyword-to-fn2 [o field-name]
-  (let [orig-fn (aget o field-name)]
-    (aset o field-name
-      (fn [x1,x2]
-        (let [y1 (if (keyword? x1) #(x1 %) x1)
-              y2 (if (keyword? x2) #(x2 %) x2)]
-          (this-as ct (.call orig-fn ct y1 y2)))))))
+(defn get-store-cur-js-fn [o field-name]
+  (let [cur-fn (aget o field-name)
+        js-fn-name (str "_js_" field-name)
+        root-fn (aget o js-fn-name)]
+    ; first store original (if we have not already done so)
+    (if (= js/undefined root-fn)
+      ; (.log js/console "storing: " js-fn-name)
+      (aset o js-fn-name cur-fn))
+    ; return cur-fn
+    cur-fn))
 
-; patch a js function, converting any seqs to js arrays
-(defn patch-args-seq-to-array [o field-name]
-  (let [orig-fn (aget o field-name)]
-    (aset o field-name
-      (fn [& args]
-        ; (.log js/console (str "patching: " (count args)))
-        (let [nargs (map #(if (sequential? %) (apply array %) %) args)]
-          ; (.log js/console (str "patched: " (type (nth nargs 0))))
-          (this-as ct (.apply orig-fn ct nargs)))))))
+; patch a js function to return a clj-ish value
+(defn patch-return-value-to-clj [o field-name]
+  (let [orig-fn (get-store-cur-js-fn o field-name)]
+    (aset o field-name (fn [& args] 
+      (js->clj (this-as ct (.apply orig-fn ct args)))))))
 
-; this hammer is too big.
-; patch a js function, converting args from clj to js
-(defn patch-args-clj-to-js [o field-name]
-  (let [orig-fn (aget o field-name)]
+; patch a js function convert specified keyword args to functions
+(defn patch-args-keyword-to-fn [o field-name & fields]
+  (let [orig-fn (get-store-cur-js-fn o field-name)
+        arg-filter (if (empty? fields) #(identity true) (set fields))]
     (aset o field-name
       (fn [& args]
         ; (.log js/console (str "patching: " (count args)))
-        (let [nargs (map clj->js args)]
+        (let [nargs (map (fn [c x] 
+                           (if (and (arg-filter c) (keyword? x)) #(x %) x))
+                         (iterate inc 0) args)]
           ; (.log js/console (str "patched: " (type (nth nargs 0))))
           (this-as ct (.apply orig-fn ct nargs)))))))
+
+; patch a js function, converting specified seqs to js arrays
+(defn patch-args-seq-to-array [o field-name & fields]
+  (let [orig-fn (get-store-cur-js-fn o field-name)
+        arg-filter (if (empty? fields) #(identity true) (set fields))]
+    (aset o field-name
+      (fn [& args]
+        ; (.log js/console (str "patching: " (count args)))
+        (let [nargs (map #(if (and (arg-filter %1) (sequential? %2))
+                            (apply array %2) %2) (iterate inc 0) args)]
+          ; (.log js/console (str "patched: " (type (nth nargs 0))))
+          (this-as ct (.apply orig-fn ct nargs)))))))
+
+; the big hammer: patch a js function, converting specified args from clj to js
+(defn patch-args-clj-to-js [o field-name & fields]
+  (let [orig-fn (get-store-cur-js-fn o field-name)
+        arg-filter (if (empty? fields) #(identity true) (set fields))]
+    (aset o field-name
+      (fn [& args]
+        ; (.log js/console (str "patching: " (count args)))
+        (let [nargs (map #(if (arg-filter %1) (clj->js %2) %2) (iterate inc 0) args)]
+          ; (.log js/console (str "patched: " (type (nth nargs 0))))
+          (this-as ct (.apply orig-fn ct nargs)))))))
+
+
+; (defn patch-args-clj-to-js [o field-name]
+;   (let [orig-fn (aget o field-name)]
+;     (aset o field-name
+;       (fn [& args]
+;         ; (.log js/console (str "patching: " (count args)))
+;         (let [nargs (map clj->js args)]
+;           ; (.log js/console (str "patched: " (type (nth nargs 0))))
+;           (this-as ct (.apply orig-fn ct nargs)))))))
+
+; poor man's unit test
+; add this to your html
+;
+    ; M = {
+    ;   testthis: function(a,b,c) {
+    ;     console.log("here comes a b c");
+    ;     console.log(a);
+    ;     console.log(b);
+    ;     console.log(c);
+    ;   }
+    ; }
+;
+; then
+(this-as ct (aset ct "toclj" js->clj))
+; (patch-args-clj-to-js js/M "testthis" 0 2)
+;
+; and from the browser js console:
+; M.testthis(toclj({}), toclj({}), toclj({}))
