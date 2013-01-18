@@ -7,7 +7,7 @@
 (defn mapish [f]
   (this-as ct
     (doall (map 
-      #(.call f js/undefined % %2 ct) (seq ct) (iterate inc 0)))))
+      #(.call f js/undefined % %2 ct) (seq ct) (range)))))
 
 ; a replacement for the foreach call (which is map that returns null)
 (defn eachish [f]
@@ -158,7 +158,7 @@
         ; (.log js/console (str "patching: " (count args)))
         (let [nargs (map (fn [c x] 
                            (if (and (arg-filter c) (keyword? x)) #(x %) x))
-                         (iterate inc 0) args)]
+                         (range) args)]
           ; (.log js/console (str "patched: " (type (nth nargs 0))))
           (this-as ct (.apply orig-fn ct nargs)))))))
 
@@ -170,7 +170,7 @@
       (fn [& args]
         ; (.log js/console (str "patching: " (count args)))
         (let [nargs (map #(if (and (arg-filter %1) (sequential? %2))
-                            (apply array %2) %2) (iterate inc 0) args)]
+                            (apply array %2) %2) (range) args)]
           ; (.log js/console (str "patched: " (type (nth nargs 0))))
           (this-as ct (.apply orig-fn ct nargs)))))))
 
@@ -181,7 +181,7 @@
     (aset o field-name
       (fn [& args]
         ; (.log js/console (str "patching: " (count args)))
-        (let [nargs (map #(if (arg-filter %1) (clj->js %2) %2) (iterate inc 0) args)]
+        (let [nargs (map #(if (arg-filter %1) (clj->js %2) %2) (range) args)]
           ; (.log js/console (str "patched: " (type (nth nargs 0))))
           (this-as ct (.apply orig-fn ct nargs)))))))
 
