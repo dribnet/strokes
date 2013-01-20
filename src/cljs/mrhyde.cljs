@@ -19,7 +19,8 @@
 (defn patch-map [m]
   ; (.log js/console (str "keys: " (keys m)))
   (doseq [k (keys m)]
-      (.__defineGetter__ m (name k) #(get m k)))
+    (if (not (goog.object.containsKey m (name k)))
+      (.__defineGetter__ m (name k) #(get m k))))
   m)
 
 (defn- strkey [x]
