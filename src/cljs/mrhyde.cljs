@@ -159,6 +159,22 @@
   )
 )
 
+; TODO: replace this with keysetscanner, etc.
+(defn add-hyde-protocol-to-map [m]
+  (extend-type m
+  IHyde
+  (has-cache? [this]
+    (goog.object.containsKey this hydekey))
+  (from-cache [this]
+    (if-let [c (aget this hydekey)]
+      ; attempt1: can we make a transient copy of a transient?
+      (let [p (persistent! c)]
+        (aset this hydekey (transient p))
+        p)
+      this))
+  )
+)
+
 ; (this-as ct (aset ct "hascache" (fn [x] (has-cache? x))))
 ; (this-as ct (aset ct "fromcache" (fn [x] (from-cache x))))
 
@@ -186,6 +202,10 @@
 (defn patch-known-mappish-types [] 
   (if-not @have-patched-mappish-flag (do
     (reset! have-patched-mappish-flag true)
+    (doseq [p [cljs.core.ObjMap
+               cljs.core.PersistentHashMap]]
+       (add-hyde-protocol-to-map p))
+
     (patch-core-map-type "ObjMap")
     (patch-core-map-type "PersistentHashMap"))))
 

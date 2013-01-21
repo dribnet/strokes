@@ -12,8 +12,7 @@
 
 (def pack (-> d3 .-layout .pack
   (.size [(- diameter 4), (- diameter 4)])
-  (.value #(aget % "size"))))
-  ; (.value :size)))
+  (.value :size)))
 
 (def svg (-> d3 (.select "body") (.append "svg")
     (.attr "width" diameter)
@@ -21,24 +20,25 @@
   (.append "g")
     (.attr "transform" "translate(2,2)")))
 
-(-> d3 (.json "flare.json" (fn [error, root]
-  (let [cljroot (js->clj jsroot :keywordize-keys true)
+(-> d3 (.json "flare.json" (fn [error, jsroot]
+  (let [root (js->clj jsroot :keywordize-keys true)
         node (-> svg (.datum root) (.selectAll ".node")
                   (.data (.-nodes pack))
                 .enter (.append "g")
-                  (.attr "class" #(if (aget % "children") "node" "leaf node"))
+                  (.attr "class" #(if (contains? % :children) "node" "leaf node"))
                   (.attr "transform" #(str "translate(" (aget % "x") "," (aget % "y") ")")))]
 
     (-> node (.append "title")
-      (.text #(str (aget % "name") (if (aget % "children") "" (formatfn (aget % "size"))))))
+      (.text #(str (:name %) (if (contains? % :children) "" (formatfn (:size %))))))
 
     (-> node (.append "circle")
-      (.attr "r" #(do (.log js/console (str %)) (aget % "r"))))
+      (.attr "r" #(aget % "r")))
+      ; (.attr "r" #(do (.log js/console (str %)) (aget % "r"))))
 
-    (-> node (.filter #(not (aget % "children"))) (.append "text")
+    (-> node (.filter #(not (:children %))) (.append "text")
       (.attr "dy" ".3em")
       (.style "text-anchor" "middle")
-      (.text #(subs (aget % "name") 0 (/ (aget % "r") 3))))
+      (.text #(subs (:name %) 0 (/ (aget % "r") 3))))
 
   ))))
 
