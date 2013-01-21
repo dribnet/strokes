@@ -1,6 +1,7 @@
 (ns mrhyde.test
     (:require [domina.tester :refer [add-test run-all-tests]]
-              [mrhyde :refer [patch-known-arrayish-types
+              [mrhyde :refer [hyde? has-cache? from-cache
+                              patch-known-arrayish-types
                               patch-known-mappish-types
                               patch-return-value-to-clj
                               patch-args-keyword-to-fn
@@ -166,5 +167,25 @@
         (assert (= r3 ["a" "b" "c"]))
         )))
 
+(add-test "js array modification of seq recoverable with hyde cache"
+    (fn []
+      (let [v [1 2 3]]
+        (assert (hyde? v))
+        (assert (not (has-cache? v)))
+        (assert (= (v (from-cache v))))
+        (let [[ra rv] (DummyLib/zeroOutFirstArrayElement v)]
+          ; the method thinks it changed the vector
+          (assert (= rv 0))
+          ; locally the vector remains unchanged
+          (assert (= v [1 2 3]))
+          ; though all bets are off if you look under the covers
+          (assert (= 0 (aget v 0)))
+          ; when it hands back a copy that too looks unchanged from cljs
+          (assert (= ra [1 2 3]))
+          ; but there is an indication there there is new information added
+          (assert has-cache? ra)
+          ; and in fact the 'js view' of this structure is available upon request
+          (assert (= [0 2 3] (from-cache ra))))
+          )))
 
   (run-all-tests "mrhyde"))

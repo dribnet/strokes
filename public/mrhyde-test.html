@@ -51,6 +51,10 @@
           arrays.push(c);
         }
         return arrays;
+      },
+      zeroOutFirstArrayElement: function(a) {
+        a[0] = 0;
+        return [a, a[0]];
       }
     }
     </script>

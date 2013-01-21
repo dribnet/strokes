@@ -19,7 +19,7 @@
 (defn patch-map [m]
   ; (.log js/console (str "keys: " (keys m)))
   (doseq [k (keys m)]
-    (if (not (goog.object.containsKey m (name k)))
+    (if-not (goog.object.containsKey m (name k))
       (.__defineGetter__ m (name k) #(get m k))))
   m)
 
@@ -31,7 +31,7 @@
 (def have-patched-js-with-key-lookup (atom false))
 
 (defn patch-js-with-key-lookup []
-  (if (not @have-patched-js-with-key-lookup) (do
+  (if-not @have-patched-js-with-key-lookup (do
     (reset! have-patched-js-with-key-lookup true)
     (extend-type object
       ILookup
@@ -96,13 +96,37 @@
       (aset new-fn k (aget orig-fn k)))
     (aset js/cljs.core s new-fn)))
 
+(def hydekey "$cljs$mrhyde$cache")
+
+(defn gen-getter [n]
+  (fn []
+    (this-as t 
+      (let [src (if (goog.object.containsKey t hydekey) (aget t hydekey) t)]
+        (nth src n js/undefined)))))
+
+(defn gen-setter [n]
+  (fn [v]
+    (this-as t
+      ; ensure cache (transient) exists
+      (if-not (goog.object.containsKey t hydekey)
+        (let [c (transient t)]
+          (aset t hydekey c)))
+      ; now use it
+      (let [c (aget t hydekey)]
+        (assoc! c n v)))))
+
+;           ))
+;       (let [src (if (goog.object.containsKey t hydekey) (t/hydekey) t)]
+;         (nth src n js/undefined)))))
+
 ; Add functionality to cljs seq prototype to make it more like a js array
 (defn patch-prototype-as-array [p o]
   ; array length call
   (.__defineGetter__ p "length" #(this-as t (count (take MAXLEN t))))
   ; access by index... we obviously need a smarter upper bound here
   (dotimes [n MAXLEN]
-    (.__defineGetter__ p n #(this-as t (nth t n js/undefined))))
+    (.__defineGetter__ p n (gen-getter n))
+    (.__defineSetter__ p n (gen-setter n)))
   ; if we are acting like an array, we'll need in impl of forEach and map
   (-> p .-forEach (set! eachish))
   (-> p .-map (set! mapish))
@@ -110,12 +134,39 @@
   (-> p .-toCljString (set! (-> p .-toString)))
   (-> p .-toString (set! #(this-as t (clojure.string/join ", " t)))))
 
+(defprotocol IHyde
+  "Container types extended with js metaprogramming"
+  (has-cache? [this] "is there cached information attached from js mutation?")
+  (from-cache [this] "render this container with cached information"))
+
+(defn add-hyde-protocol-to-seq [s]
+  (extend-type s
+  IHyde
+  (has-cache? [this]
+    (goog.object.containsKey this hydekey))
+  (from-cache [this]
+    (if-let [c (aget this hydekey)]
+      ; attempt1: can we make a transient copy of a transient?
+      (let [p (persistent! c)]
+        (aset this hydekey (transient p))
+        p)
+      this))
+  )
+)
+
+; (this-as ct (aset ct "hascache" (fn [x] (has-cache? x))))
+; (this-as ct (aset ct "fromcache" (fn [x] (from-cache x))))
+
+(defn ^boolean hyde?
+  "Returns true if coll satisfies IHyde"
+  [x] (satisfies? IHyde x))
+
 (def have-patched-arrayish-flag (atom false))
 (def have-patched-mappish-flag (atom false))
 
 ; there must be a smarter way to do this, but for now i'll forge ahead
 (defn patch-known-arrayish-types []
-  (if (not @have-patched-arrayish-flag) (do
+  (if-not @have-patched-arrayish-flag (do
     (reset! have-patched-arrayish-flag true)
     (doseq [p [cljs.core.PersistentVector
                cljs.core.LazySeq
@@ -123,11 +174,12 @@
                cljs.core.Cons
                cljs.core.Range
                cljs.core.ChunkedSeq]]
-       (patch-prototype-as-array (aget p "prototype") p))
+       (patch-prototype-as-array (aget p "prototype") p)
+       (add-hyde-protocol-to-seq p))
     (patch-core-seq-type "PersistentVector"))))
 
 (defn patch-known-mappish-types [] 
-  (if (not @have-patched-mappish-flag) (do
+  (if-not @have-patched-mappish-flag (do
     (reset! have-patched-mappish-flag true)
     (patch-core-map-type "ObjMap"))))
 
