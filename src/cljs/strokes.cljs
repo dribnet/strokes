@@ -1,16 +1,12 @@
 (ns strokes
-  (:use [mrhyde :only [patch-known-arrayish-types 
-                       patch-known-mappish-types 
-                       patch-return-value-to-clj
-                       patch-args-keyword-to-fn]]
-        [clojure.string :only [join]]
-        [cljs.reader :only [read-string]]))
+  (:require [mrhyde :refer [patch-known-arrayish-types 
+                            patch-known-mappish-types 
+                            patch-return-value-to-clj
+                            patch-args-keyword-to-fn]]
+            [clojure.string :refer [join]]
+            [cljs.reader :refer [read-string]]))
 
 (def d3 (this-as ct (aget ct "d3")))
-
-; patch the return value of d3.mouse to provide clj values
-(defn patch-mouse []
-  (patch-return-value-to-clj d3 "mouse"))
 
 ; add a new d3.edn call to pull edn data over the network (like d3.csv and d3.json)
 (defn- d3-edn
@@ -28,6 +24,8 @@
   (patch-known-mappish-types)
   ; filter d3.selection.attr inputs: v might be keyword function
   (patch-args-keyword-to-fn (-> d3 .-selection .-prototype) "attr" 1)
+  ; have mouse return cljs data structure
+  (patch-return-value-to-clj d3 "mouse")
 
   (-> d3 .-edn (set! d3-edn)) 
 ))

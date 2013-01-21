@@ -1,5 +1,5 @@
 (ns blade.examples.tutorial1
-  (:use [blade :only [L]]))
+  (:require [blade :refer [L]]))
 
 
 ; demo-guard - this is only needed because the demo is packaged with the library

@@ -1,11 +1,11 @@
 (ns blade
-  (:use [mrhyde :only [patch-known-arrayish-types 
-                       patch-known-mappish-types 
-                       patch-js-with-key-lookup
-                       patch-args-seq-to-array
-                       patch-args-clj-to-js]]
-        [clojure.string :only [join]]
-        [cljs.reader :only [read-string]]))
+  (:require [mrhyde :refer [patch-known-arrayish-types 
+                            patch-known-mappish-types 
+                            patch-js-with-key-lookup
+                            patch-args-seq-to-array
+                            patch-args-clj-to-js]]
+            [clojure.string :refer [join]]
+            [cljs.reader :refer [read-string]]))
 
 (def L (this-as ct (aget ct "L")))
 

@@ -1,5 +1,5 @@
 (ns strokes.examples.clocky
-  (:use [strokes :only [d3]]))
+  (:require [strokes :refer [d3]]))
 
 
 ; demo-guard - this is only needed because the demo is packaged with the library

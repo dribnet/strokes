@@ -1,7 +1,7 @@
 ; providing clojure data a split personality: don't be afraid to let it all out
 (ns mrhyde
-  (:use [clojure.string :only [join]]
-        [cljs.reader :only [read-string]]))
+  (:require [clojure.string :refer [join]]
+            [cljs.reader :refer [read-string]]))
 
 ; a replacement for the map call
 (defn mapish [f]
@@ -107,6 +107,7 @@
 (defn gen-setter [n]
   (fn [v]
     (this-as t
+      ; (.log js/console (str "setter: " t "," v "," n))
       ; ensure cache (transient) exists
       (if-not (goog.object.containsKey t hydekey)
         (let [c (transient t)]
@@ -133,6 +134,10 @@
   ; and we should print like a native string. (& squirrel the native one away)
   (-> p .-toCljString (set! (-> p .-toString)))
   (-> p .-toString (set! #(this-as t (clojure.string/join ", " t)))))
+
+; silence warnings about protocol, what is all that gibber-jabber anyways?
+(declare has-cache?)
+(declare from-cache)
 
 (defprotocol IHyde
   "Container types extended with js metaprogramming"

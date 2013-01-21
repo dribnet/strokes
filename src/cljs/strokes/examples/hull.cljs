@@ -1,6 +1,6 @@
 (ns strokes.examples.hull
-  (:use [clojure.string :only [join]]
-        [strokes :only [d3 patch-mouse]]))
+  (:require [clojure.string :refer [join]]
+            [strokes :refer [d3]]))
 
 
 ; demo-guard - this is only needed because the demo is packaged with the library
@@ -72,7 +72,6 @@
       (redraw-hull hull circle)))))
 
 ;(.log js/console (vert-array))
-(patch-mouse)
 (let [svg (gen-svg)
       hull (gen-hull svg)
       circle (atom (.selectAll svg "circle"))]
