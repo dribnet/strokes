@@ -1,8 +1,9 @@
 <!doctype html>
 <html>
+<!-- this file swiped and adapted from domina test suite -->
   <head>
     <meta charset="UTF-8">
-    <title>Domina Test Page (simple optimizations)</title>
+    <title>mrhyde tests</title>
     <link href="tests.css" rel="stylesheet" type="text/css"><link>
     <script type="text/javascript">
       /* Android 2.x claims XPath support, but has none.  Force non-native
@@ -22,6 +23,39 @@
     <script type="text/javascript" src="xpath.js"></script>
  </head>
   <body>
+
+    <!-- for mrhyde testing, we first setup a dummy javascript library -->
+    <script>
+    DummyLib = {
+      wrapArgs0and2: function(a,b,c) {
+        return [a, b, c];
+      },
+      wrapReturnArgsIntoArray: function(a,b,c) {
+        return [a, b, c];
+      },
+      wrapReturnArgsIntoObject: function(a,b,c) {
+        return {a: a, b: b, c: c};
+      },
+      wrapCall0on1: function(a,b,c) {
+        return a(b);
+      },
+      wrapArraysInAndOut: function(a,b,c) {
+        arrays = [];
+        if (a instanceof Array) {
+          arrays.push(a);
+        }
+        if (b instanceof Array) {
+          arrays.push(b);
+        }
+        if (c instanceof Array) {
+          arrays.push(c);
+        }
+        return arrays;
+      }
+    }
+    </script>
+
+
     <script type="text/javascript" src="out/strokes_test.js"></script>
     <script>
       mrhyde.test.launch();

@@ -132,6 +132,7 @@
     (patch-core-map-type "ObjMap"))))
 
 ; The following helpers patch individual js functions
+; TODO: some (all?) of these require patch-args-clj-to-js to have been run, why?
 
 (defn get-store-cur-js-fn [o field-name]
   (let [cur-fn (aget o field-name)
