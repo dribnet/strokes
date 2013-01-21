@@ -15,18 +15,18 @@
   (this-as ct (.call mapish ct f))
   nil)
 
-; this can be called standalone or auto-run from cljs map initialzation
-(defn patch-map [m]
-  ; (.log js/console (str "keys: " (keys m)))
-  (doseq [k (keys m)]
-    (if-not (goog.object.containsKey m (name k))
-      (.__defineGetter__ m (name k) #(get m k))))
-  m)
-
 (defn- strkey [x]
   (if (keyword? x)
     (name x)
     x))
+
+; this can be called standalone or auto-run from cljs map initialzation
+(defn patch-map [m]
+  ; (.log js/console (str "keys: " (keys m)))
+  (doseq [k (keys m)]
+    (if (and (keyword? k) (not (goog.object.containsKey m (name k))))
+      (.__defineGetter__ m (name k) #(get m k))))
+  m)
 
 (def have-patched-js-with-key-lookup (atom false))
 
@@ -186,7 +186,8 @@
 (defn patch-known-mappish-types [] 
   (if-not @have-patched-mappish-flag (do
     (reset! have-patched-mappish-flag true)
-    (patch-core-map-type "ObjMap"))))
+    (patch-core-map-type "ObjMap")
+    (patch-core-map-type "PersistentHashMap"))))
 
 ; The following helpers patch individual js functions
 ; TODO: some (all?) of these require patch-args-clj-to-js to have been run, why?
