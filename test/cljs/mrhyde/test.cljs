@@ -293,4 +293,8 @@
 
         ))))
 
+(add-test "js->clj with cycle?"
+    (fn []
+      (let [c (js->clj js/p)])))
+
   (run-all-tests "mrhyde"))

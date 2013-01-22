@@ -63,8 +63,19 @@
       zeroOutMapKeyTen: function(a) {
         a.ten = 0;
         return [a, a.ten];
-      }
+      },
     }
+    var p = {
+      node: "yes",
+      parent: null,
+      children: [
+        { node: "yes",
+          parent: null,
+          children: []
+        }
+      ]
+    };
+    p.children[0].parent = p;
     </script>
 
 

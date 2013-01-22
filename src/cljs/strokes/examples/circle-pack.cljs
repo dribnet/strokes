@@ -35,6 +35,7 @@
       (.text #(str (:name %) (if (contains? % :children) "" (formatfn (:size %))))))
 
     (-> node (.append "circle")
+      ; (.attr "r" #(do (.log js/console (str %)) (aget % "r"))))
       (.attr "r" :r))
 
     (-> node (.filter #(not (:children %))) (.append "text")
