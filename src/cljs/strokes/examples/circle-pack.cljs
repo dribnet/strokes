@@ -23,33 +23,27 @@
 (-> d3 (.json "flare.json" (fn [error, jsroot]
   (let [root (js->clj jsroot :keywordize-keys true)
         node (-> svg (.datum root) (.selectAll ".node")
-                  ; (.data (fn [& nargs] (this-as ct 
-                  ;   (recurse-from-hyde-cache (vec
-                  ;     (.apply (.-nodes pack) ct nargs))))))
-
-                  ; (.data (let [m (.-nodes pack)]
-                  ;   (.log js/console (str m)) m))
-
-                  (.data (.-nodes pack))
+                  (.data (fn [& nargs] (this-as ct 
+                    (recurse-from-hyde-cache (vec
+                      (.apply (.-nodes pack) ct nargs))))))
+                  ; (.data (.-nodes pack))
                 .enter (.append "g")
                   (.attr "class" #(if (contains? % :children) "node" "leaf node"))
-                  (.attr "transform" #(str "translate(" (aget % "x") "," (aget % "y") ")")))]
+                  (.attr "transform" #(str "translate(" (:x %) "," (:y %) ")")))]
 
     (-> node (.append "title")
       (.text #(str (:name %) (if (contains? % :children) "" (formatfn (:size %))))))
 
     (-> node (.append "circle")
-      (.attr "r" #(let [p (from-cache %)] (:r p))))
-      ; (.attr "r" #(do (.log js/console (str %)) (aget % "r"))))
+      (.attr "r" :r))
 
     (-> node (.filter #(not (:children %))) (.append "text")
       (.attr "dy" ".3em")
       (.style "text-anchor" "middle")
-      (.text #(subs (:name %) 0 (/ (aget % "r") 3))))
+      (.text #(subs (:name %) 0 (/ (:r %) 3))))
 
   ))))
 
-; WTF is self?
 (-> d3 (.select (.-frameElement js/self)) (.style "height" (str diameter "px")))
 
 )) ; end demo-guard

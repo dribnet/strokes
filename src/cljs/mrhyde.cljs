@@ -229,7 +229,10 @@
     (map? x)
       (let [c (from-cache-if-has-cache x)]
         (into {} (for [[k v] c] 
-          [(recurse-from-hyde-cache k) (recurse-from-hyde-cache v)])))
+          [(recurse-from-hyde-cache k)
+            (if (= k :parent)
+              nil
+              (recurse-from-hyde-cache v))])))
     (coll? x) 
       (let [c (from-cache-if-has-cache x)]
         (into (empty c) (map recurse-from-hyde-cache c)))
