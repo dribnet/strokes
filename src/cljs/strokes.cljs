@@ -2,6 +2,7 @@
   (:require [mrhyde :refer [patch-known-arrayish-types 
                             patch-known-mappish-types 
                             patch-return-value-to-clj
+                            patch-return-value-recurse-from-cache
                             patch-args-keyword-to-fn]]
             [clojure.string :refer [join]]
             [cljs.reader :refer [read-string]]))
@@ -30,7 +31,7 @@
   (patch-return-value-to-clj d3 "mouse")
 
   ; todo: new patch here - something like:
-  ; (patch-return-value-recurse-from-cache (-> d3 .-layout .-pack .-prototype) "nodes" 0)
+  ; (patch-return-value-recurse-from-cache (-> d3 .-layout) "pack")
 
   (-> d3 .-edn (set! d3-edn)) 
 ))

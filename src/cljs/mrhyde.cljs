@@ -175,7 +175,6 @@
   (has-cache? [this]
     (goog.object.containsKey this hyde-cache-key))
   (from-cache [this]
-    (.log js/console (str "s->" this))
     (if-let [c (aget this hyde-cache-key)]
       ; attempt1: can we make a transient copy of a transient?
       (let [p (persistent! c)]
@@ -192,7 +191,6 @@
       (or (goog.object.containsKey this hyde-cache-key)
         (not= (aget this hyde-keyset-key) (set (js-keys this)))))
     (from-cache [this]
-      (.log js/console (str "m->" this))
       (let [; current keyset (minus a possible cache-key)
             cur-keyset (difference (set (js-keys this)) #{hyde-cache-key})
             ; what new keys have appeared
@@ -218,6 +216,25 @@
 (defn ^boolean hyde?
   "Returns true if coll satisfies IHyde"
   [x] (satisfies? IHyde x))
+
+(defn from-cache-if-has-cache [x]
+  (if (and (hyde? x) (has-cache? x))
+      (from-cache x) 
+      x))
+
+(defn recurse-from-hyde-cache
+  "Recursively transforms any cached hyde objects to new persistent versions."
+  [x]
+  (cond
+    (map? x)
+      (let [c (from-cache-if-has-cache x)]
+        (into {} (for [[k v] c] 
+          [(recurse-from-hyde-cache k) (recurse-from-hyde-cache v)])))
+    (coll? x) 
+      (let [c (from-cache-if-has-cache x)]
+        (into (empty c) (map recurse-from-hyde-cache c)))
+    :else
+      (from-cache-if-has-cache x)))
 
 (def have-patched-arrayish-flag (atom false))
 (def have-patched-mappish-flag (atom false))
@@ -265,6 +282,12 @@
   (let [orig-fn (get-store-cur-js-fn o field-name)]
     (aset o field-name (fn [& args] 
       (js->clj (this-as ct (.apply orig-fn ct args)))))))
+
+; patch a js function to return a clj-ish value
+(defn patch-return-value-recurse-from-cache [o field-name]
+  (let [orig-fn (get-store-cur-js-fn o field-name)]
+    (aset o field-name (fn [& args] 
+      (recurse-from-hyde-cache (this-as ct (.apply orig-fn ct args)))))))
 
 ; patch a js function convert specified keyword args to functions
 (defn patch-args-keyword-to-fn [o field-name & fields]

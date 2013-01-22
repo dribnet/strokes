@@ -1,6 +1,7 @@
 (ns mrhyde.test
     (:require [domina.tester :refer [add-test run-all-tests]]
               [mrhyde :refer [hyde? has-cache? from-cache
+                              recurse-from-hyde-cache
                               patch-known-arrayish-types
                               patch-known-mappish-types
                               patch-return-value-to-clj
@@ -258,6 +259,38 @@
           ; and in fact the 'js view' of this structure is available upon request
           (assert (= {:one 0, :two 2, :three 3, :ten 0} (from-cache rm1)))
           (assert (= {:one 0, :two 2, :three 3, :ten 0} (from-cache rm2)))
+        ))))
+
+(add-test "deep recovery of hyde cache"
+    (fn []
+      (let [d [
+              {:bye 1, :now 2, :zero 3}
+              {:two [], :three 3}
+              {:one 1, :two 2, :vec ["fool" 1 [:zerobound]]}
+            ]]
+        (assert (hyde? d))
+        (assert (hyde? (nth d 0)))
+        (assert (hyde? (get-in d [1 :two])))
+        (assert (hyde? (get-in d [2 :vec 2])))
+        (assert (not (has-cache? d)))
+        (let [
+              ;[rm1 rv1] (DummyLib/zeroOutFirstArrayElement d)
+              [rm2 rv2] (DummyLib/zeroOutMapKeyOne (nth d 2))
+              [rm3 rv3] (DummyLib/zeroOutMapKeyTen (nth d 2))
+              [rm4 rv4] (DummyLib/zeroOutFirstArrayElement (get-in d [2 :vec]))
+              [rm5 rv5] (DummyLib/zeroOutFirstArrayElement (get-in d [2 :vec 2]))]
+
+          ; cache information is only known locally
+          (assert (not (has-cache? d)))
+          (assert (has-cache? rm3))
+          (assert (not (has-cache? (nth d 1))))
+
+          (assert (= 
+            (recurse-from-hyde-cache d)
+            [ {:bye 1, :now 2, :zero 3}
+              {:two [], :three 3}
+              {:one 0, :two 2, :vec [0 1 [0]] :ten 0} ]))
+
         ))))
 
   (run-all-tests "mrhyde"))

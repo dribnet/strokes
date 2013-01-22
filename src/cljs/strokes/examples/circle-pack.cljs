@@ -1,7 +1,7 @@
 (ns strokes.examples.circle-pack
   (:require [clojure.string :refer [join]]
+            [mrhyde :refer [from-cache recurse-from-hyde-cache]]
             [strokes :refer [d3]]))
-
 
 ; demo-guard - this is only needed because the demo is packaged with the library
 (if (and d3 (this-as ct (aget ct "strokes_demo")) (= js/strokes_demo "circle-pack")) (do
@@ -23,6 +23,13 @@
 (-> d3 (.json "flare.json" (fn [error, jsroot]
   (let [root (js->clj jsroot :keywordize-keys true)
         node (-> svg (.datum root) (.selectAll ".node")
+                  ; (.data (fn [& nargs] (this-as ct 
+                  ;   (recurse-from-hyde-cache (vec
+                  ;     (.apply (.-nodes pack) ct nargs))))))
+
+                  ; (.data (let [m (.-nodes pack)]
+                  ;   (.log js/console (str m)) m))
+
                   (.data (.-nodes pack))
                 .enter (.append "g")
                   (.attr "class" #(if (contains? % :children) "node" "leaf node"))
@@ -32,7 +39,7 @@
       (.text #(str (:name %) (if (contains? % :children) "" (formatfn (:size %))))))
 
     (-> node (.append "circle")
-      (.attr "r" #(aget % "r")))
+      (.attr "r" #(let [p (from-cache %)] (:r p))))
       ; (.attr "r" #(do (.log js/console (str %)) (aget % "r"))))
 
     (-> node (.filter #(not (:children %))) (.append "text")
