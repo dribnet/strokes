@@ -1,6 +1,7 @@
 ; providing clojure data a split personality: don't be afraid to let it all out
 (ns mrhyde
   (:require [clojure.string :refer [join]]
+            [clojure.set :refer [difference]]
             [cljs.reader :refer [read-string]]))
 
 ; a replacement for the map call
@@ -15,17 +16,42 @@
   (this-as ct (.call mapish ct f))
   nil)
 
+(def hyde-cache-key  "$cljs$mrhyde$cache")
+(def hyde-keyset-key "$cljs$mrhyde$keyset")
+
 (defn- strkey [x]
   (if (keyword? x)
     (name x)
     x))
 
+(defn gen-map-getter [k]
+  (fn []
+    (this-as t 
+      (let [src (if (goog.object.containsKey t hyde-cache-key) (aget t hyde-cache-key) t)]
+        (get src k)))))
+
+(defn gen-map-setter [k]
+  (fn [v]
+    (this-as t
+      ; (.log js/console (str "setter: " t "," v "," n))
+      ; ensure cache (transient) exists
+      (if-not (goog.object.containsKey t hyde-cache-key)
+        (let [c (transient t)]
+          (aset t hyde-cache-key c)))
+      ; now use it
+      (let [c (aget t hyde-cache-key)]
+        (assoc! c k v)))))
+
 ; this can be called standalone or auto-run from cljs map initialzation
 (defn patch-map [m]
   ; (.log js/console (str "keys: " (keys m)))
   (doseq [k (keys m)]
-    (if (and (keyword? k) (not (goog.object.containsKey m (name k))))
-      (.__defineGetter__ m (name k) #(get m k))))
+    (if (and (keyword? k) (not (goog.object.containsKey m (name k)))) (do
+      (.__defineGetter__ m (name k) (gen-map-getter k))
+      (.__defineSetter__ m (name k) (gen-map-setter k))
+      (aset m hyde-keyset-key "placeholder")
+      (aset m hyde-keyset-key (set (js-keys m)))
+    )))
   m)
 
 (def have-patched-js-with-key-lookup (atom false))
@@ -56,6 +82,7 @@
 (defn patch-map-object [o]
   ;(.log js/console (str (keys o)))
   (patch-map o)
+
   nil)
 
 ; of note -> http://stackoverflow.com/a/8843181/1010653
@@ -96,28 +123,26 @@
       (aset new-fn k (aget orig-fn k)))
     (aset js/cljs.core s new-fn)))
 
-(def hydekey "$cljs$mrhyde$cache")
-
-(defn gen-getter [n]
+(defn gen-seq-getter [n]
   (fn []
     (this-as t 
-      (let [src (if (goog.object.containsKey t hydekey) (aget t hydekey) t)]
+      (let [src (if (goog.object.containsKey t hyde-cache-key) (aget t hyde-cache-key) t)]
         (nth src n js/undefined)))))
 
-(defn gen-setter [n]
+(defn gen-seq-setter [n]
   (fn [v]
     (this-as t
       ; (.log js/console (str "setter: " t "," v "," n))
       ; ensure cache (transient) exists
-      (if-not (goog.object.containsKey t hydekey)
+      (if-not (goog.object.containsKey t hyde-cache-key)
         (let [c (transient t)]
-          (aset t hydekey c)))
+          (aset t hyde-cache-key c)))
       ; now use it
-      (let [c (aget t hydekey)]
+      (let [c (aget t hyde-cache-key)]
         (assoc! c n v)))))
 
 ;           ))
-;       (let [src (if (goog.object.containsKey t hydekey) (t/hydekey) t)]
+;       (let [src (if (goog.object.containsKey t hyde-cache-key) (t/hyde-cache-key) t)]
 ;         (nth src n js/undefined)))))
 
 ; Add functionality to cljs seq prototype to make it more like a js array
@@ -126,8 +151,8 @@
   (.__defineGetter__ p "length" #(this-as t (count (take MAXLEN t))))
   ; access by index... we obviously need a smarter upper bound here
   (dotimes [n MAXLEN]
-    (.__defineGetter__ p n (gen-getter n))
-    (.__defineSetter__ p n (gen-setter n)))
+    (.__defineGetter__ p n (gen-seq-getter n))
+    (.__defineSetter__ p n (gen-seq-setter n)))
   ; if we are acting like an array, we'll need in impl of forEach and map
   (-> p .-forEach (set! eachish))
   (-> p .-map (set! mapish))
@@ -148,32 +173,44 @@
   (extend-type s
   IHyde
   (has-cache? [this]
-    (goog.object.containsKey this hydekey))
+    (goog.object.containsKey this hyde-cache-key))
   (from-cache [this]
-    (if-let [c (aget this hydekey)]
+    (.log js/console (str "s->" this))
+    (if-let [c (aget this hyde-cache-key)]
       ; attempt1: can we make a transient copy of a transient?
       (let [p (persistent! c)]
-        (aset this hydekey (transient p))
+        (aset this hyde-cache-key (transient p))
         p)
       this))
   )
 )
 
-; TODO: replace this with keysetscanner, etc.
 (defn add-hyde-protocol-to-map [m]
   (extend-type m
-  IHyde
-  (has-cache? [this]
-    (goog.object.containsKey this hydekey))
-  (from-cache [this]
-    (if-let [c (aget this hydekey)]
-      ; attempt1: can we make a transient copy of a transient?
-      (let [p (persistent! c)]
-        (aset this hydekey (transient p))
-        p)
-      this))
-  )
-)
+    IHyde
+    (has-cache? [this]
+      (or (goog.object.containsKey this hyde-cache-key)
+        (not= (aget this hyde-keyset-key) (set (js-keys this)))))
+    (from-cache [this]
+      (.log js/console (str "m->" this))
+      (let [; current keyset (minus a possible cache-key)
+            cur-keyset (difference (set (js-keys this)) #{hyde-cache-key})
+            ; what new keys have appeared
+            new-keys   (difference cur-keyset (aget this hyde-keyset-key))
+            ; put all new key/value pairs into their own map
+            new-map    (into {} (for [k new-keys] [(keyword k) (aget this k)]))
+            ; pull out the cache too (might be js/undefined)
+            cache      (aget this hyde-cache-key)]
+        (if cache
+          ; make a persistent copy, and then store right away again as new transient!
+          (let [p (persistent! cache)]
+            (aset this hyde-cache-key (transient p))
+            ; persistent object mashed up with new keys
+            (merge p new-map))
+          ; else
+          (merge this new-map))
+      ))
+  ))
 
 ; (this-as ct (aset ct "hascache" (fn [x] (has-cache? x))))
 ; (this-as ct (aset ct "fromcache" (fn [x] (from-cache x))))

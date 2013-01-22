@@ -183,9 +183,81 @@
           ; when it hands back a copy that too looks unchanged from cljs
           (assert (= ra [1 2 3]))
           ; but there is an indication there there is new information added
-          (assert has-cache? ra)
+          (assert (has-cache? ra))
           ; and in fact the 'js view' of this structure is available upon request
           (assert (= [0 2 3] (from-cache ra))))
           )))
+
+(add-test "js obj modification of map (existing keys) recoverable with hyde cache"
+    (fn []
+      (let [m {:one 1, :two 2, :three 3}]
+        (assert (hyde? m))
+        (assert (not (has-cache? m)))
+        (assert (= (m (from-cache m))))
+        (let [[rm rv] (DummyLib/zeroOutMapKeyOne m)]
+          ; the method thinks it changed the map
+          (assert (= rv 0))
+          ; locally the vector remains unchanged
+          (assert (= m {:one 1, :two 2, :three 3}))
+          ; though all bets are off if you look under the covers
+          (assert (= 0 (aget m "one")))
+          ; when it hands back a copy that too looks unchanged from cljs
+          (assert (= rm {:one 1, :two 2, :three 3}))
+          ; but there is an indication there there is new information added
+          (assert (has-cache? rm))
+          ; and in fact the 'js view' of this structure is available upon request
+          (assert (= {:one 0, :two 2, :three 3} (from-cache rm)))
+      ))))
+
+(add-test "js obj modification of map (new keys) recoverable with hyde cache"
+    (fn []
+      (let [m {:one 1, :two 2, :three 3}]
+        (assert (hyde? m))
+        (assert (not (has-cache? m)))
+        (assert (= (m (from-cache m))))
+        (let [[rm rv] (DummyLib/zeroOutMapKeyTen m)]
+          ; (-> js/fdebug (set! m))
+          ; (-> js/gdebug (set! rm))
+          ; (-> js/has (set! has-cache?))
+          ; the method thinks it added to the map
+          (assert (= rv 0))
+          ; locally the vector remains unchanged
+          (assert (= m {:one 1, :two 2, :three 3}))
+          ; though all bets are off if you look under the covers
+          (assert (= 0 (aget m "ten")))
+          ; when it hands back a copy that too looks unchanged from cljs
+          (assert (= rm {:one 1, :two 2, :three 3}))
+          ; but there is an indication there there is new information added
+          (assert (has-cache? rm))
+          ; and in fact the 'js view' of this structure is available upon request
+          (assert (= {:one 1, :two 2, :three 3, :ten 0} (from-cache rm)))
+        ))))
+
+(add-test "js obj modification of map (new and existing keys) recoverable with hyde cache"
+    (fn []
+      (let [m {:one 1, :two 2, :three 3}]
+        (assert (hyde? m))
+        (assert (not (has-cache? m)))
+        (assert (= (m (from-cache m))))
+        (let [[rm1 rv1] (DummyLib/zeroOutMapKeyOne m)
+              [rm2 rv2] (DummyLib/zeroOutMapKeyTen rm1)]
+          ; remote additons to the maps
+          (assert (= rv1 0))
+          (assert (= rv2 0))
+          ; locally the vector remains unchanged
+          (assert (= m {:one 1, :two 2, :three 3}))
+          ; though all bets are off if you look under the covers
+          (assert (= 0 (aget m "one")))
+          (assert (= 0 (aget m "ten")))
+          ; when it hands back a copy that too looks unchanged from cljs
+          (assert (= rm1 {:one 1, :two 2, :three 3}))
+          (assert (= rm2 {:one 1, :two 2, :three 3}))
+          ; but there is an indication there there is new information added
+          (assert (has-cache? rm1))
+          (assert (has-cache? rm2))
+          ; and in fact the 'js view' of this structure is available upon request
+          (assert (= {:one 0, :two 2, :three 3, :ten 0} (from-cache rm1)))
+          (assert (= {:one 0, :two 2, :three 3, :ten 0} (from-cache rm2)))
+        ))))
 
   (run-all-tests "mrhyde"))
