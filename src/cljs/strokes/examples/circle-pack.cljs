@@ -23,10 +23,7 @@
 (-> d3 (.json "flare.json" (fn [error, jsroot]
   (let [root (js->clj jsroot :keywordize-keys true)
         node (-> svg (.datum root) (.selectAll ".node")
-                  (.data (fn [& nargs] (this-as ct 
-                    (recurse-from-hyde-cache (vec
-                      (.apply (.-nodes pack) ct nargs))))))
-                  ; (.data (.-nodes pack))
+                  (.data (.-nodes pack))
                 .enter (.append "g")
                   (.attr "class" #(if (contains? % :children) "node" "leaf node"))
                   (.attr "transform" #(str "translate(" (:x %) "," (:y %) ")")))]

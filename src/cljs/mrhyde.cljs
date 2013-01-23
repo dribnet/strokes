@@ -1,3 +1,8 @@
+; TODO
+; hyde-keyset should not include $cljs keys (use filter, etc.)
+; recurse-from-hyde-cache should mark objects so as not to hit a cycle
+; remove __define{GS}etter__ for Object.defineProperty()
+
 ; providing clojure data a split personality: don't be afraid to let it all out
 (ns mrhyde
   (:require [clojure.string :refer [join]]
@@ -226,6 +231,8 @@
   "Recursively transforms any cached hyde objects to new persistent versions."
   [x]
   (cond
+    (goog.isArray x)
+      (vec (map recurse-from-hyde-cache x))
     (map? x)
       (let [c (from-cache-if-has-cache x)]
         (into {} (for [[k v] c] 
@@ -292,6 +299,34 @@
   (let [orig-fn (get-store-cur-js-fn o field-name)]
     (aset o field-name (fn [& args] 
       (recurse-from-hyde-cache (this-as ct (.apply orig-fn ct args)))))))
+
+; patch a js fn returning a fn to return a fn returning a clj-ish value of the other fn
+(defn patch-return-value-recurse-from-cache-as-function [o field-name]
+  (let [orig-fn (get-store-cur-js-fn o field-name)]
+    (aset o field-name (fn [& args]
+      (let [dyn-fun (this-as ct (.apply orig-fn ct args))]
+        ; dyn-fun)))))
+        (fn [& nargs]
+          (this-as ct (.apply dyn-fun ct nargs))))))))
+
+(defn recurse-from-hyde-cache-maybe-fn [x]
+  (if (goog.isFunction x)
+    ; return funciton for execution-later
+    (fn [& args]
+      (recurse-from-hyde-cache (this-as ct (.apply x ct args))))
+    ; else - execute here and now
+    (recurse-from-hyde-cache x)))
+
+; patch a js function convert specified keyword args to functions
+(defn patch-args-recurse-from-cache [o field-name & fields]
+  (let [orig-fn (get-store-cur-js-fn o field-name)
+        arg-filter (if (empty? fields) #(identity true) (set fields))]
+    (aset o field-name
+      (fn [& args]
+        ; (.log js/console (str "patching: " (count args)))
+        (let [nargs (map #(if (arg-filter %1) (recurse-from-hyde-cache-maybe-fn %2) %2) (range) args)]
+          ; (.log js/console (str "patched: " (type (nth nargs 0))))
+          (this-as ct (.apply orig-fn ct nargs)))))))
 
 ; patch a js function convert specified keyword args to functions
 (defn patch-args-keyword-to-fn [o field-name & fields]
