@@ -293,8 +293,10 @@
 
         ))))
 
-(add-test "js->clj with cycle?"
-    (fn []
-      (let [c (js->clj js/p)])))
+; (add-test "js->clj with cycle?"
+;     (fn []
+;         (let [a (js-obj) b (js-obj)] (set! (.-a b) a) (set! (.-b a) b) (js->clj a)) ; #cljs surprise of the day 
+;         (let [c (js->clj js/p)])))
+;      ))
 
   (run-all-tests "mrhyde"))
