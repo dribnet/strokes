@@ -251,6 +251,7 @@
                cljs.core.IndexedSeq
                cljs.core.Cons
                cljs.core.Range
+               cljs.core.ArrayNodeSeq
                cljs.core.ChunkedSeq]]
        (patch-prototype-as-array (aget p "prototype") p)
        (add-hyde-protocol-to-seq p))
