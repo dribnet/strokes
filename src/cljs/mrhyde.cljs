@@ -254,6 +254,7 @@
   (if-not @have-patched-arrayish-flag (do
     (reset! have-patched-arrayish-flag true)
     (doseq [p [cljs.core.PersistentVector
+               cljs.core.List
                cljs.core.LazySeq
                cljs.core.IndexedSeq
                cljs.core.Cons
