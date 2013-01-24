@@ -20,9 +20,8 @@
   (.append "g")
     (.attr "transform" "translate(2,2)")))
 
-(-> d3 (.json "flare.json" (fn [error, jsroot]
-  (let [root (js->clj jsroot :keywordize-keys true)
-        node (-> svg (.datum root) (.selectAll ".node")
+(-> d3 (.edn "flare.edn" (fn [error, root]
+  (let [node (-> svg (.datum root) (.selectAll ".node")
                   (.data (.-nodes pack))
                 .enter (.append "g")
                   (.attr "class" #(if (contains? % :children) "node" "leaf node"))

@@ -10,13 +10,11 @@
 (def d3 (this-as ct (aget ct "d3")))
 
 ; add a new d3.edn call to pull edn data over the network (like d3.csv and d3.json)
-(defn- d3-edn
-  ([url callback]
-    (d3-edn url nil callback))
-  ([url mime callback]
-    (letfn [(ready [req] (callback (if req  (read-string (.-responseText req)) req)))]
-      (.log js/console (str "loading: " url))
-      (.xhr d3 url mime ready))))
+(defn d3-edn-parser [request]
+  (read-string (.-responseText request)))
+
+(defn d3-edn [url callback]
+  (-> d3 (.xhr url "application/octet-stream" callback) (.response d3-edn-parser)))
 
 (if d3 (do
   ; patch all seqs to also be read-only arrays for javascript interop
