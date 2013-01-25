@@ -11,36 +11,40 @@
 
 (def DummyLib js/DummyLib)
 
-; patch the dummy library
-(if DummyLib (do
-  ; patch all seqs to also be read-only arrays for javascript interop
-  (patch-known-arrayish-types)
+(defn init []
+  ; patch the dummy library
+  (if DummyLib (do
+    ; patch all seqs to also be read-only arrays for javascript interop
+    (patch-known-arrayish-types)
 
-  ; patch maps to include key based accessors on js object
-  (patch-known-mappish-types)
+    ; patch maps to include key based accessors on js object
+    (patch-known-mappish-types)
 
-  ;;; start patching library function calls
+    ;;; start patching library function calls
 
-  ; force params 0 and 2 to be js args
-  (patch-args-clj-to-js DummyLib "wrapArgs0and2" 0 2)
+    ; force params 0 and 2 to be js args
+    (patch-args-clj-to-js DummyLib "wrapArgs0and2" 0 2)
 
-  ; force these functions to return cljs objects
-  (patch-return-value-to-clj DummyLib "wrapReturnArgsIntoArray")
-  (patch-return-value-to-clj DummyLib "wrapReturnArgsIntoObject")
+    ; force these functions to return cljs objects
+    (patch-return-value-to-clj DummyLib "wrapReturnArgsIntoArray")
+    (patch-return-value-to-clj DummyLib "wrapReturnArgsIntoObject")
 
-  ; coerce param into function if it's a keyword
-  (patch-args-keyword-to-fn DummyLib "wrapCall0on1" 0)
+    ; coerce param into function if it's a keyword
+    (patch-args-keyword-to-fn DummyLib "wrapCall0on1" 0)
 
-  ; patch both ways (chaining)
-  (patch-args-clj-to-js DummyLib "wrapArraysInAndOut")
-  (patch-return-value-to-clj DummyLib "wrapArraysInAndOut")
-))
+    ; patch both ways (chaining)
+    (patch-args-clj-to-js DummyLib "wrapArraysInAndOut")
+    (patch-return-value-to-clj DummyLib "wrapArraysInAndOut")
+  ))
+)
 
 ; is js stupid? http://stackoverflow.com/a/5115066/1010653
 (defn js-arrays-equal [a b]
   (not (or (< a b) (< b a))))
 
 (defn ^:export launch []
+
+  (init)
 
   (add-test "js access cljs vector as array"
     (fn []
