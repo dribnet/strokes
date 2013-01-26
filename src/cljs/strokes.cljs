@@ -23,6 +23,8 @@
   (patch-known-mappish-types)
   ; filter d3.selection.attr inputs: v might be keyword function
   (patch-args-keyword-to-fn (-> d3 .-selection .-prototype) "attr" 1)
+  ; filter d3.selection.text inputs: argument mighe be a keyword function
+  (patch-args-keyword-to-fn (-> d3 .-selection .-prototype) "text" 0)
   ; filter d3.layout.pack.value inputs: v might be keyword function
   (patch-args-keyword-to-fn (-> d3 .-layout .-pack .-prototype) "value" 0)
   ; filter d3.layout.pack.value inputs: v might be keyword function
