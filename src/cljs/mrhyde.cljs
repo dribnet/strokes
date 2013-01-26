@@ -251,6 +251,12 @@
     :else
       (from-cache-if-has-cache x)))
 
+(defn repersist [x]
+  (if (goog.isFunction x)
+    (fn [& args] (repersist (this-as t (.apply x t args))))
+    ;else
+    (recurse-from-hyde-cache x)))
+
 (def have-patched-arrayish-flag (atom false))
 (def have-patched-mappish-flag (atom false))
 

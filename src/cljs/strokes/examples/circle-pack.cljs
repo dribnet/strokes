@@ -1,6 +1,6 @@
 (ns strokes.examples.circle-pack
   (:require [clojure.string :refer [join]]
-            [mrhyde :refer [from-cache recurse-from-hyde-cache]]
+            [mrhyde :refer [repersist]]
             [strokes :refer [d3]]))
 
 ; demo-guard - this is only needed because the demo is packaged with the library
@@ -20,9 +20,13 @@
   (.append "g")
     (.attr "transform" "translate(2,2)")))
 
-(-> d3 (.edn "flare.edn" (fn [error, root]
-  (let [node (-> svg (.datum root) (.selectAll ".node")
-                  (.data (.-nodes pack))
+; (-> d3 (.json "flare-full.json" (fn [error, jsroot]
+;    (let [root (js->clj jsroot :keywordize-keys true)
+;          node (-> svg (.datum root) (.selectAll ".node")
+
+  (-> d3 (.edn "flare.edn" (fn [error, root]
+    (let [node (-> svg (.datum root) (.selectAll ".node")
+                  (.data (repersist (.-nodes pack)))
                 .enter (.append "g")
                   (.attr "class" #(if (contains? % :children) "node" "leaf node"))
                   (.attr "transform" #(str "translate(" (:x %) "," (:y %) ")")))]
@@ -31,7 +35,6 @@
       (.text #(str (:name %) (if (contains? % :children) "" (formatfn (:size %))))))
 
     (-> node (.append "circle")
-      ; (.attr "r" #(do (.log js/console (str %)) (aget % "r"))))
       (.attr "r" :r))
 
     (-> node (.filter #(not (:children %))) (.append "text")

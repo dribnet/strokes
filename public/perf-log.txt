@@ -1,4 +1,4 @@
-:strokes-0.0.1-23-ga832d98-plus-1
+strokes-0.0.1-24-gb006676
 NativeCreateArray x 43,940,159 ops/sec ±0.36% (95 runs sampled)
 NativeCreateObject x 45,719,901 ops/sec ±0.54% (98 runs sampled)
 PreHyde-createListObject x 132,266 ops/sec ±0.44% (96 runs sampled)
