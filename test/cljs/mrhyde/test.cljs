@@ -111,14 +111,14 @@
 
         ; will work because object returned unchanged
         (assert (= 1 (aget r1 "one")))
-        (assert (.hasOwnProperty r1 "one"))
+        (assert (goog.object.containsKey r1 "one"))
         ; and is actually a cljs object
         (assert (satisfies? ILookup r1))
         (assert (= 1 (:one r1)))
 
         ; will work because of map to obj mapping
         (assert (= 1 (aget r2 "one")))
-        (assert (.hasOwnProperty r2 "one"))
+        (assert (goog.object.containsKey r2 "one"))
         ; and is actually now a js object
         (assert (not (satisfies? ILookup r2)))
         ; (assert (= 1 (:one r2))) ; <-- error, don't know how to catch right now
@@ -288,6 +288,11 @@
           (assert (not (has-cache? d)))
           (assert (has-cache? rm3))
           (assert (not (has-cache? (nth d 1))))
+
+          ; (-> js/fdebug1 (set! (nth d 0)))
+          ; (-> js/fdebug2 (set! (nth d 1)))
+          ; (-> js/fdebug3 (set! (nth d 2)))
+          ; (.log js/console (str (recurse-from-hyde-cache d)))
 
           (assert (= 
             (recurse-from-hyde-cache d)

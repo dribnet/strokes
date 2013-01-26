@@ -51,14 +51,17 @@
 ; this can be called standalone or auto-run from cljs map initialzation
 (defn patch-map [m]
   ; (.log js/console (str "keys: " (keys m)))
+  (aset m hyde-access-key m)
   (doseq [k (keys m)]
-    (if (and (keyword? k) (not (goog.object.containsKey m (name k)))) (do
-      (.__defineGetter__ m (name k) (gen-map-getter k))
-      (.__defineSetter__ m (name k) (gen-map-setter k))
-      (aset m hyde-keyset-key "placeholder")
-      (aset m hyde-access-key m)
-      (aset m hyde-keyset-key (set (js-keys m)))
-    )))
+    ; TODO: we need a better way to get prototype and could fallback to m
+    (let [p (.-__proto__ m)]
+      (if (and (keyword? k) (not (goog.object.containsKey m (name k)))) (do
+        (.__defineGetter__ p (name k) (gen-map-getter k))
+        (.__defineSetter__ p (name k) (gen-map-setter k))
+  ))))
+  (if (some keyword? (keys m)) (do
+    (aset m hyde-keyset-key "placeholder")
+    (aset m hyde-keyset-key (.keys js/Object m))))
   m)
 
 (def have-patched-js-with-key-lookup (atom false))
@@ -97,7 +100,7 @@
   ; (.log js/console (str "patching seq type " s))
   ; (-> js/gdebug (set! (aget js/cljs.core s)))
   (let [orig-fn (aget js/cljs.core s)
-        orig-keys (js-keys orig-fn)
+        orig-keys (.keys js/Object orig-fn)
         new-fn  (fn [& args]
                   (let [nargs (cons nil args)
                         binder (js/Function.prototype.bind.apply orig-fn nargs)
@@ -115,7 +118,7 @@
 (defn patch-core-map-type [s]
   ; (.log js/console (str "patching map type " s))
   (let [orig-fn (aget js/cljs.core s)
-        orig-keys (js-keys orig-fn)
+        orig-keys (.keys js/Object orig-fn)
         new-fn  (fn [& args]
                   (let [nargs (cons nil args)
                         binder (js/Function.prototype.bind.apply orig-fn nargs)
@@ -196,12 +199,12 @@
     IHyde
     (has-cache? [this]
       (or (goog.object.containsKey this hyde-cache-key)
-        (not= (aget this hyde-keyset-key) (set (js-keys this)))))
+        (not= (set (aget this hyde-keyset-key)) (set (.keys js/Object this)))))
     (from-cache [this]
       (let [; current keyset (minus a possible cache-key)
-            cur-keyset (difference (set (js-keys this)) #{hyde-cache-key})
+            cur-keyset (difference (set (.keys js/Object this)) #{hyde-cache-key})
             ; what new keys have appeared
-            new-keys   (difference cur-keyset (aget this hyde-keyset-key))
+            new-keys   (difference cur-keyset (set (aget this hyde-keyset-key)))
             ; put all new key/value pairs into their own map
             new-map    (into {} (for [k new-keys] [(keyword k) (aget this k)]))
             ; pull out the cache too (might be js/undefined)
