@@ -21,8 +21,9 @@
   (this-as ct (.call mapish ct f))
   nil)
 
-(def hyde-cache-key  "$cljs$mrhyde$cache")
-(def hyde-keyset-key "$cljs$mrhyde$keyset")
+(def hyde-cache-key   "$cljs$mrhyde$cache")
+(def hyde-access-key  "$cljs$mrhyde$acccess")
+(def hyde-keyset-key  "$cljs$mrhyde$keyset")
 
 (defn- strkey [x]
   (if (keyword? x)
@@ -32,8 +33,7 @@
 (defn gen-map-getter [k]
   (fn []
     (this-as t 
-      (let [src (if (goog.object.containsKey t hyde-cache-key) (aget t hyde-cache-key) t)]
-        (get src k)))))
+        (get (aget t hyde-access-key) k))))
 
 (defn gen-map-setter [k]
   (fn [v]
@@ -42,6 +42,7 @@
       ; ensure cache (transient) exists
       (if-not (goog.object.containsKey t hyde-cache-key)
         (let [c (transient t)]
+          (aset t hyde-access-key c)
           (aset t hyde-cache-key c)))
       ; now use it
       (let [c (aget t hyde-cache-key)]
@@ -55,6 +56,7 @@
       (.__defineGetter__ m (name k) (gen-map-getter k))
       (.__defineSetter__ m (name k) (gen-map-setter k))
       (aset m hyde-keyset-key "placeholder")
+      (aset m hyde-access-key m)
       (aset m hyde-keyset-key (set (js-keys m)))
     )))
   m)
