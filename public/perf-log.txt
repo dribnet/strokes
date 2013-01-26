@@ -1,0 +1,21 @@
+strokes-0.0.1-20-gab0a87d:
+
+NativeCreateArray x 43,682,343 ops/sec ±0.63% (96 runs sampled) mrhyde-benchmark.html:79
+NativeCreateObject x 45,162,259 ops/sec ±0.33% (94 runs sampled) mrhyde-benchmark.html:79
+PreHyde-createListObject x 137,240 ops/sec ±0.21% (97 runs sampled) mrhyde-benchmark.html:79
+PreHyde-createVectorObject x 14,483,579 ops/sec ±1.60% (92 runs sampled) mrhyde-benchmark.html:79
+PreHyde-createMapObject x 6,308,382 ops/sec ±1.30% (94 runs sampled) mrhyde-benchmark.html:79
+PreHyde-accessListObject x 6,661,056 ops/sec ±0.18% (99 runs sampled) mrhyde-benchmark.html:79
+PreHyde-accessVectorObject x 1,487,953 ops/sec ±0.92% (98 runs sampled) mrhyde-benchmark.html:79
+PreHyde-accessMapObject x 18,248,772 ops/sec ±0.19% (98 runs sampled) mrhyde-benchmark.html:79
+Now patching and running again... mrhyde-benchmark.html:140
+This time init took: 210 unit(s) mrhyde-benchmark.html:147
+PostHyde-createListObject x 504 ops/sec ±4.01% (77 runs sampled) mrhyde-benchmark.html:79
+PostHyde-createVectorObject x 27,725 ops/sec ±3.91% (83 runs sampled) mrhyde-benchmark.html:79
+PostHyde-createMapObject x 131 ops/sec ±4.11% (69 runs sampled) mrhyde-benchmark.html:79
+PostHyde-accessListObject x 4,378,113 ops/sec ±0.17% (100 runs sampled) mrhyde-benchmark.html:79
+PostHyde-accessVectorObject x 1,114,518 ops/sec ±2.48% (95 runs sampled) mrhyde-benchmark.html:79
+PostHyde-accessMapObject x 15,716,887 ops/sec ±2.72% (97 runs sampled) mrhyde-benchmark.html:79
+PostHyde-nativeAccessListObject x 927,638 ops/sec ±0.59% (93 runs sampled) mrhyde-benchmark.html:79
+PostHyde-nativeAccessVectorObject x 1,395,748 ops/sec ±0.16% (98 runs sampled) mrhyde-benchmark.html:79
+PostHyde-nativeAccessMapObject x 2,246,857 ops/sec ±1.58% (94 runs sampled) 

@@ -68,79 +68,103 @@
     <script type="text/javascript" src="out/strokes_test.js"></script>
     <script>
 
-    var makeSuite = function(prefix, hydemap) {
-      var suite = new Benchmark.Suite;
-      // add tests
-      // suite.add(prefix + ' test', mrhyde.benchmark.thisIsATest)
-      suite.add(prefix + ' createListObject', mrhyde.benchmark.createListObject);
-      suite.add(prefix + ' createVectorObject', mrhyde.benchmark.createVectorObject);
-      suite.add(prefix + ' createMapObject', mrhyde.benchmark.createMapObject);
+    // lazy global;
+    hydemap = null;
+    results = {};
 
-      suite.add(prefix + ' accessListObject', function() {
-        mrhyde.benchmark.accessSeqObject(hydemap.hydeList);
-      });
-      suite.add(prefix + ' accessVectorObject', function() {
-        mrhyde.benchmark.accessSeqObject(hydemap.hydeVect);
-      });
-      suite.add(prefix + ' accessMapObject', function() {
-        mrhyde.benchmark.accessMapObject(hydemap.hydeMap);
-      });
-
+    var addOnCycleEnd = function(suite) {
       // add listeners
       suite.on('cycle', function(event) {
+        results[event.target.name] = {hz: event.target.hz, rme: event.target.rme};
         console.log(String(event.target));
+        // console.log(event.target);
+      });
+    }
+
+    var addCljsCreateAccessToSuite = function(suite, prefix) {
+      // add tests
+      // suite.add(prefix + ' test', mrhyde.benchmark.thisIsATest)
+      suite.add(prefix + '-createListObject', mrhyde.benchmark.createListObject);
+      suite.add(prefix + '-createVectorObject', mrhyde.benchmark.createVectorObject);
+      suite.add(prefix + '-createMapObject', mrhyde.benchmark.createMapObject);
+
+      suite.add(prefix + '-accessListObject', function() {
+        mrhyde.benchmark.accessSeqObject(hydemap.hydeList);
+      });
+      suite.add(prefix + '-accessVectorObject', function() {
+        mrhyde.benchmark.accessSeqObject(hydemap.hydeVect);
+      });
+      suite.add(prefix + '-accessMapObject', function() {
+        mrhyde.benchmark.accessMapObject(hydemap.hydeMap);
       });
       return suite;
     }
 
-    var padSuite = function(prefix, suite) {
-      suite.add(prefix + ' nativeAccessListObject', function() {
-        var n = padmap.hydeList[1];
+    var addCljsAccessAsNativeToSuite = function(suite, prefix) {
+      suite.add(prefix + '-nativeAccessListObject', function() {
+        var n = hydemap.hydeList[1];
       });
-      suite.add(prefix + ' nativeAccessVectorObject', function() {
-        var n = padmap.hydeVect[1];
+      suite.add(prefix + '-nativeAccessVectorObject', function() {
+        var n = hydemap.hydeVect[1];
       });
-      suite.add(prefix + ' nativeAccessMapObject', function() {
-        var n = padmap.hydeMap.one;
+      suite.add(prefix + '-nativeAccessMapObject', function() {
+        var n = hydemap.hydeMap.one;
       });
     }
 
-    var suite1, suite2;
-    hydemap = {
-      hydeList: mrhyde.benchmark.createListObject(),
-      hydeVect: mrhyde.benchmark.createVectorObject(),
-      hydeMap: mrhyde.benchmark.createMapObject()    
-    };
-    padmap = {
-      hydeList: [1, 2, 3, 4],
-      hydeVect: [1, 2, 3, 4],
-      hydeMap: {one: 1, two: 2, three: 3, four: 4}
+    var runFirstSuite = function() {
+      var suite = new Benchmark.Suite;
+      suite.add("NativeCreateArray", function() { return [1,2,3,4]; });
+      suite.add("NativeCreateObject", function() { return {one: 1, two: 2, three: 3, four: 4};})
+      // add listeners
+      suite.on('complete', runSecondSuite);
+      addOnCycleEnd(suite);
+      suite.run({ 'async': true });
     }
-    suite1 = makeSuite("PreHyde", hydemap);
-    padSuite("PreHyde", suite1);
-    suite1.on('complete', function() {
-      console.log('Now patching and running again...');
-      // it would be great to grab Benchmark's nano timer here. oh well.
-      var d1 = +(new Date);
-      mrhyde.benchmark.init();
-      var d2 = +(new Date);
-      console.log("This time init took: " + (d2 - d1) + " unit(s)");
-      // re-init: this will do more stuff now
+
+    var runSecondSuite = function() {
+      var suite = new Benchmark.Suite;
       hydemap = {
         hydeList: mrhyde.benchmark.createListObject(),
         hydeVect: mrhyde.benchmark.createVectorObject(),
         hydeMap: mrhyde.benchmark.createMapObject()    
       };
-      padmap = {
+      addCljsCreateAccessToSuite(suite,"PreHyde");
+      // add listeners
+      suite.on('complete', runThirdSuite);
+      addOnCycleEnd(suite);
+      suite.run({ 'async': false });
+    }
+
+    var runThirdSuite = function() {
+      console.log('Now patching and running again...');
+      // it would be great to grab Benchmark's nano timer here. oh well.
+      var d1 = +(new Date);
+      mrhyde.benchmark.init();
+      var d2 = +(new Date);
+      var diff = d2 - d1;
+      if(diff <= 0) diff = 1;
+      console.log("This time init took: " + diff + " unit(s)");
+      results["HydeInit"] = {"hz": (1000.0 / diff)};
+
+      suite = new Benchmark.Suite;
+      hydemap = {
         hydeList: mrhyde.benchmark.createListObject(),
         hydeVect: mrhyde.benchmark.createVectorObject(),
         hydeMap: mrhyde.benchmark.createMapObject()    
       };
-      suite2 = makeSuite("PostHyde", hydemap);
-      padSuite("PostHyde", suite2);
-      suite2.run({ 'async': true });
-    })
-    .run({ 'async': true });
+      addCljsCreateAccessToSuite(suite,"PostHyde");
+      addCljsAccessAsNativeToSuite(suite,"PostHyde");
+      // add listeners
+      addOnCycleEnd(suite);
+      suite.on('complete', function () {
+        console.log("Result map: ");
+        console.log(String(mrhyde.toclj(results)));
+      });
+      suite.run({ 'async': true });
+    }
+
+    runFirstSuite();
     </script>
   </body>
 </html>

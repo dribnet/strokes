@@ -365,6 +365,8 @@
           ; (.log js/console (str "patched: " (type (nth nargs 0))))
           (this-as ct (.apply orig-fn ct nargs)))))))
 
+(defn toclj [x]
+  (js->clj x :keywordize-keys true))
 
 ; (defn patch-args-clj-to-js [o field-name]
 ;   (let [orig-fn (aget o field-name)]
@@ -388,7 +390,7 @@
     ; }
 ;
 ; then
-(this-as ct (aset ct "toclj" js->clj))
+; (this-as ct (aset ct "toclj" #(js->clj % {:keywordize-keys true})))
 ; (patch-args-clj-to-js js/M "testthis" 0 2)
 ;
 ; and from the browser js console:
