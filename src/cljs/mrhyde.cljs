@@ -1,11 +1,10 @@
 ; TODO
-; hyde-keyset should not include $cljs keys (use filter, etc.)
 ; recurse-from-hyde-cache should mark objects so as not to hit a cycle
 ; remove __define{GS}etter__ for Object.defineProperty()
 
 ; providing clojure data a split personality: don't be afraid to let it all out
 (ns mrhyde
-  (:require [clojure.string :refer [join]]
+  (:require [clojure.string :refer [join re-matches]]
             [clojure.set :refer [difference]]
             [cljs.reader :refer [read-string]]))
 
@@ -23,6 +22,7 @@
 
 (def hyde-cache-key   "$cljs$mrhyde$cache")
 (def hyde-access-key  "$cljs$mrhyde$acccess")
+(def hyde-keylist-key "$cljs$mrhyde$keylist")
 (def hyde-keyset-key  "$cljs$mrhyde$keyset")
 
 (defn- strkey [x]
@@ -60,8 +60,9 @@
         (.__defineSetter__ p (name k) (gen-map-setter k))
   ))))
   (if (some keyword? (keys m)) (do
-    (aset m hyde-keyset-key "placeholder")
-    (aset m hyde-keyset-key (.keys js/Object m))))
+    (aset m hyde-keylist-key false)
+    (aset m hyde-keyset-key false)
+    (aset m hyde-keylist-key (.keys js/Object m))))
   m)
 
 (def have-patched-js-with-key-lookup (atom false))
@@ -194,17 +195,27 @@
   )
 )
 
+(defn filtered-keylist-set [l]
+  (set (remove #(re-find #"cljs\$" %) l)))
+
+(defn lazy-init-hyde-setset [m]
+  (if (and (not (aget m hyde-keyset-key)) (aget m hyde-keylist-key))
+    ; translate keylist into keymap
+    (aset m hyde-keyset-key (filtered-keylist-set (aget m hyde-keylist-key)))))
+
 (defn add-hyde-protocol-to-map [m]
   (extend-type m
     IHyde
     (has-cache? [this]
+      (lazy-init-hyde-setset this)
       (or (goog.object.containsKey this hyde-cache-key)
-        (not= (set (aget this hyde-keyset-key)) (set (.keys js/Object this)))))
+        (not= (aget this hyde-keyset-key) (filtered-keylist-set (.keys js/Object this)))))
     (from-cache [this]
+      (lazy-init-hyde-setset this)
       (let [; current keyset (minus a possible cache-key)
-            cur-keyset (difference (set (.keys js/Object this)) #{hyde-cache-key})
+            cur-keyset (difference (filtered-keylist-set (.keys js/Object this)) #{hyde-cache-key})
             ; what new keys have appeared
-            new-keys   (difference cur-keyset (set (aget this hyde-keyset-key)))
+            new-keys   (difference cur-keyset (aget this hyde-keyset-key))
             ; put all new key/value pairs into their own map
             new-map    (into {} (for [k new-keys] [(keyword k) (aget this k)]))
             ; pull out the cache too (might be js/undefined)
