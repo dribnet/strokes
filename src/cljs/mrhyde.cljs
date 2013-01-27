@@ -1,21 +1,38 @@
-; TODO
-; add benchmarking on repersist call and setters
-; recurse-from-hyde-cache should mark objects so as not to hit a cycle
-; remove __define{GS}etter__ for Object.defineProperty()
-
 ; providing clojure data a split personality: don't be afraid to let it all out
 (ns mrhyde
   (:require [clojure.string :refer [join re-matches]]
             [clojure.set :refer [difference]]
             [cljs.reader :refer [read-string]]))
 
-; a replacement for the map call
+; TODO
+; add benchmarking on repersist call and setters
+
+; generate get-set-prop fn  with closure around stored data
+(def js-get-prop ((fn []
+  (let [reusable-descriptor (js-obj)]
+    (aset reusable-descriptor "configurable" true)
+    (aset reusable-descriptor "enumerable" true)
+    (fn js-getset-prop [obj nam getfn]
+      (aset reusable-descriptor "get" getfn)
+      (.defineProperty js/Object obj nam reusable-descriptor))))))
+
+; generate js-getset-prop fn with closure around stored data
+(def js-getset-prop ((fn []
+  (let [reusable-descriptor (js-obj)]
+    (aset reusable-descriptor "configurable" true)
+    (aset reusable-descriptor "enumerable" true)
+    (fn js-getset-prop [obj nam getfn setfn]
+      (aset reusable-descriptor "get" getfn)
+      (aset reusable-descriptor "set" setfn)
+      (.defineProperty js/Object obj nam reusable-descriptor))))))
+
+; a replacement for the array map call
 (defn mapish [f]
   (this-as ct
     (doall (map 
       #(.call f js/undefined % %2 ct) (seq ct) (range)))))
 
-; a replacement for the foreach call (which is map that returns null)
+; a replacement for the array foreach call (which is map that returns null)
 (defn eachish [f]
   ; call mapish with the same 'this'
   (this-as ct (.call mapish ct f))
@@ -56,10 +73,9 @@
   (doseq [k (keys m)]
     ; TODO: we need a better way to get prototype and could fallback to m
     (let [p (.-__proto__ m)]
-      (if (and (keyword? k) (not (goog.object.containsKey m (name k)))) (do
-        (.__defineGetter__ p (name k) (gen-map-getter k))
-        (.__defineSetter__ p (name k) (gen-map-setter k))
-  ))))
+      (if (and (keyword? k) (not (goog.object.containsKey m (name k))))
+        (js-getset-prop p (name k) (gen-map-getter k) (gen-map-setter k))
+  )))
   (if (some keyword? (keys m)) (do
     (aset m hyde-keylist-key false)
     (aset m hyde-keyset-key false)
@@ -82,7 +98,7 @@
               (aget o s) 
               not-found))))))))
 
-(def MAXLEN 5000)
+(def MAXLEN (or (this-as ct (aget ct "mrhyde_maxseqlen")) 5000))
 
 (defn patch-seq-object [o]
   ; this works but is now redundant
@@ -157,14 +173,48 @@
 ;       (let [src (if (goog.object.containsKey t hyde-cache-key) (t/hyde-cache-key) t)]
 ;         (nth src n js/undefined)))))
 
+; this works, but is slow...
+; (def binding-defaults {:configurable true :enumerable true})
+; (defn js-prop [obj nam & desc]
+;   (let [desc-map (apply array-map desc)
+;         desc-merged (merge binding-defaults desc-map)
+;         descriptor (clj->js desc-merged)]
+;     ; (.log js/console (str "def " binding-defaults " map " desc-map " merg " descriptor))
+;     ; (.log js/console descriptor)
+;     (.defineProperty js/Object obj nam descriptor)))
+
+; (defn js-prop-fast [obj nam & desc]
+;   (let [descriptor (js-obj)]
+;     (aset descriptor "configurable" true)
+;     (aset descriptor "enumerable" true)
+;     (doseq [[k v] desc]
+;       (aset descriptor k v))
+;     (.defineProperty js/Object obj nam descriptor)))
+
+; (def reusable-readonly-descriptor (js-obj))
+; (aset reusable-readonly-descriptor "configurable" true)
+; (aset reusable-readonly-descriptor "enumerable" true)
+
+; (def reusable-readwrite-descriptor (js-obj))
+; (aset reusable-readwrite-descriptor "configurable" true)
+; (aset reusable-readwrite-descriptor "enumerable" true)
+
+; (defn js-get-prop [obj nam getfn]
+;   (aset reusable-readonly-descriptor "get" getfn)
+;   (.defineProperty js/Object obj nam reusable-readonly-descriptor))
+
+; (defn js-getset-prop [obj nam getfn setfn]
+;   (aset reusable-readwrite-descriptor "get" getfn)
+;   (aset reusable-readwrite-descriptor "set" setfn)
+;   (.defineProperty js/Object obj nam reusable-readwrite-descriptor))
+
 ; Add functionality to cljs seq prototype to make it more like a js array
 (defn patch-prototype-as-array [p o]
   ; array length call
-  (.__defineGetter__ p "length" #(this-as t (count (take MAXLEN t))))
-  ; access by index... we obviously need a smarter upper bound here
+  (js-get-prop p "length" #(this-as t (count (take MAXLEN t))))
+  ; access by index... would be great if there were a smarter solution
   (dotimes [n MAXLEN]
-    (.__defineGetter__ p n (gen-seq-getter n))
-    (.__defineSetter__ p n (gen-seq-setter n)))
+    (js-getset-prop p n (gen-seq-getter n) (gen-seq-setter n)))
   ; if we are acting like an array, we'll need in impl of forEach and map
   (-> p .-forEach (set! eachish))
   (-> p .-map (set! mapish))
@@ -252,7 +302,7 @@
         skippers (get opts-map :skip [])
         skiplist (if (keyword? skippers) [skippers] skippers)
         skipset (set skiplist)]
-    (.log js/console (str "skiplist is " skiplist " and skipset " skipset))
+    ; (.log js/console (str "skiplist is " skiplist " and skipset " skipset))
     ((fn internal-recurse [x]
       (cond
         (goog.isArray x)
@@ -401,31 +451,3 @@
 
 (defn toclj [x]
   (js->clj x :keywordize-keys true))
-
-; (defn patch-args-clj-to-js [o field-name]
-;   (let [orig-fn (aget o field-name)]
-;     (aset o field-name
-;       (fn [& args]
-;         ; (.log js/console (str "patching: " (count args)))
-;         (let [nargs (map clj->js args)]
-;           ; (.log js/console (str "patched: " (type (nth nargs 0))))
-;           (this-as ct (.apply orig-fn ct nargs)))))))
-
-; poor man's unit test
-; add this to your html
-;
-    ; M = {
-    ;   testthis: function(a,b,c) {
-    ;     console.log("here comes a b c");
-    ;     console.log(a);
-    ;     console.log(b);
-    ;     console.log(c);
-    ;   }
-    ; }
-;
-; then
-; (this-as ct (aset ct "toclj" #(js->clj % {:keywordize-keys true})))
-; (patch-args-clj-to-js js/M "testthis" 0 2)
-;
-; and from the browser js console:
-; M.testthis(toclj({}), toclj({}), toclj({}))
