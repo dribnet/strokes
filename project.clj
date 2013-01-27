@@ -1,4 +1,4 @@
-(defproject net.drib/strokes "0.0.2-SNAPSHOT"
+(defproject net.drib/strokes "0.2.0"
   :description "strokes: d3 from clojurescript"
   :dependencies [
     [org.clojure/clojure "1.4.0"]
