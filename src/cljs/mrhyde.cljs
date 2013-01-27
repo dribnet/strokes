@@ -1,4 +1,5 @@
 ; TODO
+; add benchmarking on repersist call and setters
 ; recurse-from-hyde-cache should mark objects so as not to hit a cycle
 ; remove __define{GS}etter__ for Object.defineProperty()
 
@@ -245,28 +246,39 @@
 
 (defn recurse-from-hyde-cache
   "Recursively transforms any cached hyde objects to new persistent versions."
-  [x]
-  (cond
-    (goog.isArray x)
-      (vec (map recurse-from-hyde-cache x))
-    (map? x)
-      (let [c (from-cache-if-has-cache x)]
-        (into {} (for [[k v] c] 
-          [(recurse-from-hyde-cache k)
-            (if (= k :parent)
-              nil
-              (recurse-from-hyde-cache v))])))
-    (coll? x) 
-      (let [c (from-cache-if-has-cache x)]
-        (into (empty c) (map recurse-from-hyde-cache c)))
-    :else
-      (from-cache-if-has-cache x)))
+  [xo & opts]
+  (let [; flexibily handling the skipset should not be a 4 step process...
+        opts-map (apply array-map opts)
+        skippers (get opts-map :skip [])
+        skiplist (if (keyword? skippers) [skippers] skippers)
+        skipset (set skiplist)]
+    (.log js/console (str "skiplist is " skiplist " and skipset " skipset))
+    ((fn internal-recurse [x]
+      (cond
+        (goog.isArray x)
+          (vec (map internal-recurse x))
+        (map? x)
+          (let [c (from-cache-if-has-cache x)]
+            (into {} (for [[k v] c] 
+              [(internal-recurse k)
+                (if (skipset k)
+                  v
+                  (internal-recurse v))])))
+        (coll? x) 
+          (let [c (from-cache-if-has-cache x)]
+            (into (empty c) (map internal-recurse c)))
+        :else
+          (from-cache-if-has-cache x))) 
+      xo)))
 
-(defn repersist [x]
+(defn repersist [x & opts]
+  "recurse x (or return value of x) and extract persistent value
+   options can include 
+     :skip [keys] -> include vals for these keys as-is"
   (if (goog.isFunction x)
-    (fn [& args] (repersist (this-as t (.apply x t args))))
+    (fn [& args] (apply repersist (this-as t (.apply x t args)) opts))
     ;else
-    (recurse-from-hyde-cache x)))
+    (apply recurse-from-hyde-cache x opts)))
 
 (def have-patched-arrayish-flag (atom false))
 (def have-patched-mappish-flag (atom false))

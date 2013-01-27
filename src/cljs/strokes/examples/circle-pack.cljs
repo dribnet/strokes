@@ -26,7 +26,7 @@
 
   (-> d3 (.edn "flare.edn" (fn [error, root]
     (let [node (-> svg (.datum root) (.selectAll ".node")
-                  (.data (repersist (.-nodes pack)))
+                  (.data (repersist (.-nodes pack) :skip [:children :parent]))
                 .enter (.append "g")
                   (.attr "class" #(if (contains? % :children) "node" "leaf node"))
                   (.attr "transform" #(str "translate(" (:x %) "," (:y %) ")")))]
