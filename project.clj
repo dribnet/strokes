@@ -1,5 +1,8 @@
-(defproject net.drib/strokes "0.2.0"
+(defproject net.drib/strokes "0.2.1-SNAPSHOT"
   :description "strokes: d3 from clojurescript"
+  :url "https://github.com/dribnet/strokes"
+  :license {:name "Eclipse Public License"
+            :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [
     [org.clojure/clojure "1.4.0"]
     [domina "1.0.1"]] ; <-- currently used only for unit test framework
