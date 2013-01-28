@@ -1,6 +1,7 @@
 (ns strokes
   (:require [mrhyde :refer [patch-known-arrayish-types 
                             patch-known-mappish-types 
+                            patch-tostring-hydearray-is-array
                             patch-return-value-to-clj
                             patch-args-recurse-from-cache
                             patch-args-keyword-to-fn]]
@@ -21,6 +22,8 @@
   (patch-known-arrayish-types)
   ; patch maps to include key based accessors on js object
   (patch-known-mappish-types)
+  ; tell anyone that asks that clj sequential types are really arrays
+  ; (patch-tostring-hydearray-is-array)
   ; filter d3.selection.attr inputs: v might be keyword function
   (patch-args-keyword-to-fn (-> d3 .-selection .-prototype) "attr" 1)
   ; filter d3.selection.text inputs: argument mighe be a keyword function

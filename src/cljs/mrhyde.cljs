@@ -42,6 +42,8 @@
 (def hyde-access-key  "$cljs$mrhyde$acccess")
 (def hyde-keylist-key "$cljs$mrhyde$keylist")
 (def hyde-keyset-key  "$cljs$mrhyde$keyset")
+(def hyde-proto-array-marker "$cljs$mrhyde$isarray")
+(def hyde-proto-object-marker "$cljs$mrhyde$isobject")
 
 (defn- strkey [x]
   (if (keyword? x)
@@ -110,7 +112,6 @@
 (defn patch-map-object [o]
   ;(.log js/console (str (keys o)))
   (patch-map o)
-
   nil)
 
 ; of note -> http://stackoverflow.com/a/8843181/1010653
@@ -210,6 +211,8 @@
 
 ; Add functionality to cljs seq prototype to make it more like a js array
 (defn patch-prototype-as-array [p o]
+  ; mark this prototype as a 'hyde array'
+  (aset p hyde-proto-array-marker true)
   ; array length call
   (js-get-prop p "length" #(this-as t (count (take MAXLEN t))))
   ; access by index... would be great if there were a smarter solution
@@ -221,6 +224,11 @@
   ; and we should print like a native string. (& squirrel the native one away)
   (-> p .-toCljString (set! (-> p .-toString)))
   (-> p .-toString (set! #(this-as t (clojure.string/join ", " t)))))
+
+; Add functionality to cljs seq prototype to make it more like a js array
+(defn patch-prototype-as-map [p o]
+  ; mark this prototype as a 'hyde array'
+  (aset p hyde-proto-object-marker true))
 
 ; silence warnings about protocol, what is all that gibber-jabber anyways?
 (declare has-cache?)
@@ -289,6 +297,14 @@
   "Returns true if coll satisfies IHyde"
   [x] (satisfies? IHyde x))
 
+(defn ^boolean hyde-array?
+  "Returns true if coll satisfies IHyde"
+  [x] (and (satisfies? IHyde x) (aget x hyde-proto-array-marker)))
+
+(defn ^boolean hyde-object?
+  "Returns true if coll satisfies IHyde"
+  [x] (and (satisfies? IHyde x) (aget x hyde-proto-object-marker)))
+
 (defn from-cache-if-has-cache [x]
   (if (and (hyde? x) (has-cache? x))
       (from-cache x) 
@@ -354,6 +370,7 @@
     (reset! have-patched-mappish-flag true)
     (doseq [p [cljs.core.ObjMap
                cljs.core.PersistentHashMap]]
+       (patch-prototype-as-map (aget p "prototype") p)
        (add-hyde-protocol-to-map p))
 
     (patch-core-map-type "ObjMap")
@@ -448,6 +465,20 @@
         (let [nargs (map #(if (arg-filter %1) (clj->js %2) %2) (range) args)]
           ; (.log js/console (str "patched: " (type (nth nargs 0))))
           (this-as ct (.apply orig-fn ct nargs)))))))
+
+(defn patch-tostring-sequential-isarray [o field-name]
+  ; (.log js/console (str "installing " o "," field-name))
+  (let [orig-fn (get-store-cur-js-fn o field-name)]
+    (aset o field-name
+      (fn [& args]
+        (this-as ct
+          ; (.log js/console (str "checking " ct))
+          (if (hyde-array? ct) "[object Array]"
+           ;else
+          (.apply orig-fn ct args)))))))
+
+(defn patch-tostring-hydearray-is-array []
+  (patch-tostring-sequential-isarray (-> js/Object .-prototype) "toString"))
 
 (defn toclj [x]
   (js->clj x :keywordize-keys true))
