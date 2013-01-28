@@ -390,6 +390,16 @@
     ; return cur-fn
     cur-fn))
 
+(defn restore-original-js-fn [o field-name]
+  (let [js-fn-name (str "_js_" field-name)
+        root-fn (aget o js-fn-name)]
+    ; first store original (if we have not already done so)
+    (if (not= js/undefined root-fn)
+      ; (.log js/console "storing: " js-fn-name)
+      (aset o field-name root-fn))
+    ; return cur-fn
+    root-fn))
+
 ; patch a js function to return a clj-ish value
 (defn patch-return-value-to-clj [o field-name]
   (let [orig-fn (get-store-cur-js-fn o field-name)]
