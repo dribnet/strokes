@@ -38,6 +38,31 @@
   (this-as ct (.call mapish ct f))
   nil)
 
+(defn hyde-array-splice [& args]
+  (.log js/console "WARNING: someone has called unsupported method splice")
+)
+
+; currently only implemented for positive indices
+; tries to honor laziness
+; most likely has different edge cases if end > begin and whatnot
+(defn hyde-array-slice [& args]
+  (this-as this
+    (let [begin (first args)
+          end (second args)]
+      (if (nil? end)
+        (drop begin this)
+        (take (- end begin) (drop begin this)))
+    ))
+)
+
+(defn hyde-array-push [& args]
+  (.log js/console "WARNING: someone has called unsupported method push")
+)
+
+(defn hyde-array-sort [& args]
+  (.log js/console "WARNING: someone has called unsupported method sort")
+)
+
 (def hyde-cache-key   "$cljs$mrhyde$cache")
 (def hyde-access-key  "$cljs$mrhyde$acccess")
 (def hyde-keylist-key "$cljs$mrhyde$keylist")
@@ -221,6 +246,12 @@
   ; if we are acting like an array, we'll need in impl of forEach and map
   (-> p .-forEach (set! eachish))
   (-> p .-map (set! mapish))
+  ; this is a half-hearted version
+  (-> p .-slice (set! hyde-array-slice))
+  ; these not yet supported, but at least we get a warning
+  (-> p .-splice (set! hyde-array-splice))
+  (-> p .-push (set! hyde-array-push))
+  (-> p .-sort (set! hyde-array-sort))
   ; and we should print like a native string. (& squirrel the native one away)
   (-> p .-toCljString (set! (-> p .-toString)))
   (-> p .-toString (set! #(this-as t (clojure.string/join ", " t)))))
@@ -482,13 +513,15 @@
     (aset o field-name
       (fn [& args]
         (this-as ct
-          ; (.log js/console (str "checking " ct))
           (if (hyde-array? ct) "[object Array]"
-           ;else
-          (.apply orig-fn ct args)))))))
+            ;else
+            (.apply orig-fn ct args)))))))
 
 (defn patch-tostring-hydearray-is-array []
   (patch-tostring-sequential-isarray (-> js/Object .-prototype) "toString"))
 
 (defn toclj [x]
   (js->clj x :keywordize-keys true))
+
+(defn tojs [x]
+  (clj->js x))
