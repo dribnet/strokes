@@ -1,9 +1,11 @@
 (ns blade
-  (:require [mrhyde :refer [patch-known-arrayish-types 
-                            patch-known-mappish-types 
-                            patch-js-with-key-lookup
-                            patch-args-seq-to-array
-                            patch-args-clj-to-js]]
+  (:require [mrhyde.typepatcher
+               :refer [patch-known-arrayish-types 
+                       patch-known-mappish-types]]
+            [mrhyde.funpatcher
+               :refer [patch-js-with-key-lookup
+                       patch-args-seq-to-array
+                       patch-args-clj-to-js]]
             [clojure.string :refer [join]]
             [cljs.reader :refer [read-string]]))
 

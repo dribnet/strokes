@@ -1,11 +1,14 @@
 (ns mrhyde.benchmark
-    (:require [mrhyde :refer [hyde? has-cache? from-cache
-                              recurse-from-hyde-cache
-                              patch-known-arrayish-types
-                              patch-known-mappish-types
-                              patch-return-value-to-clj
-                              patch-args-keyword-to-fn
-                              patch-args-clj-to-js]]
+    (:require [mrhyde.mrhyde :refer 
+                [hyde? has-cache? from-cache]]
+              [mrhyde.typepatcher :refer 
+                [recurse-from-hyde-cache
+                 patch-known-arrayish-types
+                 patch-known-mappish-types]]
+              [mrhyde.funpatcher :refer 
+                [patch-return-value-to-clj
+                 patch-args-keyword-to-fn
+                 patch-args-clj-to-js]]
       ))
 
 (def DummyLib js/DummyLib)

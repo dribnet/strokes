@@ -1,6 +1,6 @@
 (ns strokes.examples.circle-pack
   (:require [clojure.string :refer [join]]
-            [mrhyde :refer [repersist]]
+            [mrhyde.typepatcher :refer [repersist]]
             [strokes :refer [d3]]))
 
 ; demo-guard - this is only needed because the demo is packaged with the library

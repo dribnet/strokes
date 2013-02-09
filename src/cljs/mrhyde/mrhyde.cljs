@@ -1,5 +1,5 @@
 ; providing clojure data a split personality: don't be afraid to let it all out
-(ns mrhyde
+(ns mrhyde.mrhyde
   (:require [clojure.string :refer [join re-matches]]
             [cljs.reader :refer [read-string]]
             [mrhyde.guts :refer [hyde-proto-array-marker hyde-proto-object-marker]]

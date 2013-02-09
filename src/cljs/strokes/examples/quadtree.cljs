@@ -1,7 +1,6 @@
 (ns strokes.examples.quadtree
   (:require [clojure.string :refer [join]]
-            [strokes :refer [d3]]
-            [mrhyde :refer [patch-map]]))
+            [strokes :refer [d3]]))
 
 ; demo-guard - this is only needed because the demo is packaged with the library
 (if (and d3 (this-as ct (aget ct "strokes_demo")) (= js/strokes_demo "quadtree")) (do

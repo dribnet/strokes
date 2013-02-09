@@ -1,9 +1,11 @@
 (ns mrhyde.test
     (:require [domina.tester :refer [add-test run-all-tests]]
-              [mrhyde :refer [hyde? has-cache? from-cache
+              [mrhyde.mrhyde :refer [hyde? has-cache? from-cache]]
+              [mrhyde.typepatcher :refer [
                               recurse-from-hyde-cache
                               patch-known-arrayish-types
-                              patch-known-mappish-types
+                              patch-known-mappish-types]]
+              [mrhyde.funpatcher :refer [
                               patch-return-value-to-clj
                               patch-args-keyword-to-fn
                               patch-args-clj-to-js]]
@@ -308,5 +310,4 @@
 ;         (let [c (js->clj js/p)])))
 ;      ))
 
-
-(run-all-tests "mrhyde"))
+  (run-all-tests "mrhyde"))

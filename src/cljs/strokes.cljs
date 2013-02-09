@@ -1,10 +1,12 @@
 (ns strokes
-  (:require [mrhyde :refer [patch-known-arrayish-types 
-                            patch-known-mappish-types 
-                            patch-tostring-hydearray-is-array
-                            patch-return-value-to-clj
-                            patch-args-recurse-from-cache
-                            patch-args-keyword-to-fn]]
+  (:require [mrhyde.typepatcher
+               :refer [patch-known-arrayish-types 
+                       patch-known-mappish-types]]
+            [mrhyde.funpatcher
+               :refer [patch-tostring-hydearray-is-array
+                       patch-return-value-to-clj
+                       patch-args-recurse-from-cache
+                       patch-args-keyword-to-fn]]
             [clojure.string :refer [join]]
             [cljs.reader :refer [read-string]]))
 
