@@ -4,7 +4,6 @@
   <head>
     <meta charset="UTF-8">
     <title>mrhyde tests</title>
-    <link href="tests.css" rel="stylesheet" type="text/css"><link>
     <script type="text/javascript">
       /* Android 2.x claims XPath support, but has none.  Force non-native
          XPath implementation in this case */
@@ -23,16 +22,9 @@
     <script type="text/javascript" src="xpath.js"></script>
  </head>
   <body>
-    <iframe src="single-mrhyde-test.html" width="50%" seamless="true" name="noopts" sandbox="">
-      <p>Your browser does not support iframes - what the hell browser is this?</p>
-    </iframe>
-    <iframe src="single-mrhyde-test.html" width="50%" seamless="true" name="someopts" sandbox="">
-      <p>Your browser does not support iframes - what the hell browser is this?</p>
-    </iframe>
-
     <script type="text/javascript" src="dummylib.js"></script>
     <script type="text/javascript" src="out/strokes_test.js"></script>
-    <script>
+    <script id="replace-this-node">
       mrhyde.test.launch();
     </script>
   </body>

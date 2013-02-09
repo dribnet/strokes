@@ -308,4 +308,5 @@
 ;         (let [c (js->clj js/p)])))
 ;      ))
 
-  (run-all-tests "mrhyde"))
+
+(run-all-tests "mrhyde"))
