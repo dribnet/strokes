@@ -525,3 +525,6 @@
 
 (defn tojs [x]
   (clj->js x))
+
+(defn cljreader [x]
+  (read-string x))
