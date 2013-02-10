@@ -44,7 +44,7 @@
 (defn js-arrays-equal [a b]
   (not (or (< a b) (< b a))))
 
-(defn ^:export launch []
+(defn ^:export launch [s]
 
   (init)
 
@@ -310,4 +310,4 @@
 ;         (let [c (js->clj js/p)])))
 ;      ))
 
-  (run-all-tests "mrhyde"))
+  (run-all-tests (str "mrhyde: " s)))

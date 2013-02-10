@@ -5,37 +5,34 @@
     <meta charset="UTF-8">
     <title>mrhyde tests</title>
     <link href="tests.css" rel="stylesheet" type="text/css"><link>
-    <script type="text/javascript">
-      /* Android 2.x claims XPath support, but has none.  Force non-native
-         XPath implementation in this case */
-      if (document.implementation
-           && document.implementation.hasFeature
-           && document.implementation.hasFeature("XPath",null)
-           && !document.evaluate) {
-        window.jsxpath = {
-          targetFrame: undefined,
-          exportInstaller: false,
-          useNative: false, /* force non-native implementation */
-          useInnerText: true
-        };
-      }
-    </script>
-    <script type="text/javascript" src="xpath.js"></script>
  </head>
   <body>
-<!--     <iframe src="single-mrhyde-test.html" width="50%" seamless="true" name="noopts" sandbox="">
+     <iframe style="display:inline" src="mrhyde-test-no-opt.html" width="45%" height="600" seamless="true" name="noopts">
       <p>Your browser does not support iframes - what the hell browser is this?</p>
     </iframe>
+     <iframe style="display:inline" src="mrhyde-test-whitespace.html" width="45%" height="600" seamless="true" name="noopts">
+      <p>Your browser does not support iframes - what the hell browser is this?</p>
+    </iframe>
+     <iframe style="display:inline" src="mrhyde-test-simple.html" width="45%" height="600" seamless="true" name="noopts">
+      <p>Your browser does not support iframes - what the hell browser is this?</p>
+    </iframe>
+     <iframe style="display:inline" src="mrhyde-test-advanced.html" width="45%" height="600" seamless="true" name="noopts">
+      <p>Your browser does not support iframes - what the hell browser is this?</p>
+    </iframe>
+<!--
     <iframe src="single-mrhyde-test.html" width="50%" seamless="true" name="someopts" sandbox="">
       <p>Your browser does not support iframes - what the hell browser is this?</p>
     </iframe>
- -->
     
+    <script type="text/javascript" src="d3/d3.js"></script>
     <script type="text/javascript" src="dummylib.js"></script>
-    <script type="text/javascript" src="out/strokes_test.js"></script>
+    <div id="daddy">
+      <script id="hook-of-destruction" type="text/javascript" src="out/strokes_test.js"></script>
+    </div>
     <script>
       mrhyde.test.launch();
     </script>
+ -->
   
   </body>
 </html>

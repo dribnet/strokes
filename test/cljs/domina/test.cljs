@@ -1,11 +1,14 @@
-(ns domina.tester
-  (:require [domina :refer [add-class! append! by-id destroy! prepend!
-                            single-node set-text!]]
-        [domina.xpath :refer [xpath]]
-        [domina.events :refer [unlisten!]]))
+(ns domina.tester)
+
+; debug helper
+; (defn p [& args]
+;   (.log js/console (apply str args))
+; )
+
+(def d3 (this-as ct (aget ct "d3")))
 
 ;
-; As the namespace states, this test framework ripped from domina
+; This framework is a mutated form of domina's test suite.
 ;
 
 (js* "
@@ -43,39 +46,21 @@
 (defn reset-tests []
   (reset! tests []))
 
-(defn reset
-  "resets the page"
-  []
-  (destroy! (xpath "//body/*"))
-  (unlisten! (xpath "//*")))
-
-(defn standard-fixture
-  "Standard fixture html"
-  []
-  (append! (xpath "//body")
-           "<div class='d1'><p class='p1'>P1</p><p class='p2'>P2</p>
-<p id='id1' class='p3'>P3</p>"))
-
-
 (defn report
   [suitename test-results]
-  (reset)
-  (doseq [[name result] test-results]
-    (let [result-div (single-node "<div class='test-result'></div>")]
-      (set-text! result-div name)
-      (if (not (= result nil))
-        (do
-          (add-class! result-div "failed")
-          (append! result-div (str "<div class='message'>" result "</div>")))
-        (add-class! result-div "passed"))
-      (append! (xpath "//body") result-div)))
-  (prepend! (xpath "//body") (str "<div id='test-summary'>" suitename ": ran <span id='total-tests'></span> tests with <span id='total-failures'></span> failures"))
-  (set-text! (by-id "total-tests") (count test-results))
-  (let [failure-count (count (filter (complement nil?) (map second test-results)))]
-    (set-text! (by-id "total-failures") failure-count)
-    (if (= 0 failure-count)
-      (add-class! (by-id "test-summary") "passed")
-      (add-class! (by-id "test-summary") "failed"))))
+  (if-let [script-node (-> d3 (.select "#hook-of-destruction") .node)]
+    (if-let [selected-parent (-> d3 (.select (-> script-node .-parentNode)))]
+      (let [failure-count (count (filter (complement nil?) (map second test-results)))]
+        (-> selected-parent (.selectAll "*") .remove)
+        (-> selected-parent (.append "div")
+          (.text (str suitename " ran " (count test-results) " tests with " failure-count " failures"))
+          (.attr "id" "test-summary")
+          (.classed (if (zero? failure-count) "passed" "failed") true))
+        (-> selected-parent (.selectAll "div.test-resuls")
+            (.data (clj->js test-results))
+          (.enter) (.append "div")
+            (.attr "class" (fn [[_ res] _] (str "test-result " (if (nil? res) "passed" "failed"))))
+            (.text (fn [[nam _] _] nam)) )))))
 
 (def test-results (doall (run-tests)))
 
