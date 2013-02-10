@@ -73,7 +73,7 @@
 
 ;(.log js/console (vert-array))
 (let [svg (gen-svg)
-      data (gen-data)]
+      data (vec (gen-data))]
 
   (reset! quadtree 
     (-> d3 .-geom 

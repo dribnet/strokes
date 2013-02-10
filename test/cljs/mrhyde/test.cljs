@@ -3,7 +3,8 @@
               [mrhyde.mrhyde :refer [hyde? has-cache? from-cache]]
               [mrhyde.typepatcher :refer [
                               recurse-from-hyde-cache
-                              patch-known-arrayish-types
+                              patch-known-vector-types
+                              patch-known-sequential-types
                               patch-known-mappish-types]]
               [mrhyde.funpatcher :refer [
                               patch-return-value-to-clj
@@ -17,7 +18,8 @@
   ; patch the dummy library
   (if DummyLib (do
     ; patch all seqs to also be read-only arrays for javascript interop
-    (patch-known-arrayish-types)
+    (patch-known-vector-types)
+    (patch-known-sequential-types)
 
     ; patch maps to include key based accessors on js object
     (patch-known-mappish-types)

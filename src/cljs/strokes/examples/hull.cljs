@@ -43,7 +43,7 @@
 
 ; redraw hull and points. called after any changes to vert-atom
 (defn redraw-hull[hull circle]
-  (let [verts @vert-atom]
+  (let [verts (vec @vert-atom)]
     (-> (.datum hull (-> d3 .-geom (.hull verts)))
         (.attr "d" #(str "M" (join "L" %) "Z")))
     (swap! circle #(.data % verts))

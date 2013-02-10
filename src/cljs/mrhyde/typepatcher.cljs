@@ -1,9 +1,14 @@
 (ns mrhyde.typepatcher
-  (:require [mrhyde.mrhyde :refer [hyde-array? has-cache? from-cache hyde? IHyde]]
+  (:require [mrhyde.mrhyde :refer [hyde-array? hyde-object? has-cache? from-cache hyde? IHyde]]
             [mrhyde.guts :refer [get-store-cur-js-fn restore-original-js-fn
                             hyde-proto-array-marker hyde-proto-object-marker]]
             [clojure.set :refer [difference]]
             ))
+
+; debug helper
+(defn p [& args]
+  (.log js/console (apply str args))
+)
 
 ; generate get-set-prop fn  with closure around stored data
 (def install-js-get-prop ((fn []
@@ -24,21 +29,50 @@
       (aset reusable-descriptor "set" setfn)
       (.defineProperty js/Object obj nam reusable-descriptor))))))
 
-; a replacement for the array map call
-(defn mapish [f]
-  (this-as ct
-    (doall (map 
-      #(.call f js/undefined % %2 ct) (seq ct) (range)))))
+;;;; ARRAY METHODS
 
-; a replacement for the array foreach call (which is map that returns null)
-(defn eachish [f]
-  ; call mapish with the same 'this'
-  (this-as ct (.call mapish ct f))
-  nil)
+;; Array Mutator methods
+
+(defn hyde-array-pop [& args]
+  (.log js/console "WARNING: someone has called unsupported hyde-array method pop"))
+
+(defn hyde-array-push [& args]
+  (.log js/console "WARNING: someone has called unsupported hyde-array method push"))
+
+(defn hyde-array-reverse [& args]
+  (.log js/console "WARNING: someone has called unsupported hyde-array method reverse"))
+
+(defn hyde-array-shift [& args]
+  (.log js/console "WARNING: someone has called unsupported hyde-array method shift"))
+
+(defn hyde-array-sort [& args]
+  (.log js/console "WARNING: someone has called unsupported hyde-array method sort"))
 
 (defn hyde-array-splice [& args]
-  (.log js/console "WARNING: someone has called unsupported method splice")
-)
+  (.log js/console "WARNING: someone has called unsupported hyde-array method splice"))
+
+(defn hyde-array-unshift [& args]
+  (.log js/console "WARNING: someone has called unsupported hyde-array method unshift"))
+
+;; Array accessor methods
+
+(defn hyde-array-concat [& args]
+  (.log js/console "WARNING: someone has called unsupported hyde-array method concat"))
+
+(defn hyde-array-join [& args]
+  (.log js/console "WARNING: someone has called unsupported hyde-array method join"))
+
+(defn hyde-array-concat [& args]
+  (.log js/console "WARNING: someone has called unsupported hyde-array method concat"))
+
+(defn hyde-array-concat [& args]
+  (.log js/console "WARNING: someone has called unsupported hyde-array method concat"))
+
+(defn hyde-array-concat [& args]
+  (.log js/console "WARNING: someone has called unsupported hyde-array method concat"))
+
+(defn hyde-array-concat [& args]
+  (.log js/console "WARNING: someone has called unsupported hyde-array method concat"))
 
 ; currently only implemented for positive indices
 ; tries to honor laziness
@@ -49,17 +83,53 @@
           end (second args)]
       (if (nil? end)
         (drop begin this)
-        (take (- end begin) (drop begin this)))
-    ))
-)
+        (take (- end begin) (drop begin this))))))
 
-(defn hyde-array-push [& args]
-  (.log js/console "WARNING: someone has called unsupported method push")
-)
+(defn hyde-array-vector-slice [& args]
+  (.log js/console "note: calling untested hyde-array vector-slice")
+  (this-as this
+    (apply subvec this args)))
 
-(defn hyde-array-sort [& args]
-  (.log js/console "WARNING: someone has called unsupported method sort")
-)
+(defn hyde-array-to-source [& args]
+  (.log js/console "WARNING: someone has called unsupported hyde-array method toSource"))
+
+(defn hyde-array-to-string [& args]
+  (this-as this (clojure.string/join ", " this)))
+
+(defn hyde-array-index-of [& args]
+  (.log js/console "WARNING: someone has called unsupported hyde-array method indexOf"))
+
+(defn hyde-array-last-index-of [& args]
+  (.log js/console "WARNING: someone has called unsupported hyde-array method lastIndexOf"))
+
+;; Array iteration methods
+
+(defn hyde-array-every [& args]
+  (.log js/console "WARNING: someone has called unsupported hyde-array method every"))
+
+(defn hyde-array-some [& args]
+  (.log js/console "WARNING: someone has called unsupported hyde-array method some"))
+
+(defn hyde-array-filter [& args]
+  (.log js/console "WARNING: someone has called unsupported hyde-array method filter"))
+
+(defn hyde-array-map [f]
+  (this-as ct
+    (doall (map 
+      #(.call f js/undefined % %2 ct) (seq ct) (range)))))
+
+; forEach is a map that returns null
+(defn hyde-array-for-each [f]
+  ; call mapish with the same 'this'
+  (this-as ct (.call hyde-array-map ct f))
+  nil)
+
+(defn hyde-array-reduce [& args]
+  (.log js/console "WARNING: someone has called unsupported hyde-array method reduce"))
+
+(defn hyde-array-reduce-right [& args]
+  (.log js/console "WARNING: someone has called unsupported hyde-array method reduce-Right"))
+
 
 (def hyde-cache-key   "$cljs$mrhyde$cache")
 (def hyde-access-key  "$cljs$mrhyde$acccess")
@@ -139,10 +209,10 @@
 (defn patch-core-seq-type [s]
   ; (.log js/console (str "patching seq type " s))
   ; (-> js/gdebug (set! (aget js/cljs.core s)))
-  (let [orig-fn (aget js/cljs.core s)
+  (let [orig-fn (aget (.-core js/cljs) s)
         orig-keys (.keys js/Object orig-fn)
         new-fn  (fn [& args]
-                  (let [nargs (cons nil args)
+                  (let [nargs (apply array (cons nil args))
                         binder (js/Function.prototype.bind.apply orig-fn nargs)
                         that  (new binder)]
                     (patch-seq-object that)
@@ -160,7 +230,7 @@
   (let [orig-fn (aget js/cljs.core s)
         orig-keys (.keys js/Object orig-fn)
         new-fn  (fn [& args]
-                  (let [nargs (cons nil args)
+                  (let [nargs (apply array (cons nil args))
                         binder (js/Function.prototype.bind.apply orig-fn nargs)
                         that  (new binder)]
                     (patch-map-object that)
@@ -192,7 +262,7 @@
         (assoc! c n v)))))
 
 ; Add functionality to cljs seq prototype to make it more like a js array
-(defn patch-prototype-as-array [p o]
+(defn patch-prototype-as-array [p o is-vect]
   ; mark this prototype as a 'hyde array'
   (aset p hyde-proto-array-marker true)
   ; array length call
@@ -200,18 +270,33 @@
   ; access by index... would be great if there were a smarter solution
   (dotimes [n MAXLEN]
     (install-js-getset-prop p n (gen-seq-getter n) (gen-seq-setter n)))
-  ; if we are acting like an array, we'll need in impl of forEach and map
-  (-> p .-forEach (set! eachish))
-  (-> p .-map (set! mapish))
-  ; this is a half-hearted version
-  (-> p .-slice (set! hyde-array-slice))
-  ; these not yet supported, but at least we get a warning
-  (-> p .-splice (set! hyde-array-splice))
-  (-> p .-push (set! hyde-array-push))
-  (-> p .-sort (set! hyde-array-sort))
-  ; and we should print like a native string. (& squirrel the native one away)
+
+  ; squirrel away native print
   (-> p .-toCljString (set! (-> p .-toString)))
-  (-> p .-toString (set! #(this-as t (clojure.string/join ", " t)))))
+  ; install mutator methods
+  (-> p .-pop (set! hyde-array-pop))
+  (-> p .-push (set! hyde-array-push))
+  (-> p .-reverse (set! hyde-array-reverse))
+  (-> p .-shift (set! hyde-array-shift))
+  (-> p .-sort (set! hyde-array-sort))
+  (-> p .-splice (set! hyde-array-splice))
+  (-> p .-unshift (set! hyde-array-unshift))
+  ; install accessor methods
+  (-> p .-concat (set! hyde-array-concat))
+  (-> p .-join (set! hyde-array-pop))
+  (-> p .-slice (set! (if is-vect hyde-array-vector-slice hyde-array-slice)))
+  (-> p .-toSource (set! hyde-array-to-source))
+  (-> p .-toString (set! hyde-array-to-string))
+  (-> p .-indexOf (set! hyde-array-index-of))
+  (-> p .-lastIndexOf (set! hyde-array-last-index-of))
+  ; install iteration methods
+  (-> p .-forEach (set! hyde-array-for-each))
+  (-> p .-every (set! hyde-array-every))
+  (-> p .-some (set! hyde-array-some))
+  (-> p .-filter (set! hyde-array-filter))
+  (-> p .-map (set! hyde-array-map))
+  (-> p .-reduce (set! hyde-array-reduce))
+  (-> p .-reduceRight (set! hyde-array-reduce-right)))
 
 ; Add functionality to cljs seq prototype to make it more like a js array
 (defn patch-prototype-as-map [p o]
@@ -306,30 +391,61 @@
    options can include 
      :skip [keys] -> include vals for these keys as-is"
   (if (goog.isFunction x)
-    (fn [& args] (apply repersist (this-as t (.apply x t args)) opts))
+    (fn [& args] (apply repersist (this-as t (.apply x t (apply array args))) opts))
     ;else
     (apply recurse-from-hyde-cache x opts)))
 
 (def have-patched-arrayish-flag (atom false))
 (def have-patched-mappish-flag (atom false))
 
+(defn patch-sequential-type [t]
+  (if (hyde-array? (aget t "prototype"))
+    (p (str "already a hyde-array: " t))
+    (do
+     (patch-prototype-as-array (aget t "prototype") t false)
+     (add-hyde-protocol-to-seq t))))
+
+(defn patch-vector-type [t]
+  (if (hyde-array? (aget t "prototype"))
+    (p (str "already a hyde-array: " t))
+    (do
+     (patch-prototype-as-array (aget t "prototype") t true)
+     (add-hyde-protocol-to-seq t))))
+
+(defn patch-map-type [[t, s]]
+  (if (hyde-object? (aget t "prototype"))
+    (p (str "already a hyde-object: " t))
+    (do
+     (patch-prototype-as-map (aget t "prototype") t)
+     (add-hyde-protocol-to-map t)
+     (patch-core-map-type s))))
+
 ; there must be a smarter way to do this, but for now i'll forge ahead
-(defn patch-known-arrayish-types []
-  (if-not @have-patched-arrayish-flag (do
-    (reset! have-patched-arrayish-flag true)
-    (doseq [p [cljs.core.PersistentVector
-               cljs.core.List
-               cljs.core.LazySeq
-               cljs.core.IndexedSeq
-               cljs.core.Cons
-               cljs.core.Range
-               cljs.core.ArrayNodeSeq
-               cljs.core.ChunkedSeq]]
-       (patch-prototype-as-array (aget p "prototype") p)
-       (add-hyde-protocol-to-seq p))
-    (patch-core-seq-type "PersistentVector"))))
+(defn patch-known-sequential-types []
+  (doseq [p [cljs.core.List
+             cljs.core.LazySeq
+             cljs.core.IndexedSeq
+             cljs.core.Cons
+             cljs.core.Range
+             cljs.core.ArrayNodeSeq
+             cljs.core.ChunkedSeq]]
+    (patch-sequential-type p)))
+
+; there must be a smarter way to do this, but for now i'll forge ahead
+(defn patch-known-vector-types []
+  (doseq [p [cljs.core.PersistentVector
+             cljs.core.Subvec]]
+    (patch-vector-type p)) )
+  ; todo: is this doing something? refactor?
+  ; (patch-core-seq-type "PersistentVector"))
 
 (defn patch-known-mappish-types [] 
+  (patch-sequential-type cljs.core.LazySeq) ; <-- TODO BUG - this should not be necessary!
+  (doseq [p [[cljs.core.ObjMap, "ObjMap"]
+             [cljs.core.PersistentHashMap, "PersistentHashMap"]]]
+    (patch-map-type p)))
+
+(defn old-known-mappish-types [] 
   (if-not @have-patched-mappish-flag (do
     (reset! have-patched-mappish-flag true)
     (doseq [p [cljs.core.ObjMap

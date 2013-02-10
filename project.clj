@@ -19,23 +19,23 @@
                                     :optimizations :simple}}
 
                        {:source-path "test/cljs"
-                        :compiler  {:libs ["goog/dom/query.js"]
-                                    :pretty-print true
-                                    :optimizations :none
-                                    :output-dir "public/build_no_opt"
-                                    :output-to "public/out/strokes_test_no_opt.js"}}
-                       {:source-path "test/cljs"
                         :compiler  {:optimizations :whitespace
                                     :pretty-print true
-                                    :output-dir ".cljsbuild/whitespace"
+                                    :print-input-delimiter true
                                     :output-to "public/out/strokes_test_whitespace.js"}}
                        {:source-path "test/cljs"
                         :compiler  {:optimizations :simple
                                     :pretty-print true
-                                    :output-dir ".cljsbuild/simple"
+                                    ;:output-dir ".cljsbuild/simple"
                                     :output-to "public/out/strokes_test_simple.js"}}
                        {:source-path "test/cljs"
                         :compiler  {:optimizations :advanced
                                     :pretty-print true
-                                    :output-dir ".cljsbuild/advanced"
-                                    :output-to "public/out/strokes_test_advanced.js"}}]})
+                                    :print-input-delimiter true
+                                    ;:output-dir ".cljsbuild/advanced"
+                                    :output-to "public/out/strokes_test_advanced.js"}}
+                       {:source-path "test/cljs"
+                        :compiler  {:optimizations :advanced
+                                    :pretty-print false
+                                    ;:output-dir ".cljsbuild/advanced"
+                                    :output-to "public/out/strokes_test_min.js"}}]})

@@ -1,6 +1,7 @@
 (ns strokes
   (:require [mrhyde.typepatcher
-               :refer [patch-known-arrayish-types 
+               :refer [patch-known-vector-types
+                       patch-known-sequential-types 
                        patch-known-mappish-types]]
             [mrhyde.funpatcher
                :refer [patch-tostring-hydearray-is-array
@@ -21,7 +22,8 @@
 
 (if d3 (do
   ; patch all seqs to also be read-only arrays for javascript interop
-  (patch-known-arrayish-types)
+  (patch-known-vector-types)
+  ; (patch-known-sequential-types)
   ; patch maps to include key based accessors on js object
   (patch-known-mappish-types)
   ; tell anyone that asks that clj sequential types are really arrays
@@ -35,7 +37,7 @@
   ; filter d3.layout.pack.value inputs: v might be keyword function
   (patch-args-keyword-to-fn (-> d3 .-layout .-pack .-prototype) "children" 0)
   ; have mouse return cljs data structure
-  (patch-return-value-to-clj d3 "mouse")
+  ; (patch-return-value-to-clj d3 "mouse")
 
   ; todo: new patch here - something like:
   ; (patch-return-value-recurse-from-cache-as-function (-> d3 .-layout) "pack")

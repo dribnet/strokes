@@ -1,6 +1,7 @@
 (ns blade
   (:require [mrhyde.typepatcher
-               :refer [patch-known-arrayish-types 
+               :refer [patch-known-vector-types
+                       patch-known-sequential-types 
                        patch-known-mappish-types]]
             [mrhyde.funpatcher
                :refer [patch-js-with-key-lookup
@@ -13,7 +14,8 @@
 
 (if L (do
   ; patch all seqs to also be read-only arrays for javascript interop
-  (patch-known-arrayish-types)
+  (patch-known-vector-types)
+  (patch-known-sequential-types)
   ; patch maps to include key based accessors on js object
   (patch-known-mappish-types)
 
