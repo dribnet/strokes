@@ -1,5 +1,5 @@
 (ns mrhyde.test
-    (:require [domina.tester :refer [add-test run-all-tests]]
+    (:require [mrhyde.tester :refer [add-test run-all-tests]]
               [mrhyde.mrhyde :refer [hyde? has-cache? from-cache]]
               [mrhyde.typepatcher :refer [
                               recurse-from-hyde-cache

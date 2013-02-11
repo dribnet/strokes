@@ -1,5 +1,5 @@
 (ns strokes.test
-    (:require [domina.tester :refer [add-test run-all-tests]]))
+    (:require [mrhyde.tester :refer [add-test run-all-tests]]))
 
 (defn ^:export launch []
   ; (add-test "2 + 2 = 2"

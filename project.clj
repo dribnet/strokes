@@ -3,39 +3,42 @@
   :url "https://github.com/dribnet/strokes"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [
-    [org.clojure/clojure "1.4.0"]
-    [domina "1.0.1"]] ; <-- currently used only for unit test framework
+  :dependencies [[org.clojure/clojure "1.4.0"]]
   :min-lein-version "2.0.0"
   :source-paths ["src/clj" "src/cljs"]
 
-  :plugins [[lein-cljsbuild "0.2.10"]]
+  :plugins [[lein-cljsbuild "0.3.0"]]
 
-  :cljsbuild {:builds [{:source-path "src/cljs"
+  :cljsbuild {:builds [{:source-paths ["src/cljs"]
                         :jar true
                         :compiler { :output-to "public/out/strokes.js"
+                                    :externs ["public/d3/d3-externs.js"]
                                    ;:optimizations :whitespace
                                    ;:pretty-print true 
                                     :optimizations :simple}}
 
-                       {:source-path "test/cljs"
+                       {:source-paths ["test/cljs"]
                         :compiler  {:optimizations :whitespace
+                                    :externs ["public/d3/d3-externs.js"]
                                     :pretty-print true
                                     :print-input-delimiter true
                                     :output-to "public/out/strokes_test_whitespace.js"}}
-                       {:source-path "test/cljs"
+                       {:source-paths ["test/cljs"]
                         :compiler  {:optimizations :simple
+                                    :externs ["public/d3/d3-externs.js"]
                                     :pretty-print true
                                     ;:output-dir ".cljsbuild/simple"
                                     :output-to "public/out/strokes_test_simple.js"}}
-                       {:source-path "test/cljs"
+                       {:source-paths ["test/cljs"]
                         :compiler  {:optimizations :advanced
+                                    :externs ["public/d3/d3-externs.js"]
                                     :pretty-print true
                                     :print-input-delimiter true
-                                    ;:output-dir ".cljsbuild/advanced"
                                     :output-to "public/out/strokes_test_advanced.js"}}
-                       {:source-path "test/cljs"
-                        :compiler  {:optimizations :advanced
-                                    :pretty-print false
-                                    ;:output-dir ".cljsbuild/advanced"
-                                    :output-to "public/out/strokes_test_min.js"}}]})
+                       ; {:source-path "test/cljs"
+                       ;  :compiler  {:optimizations :advanced
+                       ;              :externs ["public/d3/d3-externs.js"]
+                       ;              :pretty-print false
+                       ;              ;:output-dir ".cljsbuild/advanced"
+                       ;              :output-to "public/out/strokes_test_min.js"}}
+                                    ]})

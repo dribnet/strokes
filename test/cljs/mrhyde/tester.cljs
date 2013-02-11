@@ -1,4 +1,8 @@
-(ns domina.tester)
+(ns mrhyde.tester)
+
+;
+; This framework is a mutated form of domina's test suite.
+;
 
 ; debug helper
 ; (defn p [& args]
@@ -6,10 +10,6 @@
 ; )
 
 (def d3 (this-as ct (aget ct "d3")))
-
-;
-; This framework is a mutated form of domina's test suite.
-;
 
 (js* "
   window['tryfn'] = function(f) {

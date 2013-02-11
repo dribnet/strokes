@@ -443,16 +443,5 @@
   (patch-sequential-type cljs.core.LazySeq) ; <-- TODO BUG - this should not be necessary!
   (doseq [p [[cljs.core.ObjMap, "ObjMap"]
              [cljs.core.PersistentHashMap, "PersistentHashMap"]]]
-    (patch-map-type p)))
-
-(defn old-known-mappish-types [] 
-  (if-not @have-patched-mappish-flag (do
-    (reset! have-patched-mappish-flag true)
-    (doseq [p [cljs.core.ObjMap
-               cljs.core.PersistentHashMap]]
-       (patch-prototype-as-map (aget p "prototype") p)
-       (add-hyde-protocol-to-map p))
-
-    (patch-core-map-type "ObjMap")
-    (patch-core-map-type "PersistentHashMap"))))
-
+             nil))
+    ; (patch-map-type p)))
