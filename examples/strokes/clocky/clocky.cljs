@@ -1,10 +1,7 @@
-(ns strokes.examples.clocky
+(ns clocky.clocky
   (:require [strokes :refer [d3]]))
 
-
-; demo-guard - this is only needed because the demo is packaged with the library
-(if (and d3 (this-as ct (aget ct "strokes_demo")) (= js/strokes_demo "clocky")) (do
-
+(strokes/bootstrap)
 
 (def Tau (* 2 Math/PI))
 
@@ -57,6 +54,3 @@
           (.attr "d", arc))
       ; our work is never done
       false)))
-
-
-)) ; end demo-guard

@@ -13,38 +13,40 @@
 
 (def d3 (this-as ct (aget ct "d3")))
 
-; add a new d3.edn call to pull edn data over the network (like d3.csv and d3.json)
-(defn d3-edn-parser [request]
+(defn edn-parser-callback [request]
   (read-string (.-responseText request)))
 
-(defn d3-edn [url callback]
-  (-> d3 (.xhr url "application/octet-stream" callback) (.response d3-edn-parser)))
+(defn fetch-edn [url callback]
+  (-> d3 (.xhr url "application/octet-stream" callback) (.response edn-parser-callback)))
 
-(if d3 (do
+(defn bootstrap [& opts]
   ; patch all seqs to also be read-only arrays for javascript interop
   (patch-known-vector-types)
   ; (patch-known-sequential-types)
   ; patch maps to include key based accessors on js object
   (patch-known-mappish-types)
-  ; tell anyone that asks that clj sequential types are really arrays
-  ; (patch-tostring-hydearray-is-array)
-  ; filter d3.selection.attr inputs: v might be keyword function
-  (patch-args-keyword-to-fn (-> d3 .-selection .-prototype) "attr" 1)
-  ; filter d3.selection.text inputs: argument mighe be a keyword function
-  (patch-args-keyword-to-fn (-> d3 .-selection .-prototype) "text" 0)
-  ; filter d3.layout.pack.value inputs: v might be keyword function
-  (patch-args-keyword-to-fn (-> d3 .-layout .-pack .-prototype) "value" 0)
-  ; filter d3.layout.pack.value inputs: v might be keyword function
-  (patch-args-keyword-to-fn (-> d3 .-layout .-pack .-prototype) "children" 0)
-  ; have mouse return cljs data structure
-  ; (patch-return-value-to-clj d3 "mouse")
 
-  ; todo: new patch here - something like:
-  ; (patch-return-value-recurse-from-cache-as-function (-> d3 .-layout) "pack")
-  ; (patch-args-recurse-from-cache (-> d3 .-selection .-prototype) "data")
+  (if d3 (do
+    ; tell anyone that asks that clj sequential types are really arrays
+    ; (patch-tostring-hydearray-is-array)
+    ; filter d3.selection.attr inputs: v might be keyword function
+    (patch-args-keyword-to-fn (-> d3 .-selection .-prototype) "attr" 1)
+    ; filter d3.selection.text inputs: argument mighe be a keyword function
+    (patch-args-keyword-to-fn (-> d3 .-selection .-prototype) "text" 0)
+    ; filter d3.layout.pack.value inputs: v might be keyword function
+    (patch-args-keyword-to-fn (-> d3 .-layout .-pack .-prototype) "value" 0)
+    ; filter d3.layout.pack.value inputs: v might be keyword function
+    (patch-args-keyword-to-fn (-> d3 .-layout .-pack .-prototype) "children" 0)
+    ; have mouse return cljs data structure
+    ; (patch-return-value-to-clj d3 "mouse")
 
-  (-> d3 .-edn (set! d3-edn)) 
-))
+    ; todo: new patch here - something like:
+    ; (patch-return-value-recurse-from-cache-as-function (-> d3 .-layout) "pack")
+    ; (patch-args-recurse-from-cache (-> d3 .-selection .-prototype) "data")
+
+    ; (-> d3 .-edn (set! d3-edn)) 
+  ))
+)
 
 ; stragglers is still a work in progress...
 

@@ -2,10 +2,7 @@
   (:require [clojure.string :refer [join]]
             [strokes :refer [d3]]))
 
-
-; demo-guard - this is only needed because the demo is packaged with the library
-(if (and d3 (this-as ct (aget ct "strokes_demo")) (= js/strokes_demo "hull")) (do
-
+(strokes/bootstrap)
 
 (def width 960)
 (def height 500)
@@ -78,5 +75,3 @@
   (draw-border svg)
   (add-mouse-callbacks svg hull circle)
   (redraw-hull hull circle))
-
-)) ; end demo-guard

@@ -3,7 +3,7 @@
 // javascript file: http://d3js.org/d3.v3.js
 // run: d3
 // run and reformat: d3.selection.prototype
-// and manually append: d3.selection.enter
+// and manually append: d3.selection.enter, d3.geom.quadtree
 // and include the d3 version up here at the top for good measure
 
 var d3 = {
@@ -242,3 +242,22 @@ d3.selection.prototype = {
 };
 
 d3.selection.enter = function () {};
+
+// it's not clear if quadtree is working yet...
+// i wish this didn't give two warnings when compiling...
+//    commenting out for now
+/*
+d3.geom.quadtree = function() {
+  function d3_geom_quadtreeNode() {
+    return {
+      leaf: true,
+      nodes: [],
+      point: null
+    };
+  }
+  var root = d3_geom_quadtreeNode();
+  root.add = function(p) {};
+  root.visit = function(f) {};
+  return root;
+}
+*/

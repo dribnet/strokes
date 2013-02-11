@@ -17,6 +17,7 @@
                                    ;:pretty-print true 
                                     :optimizations :simple}}
 
+                       ; tests
                        {:source-paths ["test/cljs"]
                         :compiler  {:optimizations :whitespace
                                     :externs ["public/d3/d3-externs.js"]
@@ -36,6 +37,30 @@
                                     ; :output-dir ".cljsbuild/advanced"
                                     :print-input-delimiter true
                                     :output-to "public/out/strokes_test_advanced.js"}}
+
+
+                      ; examples
+                       {:source-paths ["src/cljs" "examples/strokes/clocky"]
+                        :compiler  {:optimizations :simple
+                                    :externs ["public/d3/d3-externs.js"]
+                                    :pretty-print false
+                                    :output-to "public/out/strokes-clocky.js"}}
+                       {:source-paths ["src/cljs" "examples/strokes/hull"]
+                        :compiler  {:optimizations :advanced
+                                    :externs ["public/d3/d3-externs.js"]
+                                    :pretty-print false
+                                    :output-to "public/out/strokes-hull.js"}}
+                       {:source-paths ["src/cljs" "examples/strokes/quadtree"]
+                        :compiler  {:optimizations :simple
+                                    :externs ["public/d3/d3-externs.js"]
+                                    :pretty-print false
+                                    :output-to "public/out/strokes-quadtree.js"}}
+                       {:source-paths ["src/cljs" "examples/strokes/circle-pack"]
+                        :compiler  {:optimizations :simple
+                                    :externs ["public/d3/d3-externs.js"]
+                                    :pretty-print false
+                                    :output-to "public/out/strokes-circle-pack.js"}}
+
                        ; {:source-path "test/cljs"
                        ;  :compiler  {:optimizations :advanced
                        ;              :externs ["public/d3/d3-externs.js"]
