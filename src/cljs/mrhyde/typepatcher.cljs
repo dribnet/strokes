@@ -29,6 +29,15 @@
       (aset reusable-descriptor "set" setfn)
       (.defineProperty js/Object obj nam reusable-descriptor))))))
 
+(def hyde-cache-key   "$cljs$mrhyde$cache")
+(def hyde-access-key  "$cljs$mrhyde$acccess")
+(def hyde-keylist-key "$cljs$mrhyde$keylist")
+(def hyde-keyset-key  "$cljs$mrhyde$keyset")
+
+(defn hyde-array-ensure-cached [h]
+  (if-not (goog.object.containsKey h hyde-cache-key)
+    (aset h hyde-cache-key (apply array h))))
+
 ;;;; ARRAY METHODS
 
 ;; Array Mutator methods
@@ -43,10 +52,22 @@
   (.log js/console "WARNING: someone has called unsupported hyde-array method reverse"))
 
 (defn hyde-array-shift [& args]
-  (.log js/console "WARNING: someone has called unsupported hyde-array method shift"))
+  (.log js/console "note: calling untested hyde-array shift")
+  (this-as t
+    ; ensure cache (transient) exists
+    (hyde-array-ensure-cached t)
+    (let [c (aget t hyde-cache-key)]
+      (.shift c))))
 
 (defn hyde-array-sort [& args]
-  (.log js/console "WARNING: someone has called unsupported hyde-array method sort"))
+  (.log js/console "note: calling untested hyde-array sort")
+  (this-as t
+    ; ensure cache (transient) exists
+    (hyde-array-ensure-cached t)
+    (let [c (aget t hyde-cache-key)]
+      (.sort c)
+      ; return yourself
+      t)))
 
 (defn hyde-array-splice [& args]
   (.log js/console "WARNING: someone has called unsupported hyde-array method splice"))
@@ -130,11 +151,6 @@
 (defn hyde-array-reduce-right [& args]
   (.log js/console "WARNING: someone has called unsupported hyde-array method reduce-Right"))
 
-
-(def hyde-cache-key   "$cljs$mrhyde$cache")
-(def hyde-access-key  "$cljs$mrhyde$acccess")
-(def hyde-keylist-key "$cljs$mrhyde$keylist")
-(def hyde-keyset-key  "$cljs$mrhyde$keyset")
 
 (defn- strkey [x]
   (if (keyword? x)
@@ -252,14 +268,11 @@
 (defn gen-seq-setter [n]
   (fn [v]
     (this-as t
-      ; (.log js/console (str "setter: " t "," v "," n))
       ; ensure cache (transient) exists
-      (if-not (goog.object.containsKey t hyde-cache-key)
-        (let [c (transient t)]
-          (aset t hyde-cache-key c)))
+      (hyde-array-ensure-cached t)
       ; now use it
       (let [c (aget t hyde-cache-key)]
-        (assoc! c n v)))))
+        (aset c n v)))))
 
 ; Add functionality to cljs seq prototype to make it more like a js array
 (defn patch-prototype-as-array [p o is-vect]
@@ -310,10 +323,7 @@
     (goog.object.containsKey this hyde-cache-key))
   (from-cache [this]
     (if-let [c (aget this hyde-cache-key)]
-      ; attempt1: can we make a transient copy of a transient?
-      (let [p (persistent! c)]
-        (aset this hyde-cache-key (transient p))
-        p)
+      (vec c)
       this))
   )
 )

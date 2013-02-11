@@ -18,13 +18,13 @@
                                     :optimizations :simple}}
 
                        ; tests
-                       {:source-paths ["test/cljs"]
+                       {:source-paths ["src/cljs" "test/cljs"]
                         :compiler  {:optimizations :whitespace
                                     :externs ["public/d3/d3-externs.js"]
                                     :pretty-print true
                                     :print-input-delimiter true
                                     :output-to "public/out/strokes_test_whitespace.js"}}
-                       {:source-paths ["test/cljs"]
+                       {:source-paths ["src/cljs" "test/cljs"]
                         :compiler  {:optimizations :simple
                                     :externs ["public/d3/d3-externs.js"]
                                     :pretty-print true
@@ -40,22 +40,22 @@
 
 
                       ; examples
-                       {:source-paths ["src/cljs" "examples/strokes/clocky"]
+                       {:source-paths ["examples/strokes/clocky"]
                         :compiler  {:optimizations :simple
                                     :externs ["public/d3/d3-externs.js"]
                                     :pretty-print false
                                     :output-to "public/out/strokes-clocky.js"}}
-                       {:source-paths ["src/cljs" "examples/strokes/hull"]
+                       {:source-paths ["examples/strokes/hull"]
                         :compiler  {:optimizations :advanced
                                     :externs ["public/d3/d3-externs.js"]
                                     :pretty-print false
                                     :output-to "public/out/strokes-hull.js"}}
-                       {:source-paths ["src/cljs" "examples/strokes/quadtree"]
+                       {:source-paths ["examples/strokes/quadtree"]
                         :compiler  {:optimizations :simple
                                     :externs ["public/d3/d3-externs.js"]
                                     :pretty-print false
                                     :output-to "public/out/strokes-quadtree.js"}}
-                       {:source-paths ["src/cljs" "examples/strokes/circle-pack"]
+                       {:source-paths ["examples/strokes/circle-pack"]
                         :compiler  {:optimizations :simple
                                     :externs ["public/d3/d3-externs.js"]
                                     :pretty-print false
