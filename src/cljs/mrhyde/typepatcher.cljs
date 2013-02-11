@@ -227,7 +227,7 @@
 
 (defn patch-core-map-type [s]
   ; (.log js/console (str "patching map type " s))
-  (let [orig-fn (aget js/cljs.core s)
+  (let [orig-fn (aget (.-core js/cljs) s)
         orig-keys (.keys js/Object orig-fn)
         new-fn  (fn [& args]
                   (let [nargs (apply array (cons nil args))
@@ -422,26 +422,40 @@
 
 ; there must be a smarter way to do this, but for now i'll forge ahead
 (defn patch-known-sequential-types []
-  (doseq [p [cljs.core.List
+  (doseq [t [cljs.core.List
              cljs.core.LazySeq
              cljs.core.IndexedSeq
              cljs.core.Cons
              cljs.core.Range
              cljs.core.ArrayNodeSeq
              cljs.core.ChunkedSeq]]
-    (patch-sequential-type p)))
+    (patch-sequential-type t)))
 
 ; there must be a smarter way to do this, but for now i'll forge ahead
 (defn patch-known-vector-types []
-  (doseq [p [cljs.core.PersistentVector
+  (doseq [t [cljs.core.PersistentVector
              cljs.core.Subvec]]
-    (patch-vector-type p)) )
+    (patch-vector-type t)) )
   ; todo: is this doing something? refactor?
   ; (patch-core-seq-type "PersistentVector"))
 
+; a funny idea
+; (alter-meta! #'ObjMap assoc :extern true)
+
+; this ensures the symbols exist, but they are copies so the wrong thing is patched...
+; (at least when compiled with advanced closure optimations)
+(js* "
+goog.exportSymbol('cljs', cljs);
+goog.exportSymbol('cljs.core', cljs.core);
+goog.exportSymbol('cljs.ObjMap', cljs.core.ObjMap);
+goog.exportSymbol('cljs.PersistentHashMap', cljs.core.PersistentHashMap);
+goog.exportProperty(cljs, 'core', cljs.core);
+goog.exportProperty(cljs.core, 'ObjMap', cljs.core.ObjMap);
+goog.exportProperty(cljs.core, 'PersistentHashMap', cljs.core.PersistentHashMap);
+")
+
 (defn patch-known-mappish-types [] 
   (patch-sequential-type cljs.core.LazySeq) ; <-- TODO BUG - this should not be necessary!
-  (doseq [p [[cljs.core.ObjMap, "ObjMap"]
+  (doseq [t [[cljs.core.ObjMap, "ObjMap"]
              [cljs.core.PersistentHashMap, "PersistentHashMap"]]]
-             nil))
-    ; (patch-map-type p)))
+    (patch-map-type t)))

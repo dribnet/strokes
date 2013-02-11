@@ -33,6 +33,7 @@
                         :compiler  {:optimizations :advanced
                                     :externs ["public/d3/d3-externs.js"]
                                     :pretty-print true
+                                    ; :output-dir ".cljsbuild/advanced"
                                     :print-input-delimiter true
                                     :output-to "public/out/strokes_test_advanced.js"}}
                        ; {:source-path "test/cljs"
