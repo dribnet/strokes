@@ -1,5 +1,5 @@
-(defproject voronoi-example "0.0.1-SNAPSHOT"
-  :description "voronoi-example"
+(defproject example "0.0.1-SNAPSHOT"
+  :description "strokes rotating voronoi example"
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [net.drib/strokes "0.2.2-SNAPSHOT"]]
   :min-lein-version "2.0.0"
@@ -8,6 +8,6 @@
   :plugins [[lein-cljsbuild "0.3.0"]]
 
   :cljsbuild {:builds [{:source-paths ["src/cljs"]
-                        :compiler { :output-to "public/out/voronoi-clipping.js"
+                        :compiler { :output-to "public/out/rotating-voronoi.js"
                                     :pretty-print true 
-                                    :optimizations :simple}}]})
+                                    :optimizations :whitespace}}]})
