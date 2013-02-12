@@ -52,7 +52,6 @@
   (.log js/console "WARNING: someone has called unsupported hyde-array method reverse"))
 
 (defn hyde-array-shift [& args]
-  (.log js/console "note: calling untested hyde-array shift")
   (this-as t
     ; ensure cache (transient) exists
     (hyde-array-ensure-cached t)
@@ -60,7 +59,6 @@
       (.shift c))))
 
 (defn hyde-array-sort [& args]
-  (.log js/console "note: calling untested hyde-array sort")
   (this-as t
     ; ensure cache (transient) exists
     (hyde-array-ensure-cached t)

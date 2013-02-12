@@ -48,17 +48,13 @@
   ))
 )
 
-; stragglers is still a work in progress...
+; let's add a bunch of handy d3 *fields* here
 
-(defn add-stragglers [x]
-  "adds elements to map x that have been stuck onto the js object x"
-  (let [empty-map {}
-        new-keys (remove (set (js-keys empty-map)) (js-keys x))]
-        ;main-keys (remove #(re-matches #"^:cljs\$.*" (str %)) new-keys)] <- idea for future?
-    (into x
-        (for [k new-keys]
-          [(keyword k) (aget x k)]))))
-
-(defn array-add-stragglers [a]
-  "unpack an array of maps, add stragglers, and repack into array"
-  (apply array (map add-stragglers a)))
+(def timer (.. d3 -timer))
+(def arc (.. d3 -svg -arc))
+(def polygon (.. d3 -geom -polygon))
+(def voronoi (.. d3 -geom -voronoi))
+(def category10 (.. d3 -scale -category10))
+(def category20 (.. d3 -scale -category20))
+(def category20b (.. d3 -scale -category20b))
+(def category20c (.. d3 -scale -category20c))

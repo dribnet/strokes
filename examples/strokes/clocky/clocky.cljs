@@ -11,11 +11,11 @@
 
 (def arc
   "returns function capabable of generating arcs from datums"
-  (-> d3 .-svg .arc
-    (.startAngle #(/ (* (:value %) Tau) 100))
-    (.endAngle #(/ (* (+ 50 (:value %)) Tau) 100))
-    (.innerRadius 0)
-    (.outerRadius #((keyword (:key %)) radii))))
+  (.. d3 -svg arc
+    (startAngle #(/ (* (:value %) Tau) 100))
+    (endAngle #(/ (* (+ 50 (:value %)) Tau) 100))
+    (innerRadius 0)
+    (outerRadius #((keyword (:key %)) radii))))
 
 (defn curClockData []
   "generates an array of 8 datums, one for each arc to draw"
@@ -34,23 +34,22 @@
       {:value (+ millis 50), :key "millis", :which 2} ]))
 
 (let [root 
-        (-> d3 (.select "#clocky") (.append "svg")
-            (.attr "width" 600)
-            (.attr "height" 600)
-            (.append "g")
-            (.attr "transform" "translate(300,300)"))
+        (.. d3 (select "#clocky") (append "svg")
+            (attr "width" 600)
+            (attr "height" 600)
+            (append "g")
+            (attr "transform" "translate(300,300)"))
       rings
-        (-> root (.selectAll "g") (.data curClockData))]
+        (.. root (selectAll "g") (data curClockData))]
 
     ; side effect = a path for each data element returned from curClockData
-    (-> (.enter rings) (.append "g") (.append "path"))
+    (.. rings (enter) (append "g") (append "path"))
 
     ; this timer loops forever, rebinding via curClockData
-    (.timer d3 (fn []
-      ;(.log js/console root)
-      (-> root (.selectAll "g") (.data curClockData)
-          (.select "path")
-          (.attr "class" #(str (:key %) (:which %)))
-          (.attr "d", arc))
+    (strokes/timer (fn []
+      (.. root (selectAll "g") (data curClockData)
+          (select "path")
+          (attr "class" #(str (:key %) (:which %)))
+          (attr "d", arc))
       ; our work is never done
       false)))
