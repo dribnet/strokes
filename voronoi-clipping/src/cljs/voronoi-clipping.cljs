@@ -1,6 +1,6 @@
 (ns voronoi-example
   (:require [clojure.string :refer [join]]
-            [strokes :refer [d3]]))
+            [strokes :refer [d3 voronoi category10]]))
 
 (strokes/bootstrap)
 
@@ -17,11 +17,7 @@
       [(- width padding), (- height padding)]
       [(- width padding), padding]])))
 
-; grab some functions from d3 (consider migrating into strokes)
-(def category10 (.. d3 -scale category10))
-(def voronoi (.. d3 -geom -voronoi))
-; local variable like width and height
-(def colorfn category10)
+(def colorfn (category10))
 
 (def svg (-> d3 (.select "body") (.append "svg")
       (.attr "width" width)

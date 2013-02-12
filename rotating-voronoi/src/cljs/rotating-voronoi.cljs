@@ -1,6 +1,6 @@
 (ns rotating-voronoi
   (:require [clojure.string :refer [join]]
-            [strokes :refer [d3]]))
+            [strokes :refer [d3 timer polygon voronoi]]))
 
 (strokes/bootstrap)
 
@@ -20,11 +20,6 @@
   ; todo: how can we force vector not to be lazy?
   ; (apply vector (doall (map deref @points))))
   (apply array (map deref @points)))
-
-; grab some functions from d3 (consider migrating into strokes)
-(def polygon (.. d3 -geom -polygon))
-(def timer (.. d3 -timer))
-(def voronoi (.. d3 -geom -voronoi))
 
 (def bounds (polygon [
       [(/ (- width) 2) (/ (- height) 2)]
