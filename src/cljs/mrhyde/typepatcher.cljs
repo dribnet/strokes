@@ -6,9 +6,8 @@
             ))
 
 ; debug helper
-(defn p [& args]
-  (.log js/console (apply str args))
-)
+(defn dp [& args]
+  (.log js/console (apply str args)) )
 
 ; generate get-set-prop fn  with closure around stored data
 (def install-js-get-prop ((fn []
@@ -408,21 +407,21 @@
 
 (defn patch-sequential-type [t]
   (if (hyde-array? (aget t "prototype"))
-    (p (str "already a hyde-array: " t))
+    (dp (str "already a hyde-array: " t))
     (do
      (patch-prototype-as-array (aget t "prototype") t false)
      (add-hyde-protocol-to-seq t))))
 
 (defn patch-vector-type [t]
   (if (hyde-array? (aget t "prototype"))
-    (p (str "already a hyde-array: " t))
+    (dp (str "already a hyde-array: " t))
     (do
      (patch-prototype-as-array (aget t "prototype") t true)
      (add-hyde-protocol-to-seq t))))
 
 (defn patch-map-type [[t, s]]
   (if (hyde-object? (aget t "prototype"))
-    (p (str "already a hyde-object: " t))
+    (dp (str "already a hyde-object: " t))
     (do
      (patch-prototype-as-map (aget t "prototype") t)
      (add-hyde-protocol-to-map t)
@@ -452,18 +451,46 @@
 
 ; this ensures the symbols exist, but they are copies so the wrong thing is patched...
 ; (at least when compiled with advanced closure optimations)
-(js* "
-goog.exportSymbol('cljs', cljs);
-goog.exportSymbol('cljs.core', cljs.core);
-goog.exportSymbol('cljs.ObjMap', cljs.core.ObjMap);
-goog.exportSymbol('cljs.PersistentHashMap', cljs.core.PersistentHashMap);
-goog.exportProperty(cljs, 'core', cljs.core);
-goog.exportProperty(cljs.core, 'ObjMap', cljs.core.ObjMap);
-goog.exportProperty(cljs.core, 'PersistentHashMap', cljs.core.PersistentHashMap);
-")
+; (js* "
+; goog.exportSymbol('cljs', cljs);
+; goog.exportSymbol('cljs.core', cljs.core);
+; goog.exportSymbol('cljs.ObjMap', cljs.core.ObjMap);
+; goog.exportSymbol('cljs.PersistentHashMap', cljs.core.PersistentHashMap);
+; goog.exportProperty(cljs, 'core', cljs.core);
+; goog.exportProperty(cljs.core, 'ObjMap', cljs.core.ObjMap);
+; goog.exportProperty(cljs.core, 'PersistentHashMap', cljs.core.PersistentHashMap);
+; ")
 
 (defn patch-known-mappish-types [] 
   (patch-sequential-type cljs.core.LazySeq) ; <-- TODO BUG - this should not be necessary!
   (doseq [t [[cljs.core.ObjMap, "ObjMap"]
              [cljs.core.PersistentHashMap, "PersistentHashMap"]]]
-    (patch-map-type t)))
+    (if (= (first t) (aget cljs.core (second t)))
+      (patch-map-type t))))
+
+
+
+; (defn get-member-name [o m]
+;   (or (first (filter #(= (aget o %) m) (.keys js/Object o)))
+;       (first (filter #(= (aget o %) m) (.keys js/Object js/window)))))
+
+; (defn patch-map-type [[f, p]]
+;   (if (hyde-object? (aget f "prototype"))
+;     (dp (str "already a hyde-object: " f))
+;     (if-let [nam (get-member-name p f)]
+;       (do
+;         (dp "i found " nam " in " p)
+;         (patch-prototype-as-map (aget f "prototype") f)
+;         (add-hyde-protocol-to-map f)
+;         (patch-core-map-type f p nam)))))
+
+; ; another failed attempt
+; (defn patch-core-map-constructor [f]
+;   ; (.log js/console (str "patching map type " s))
+;   (let [orig-fn (aget f "constructor")
+;         new-fn  (fn [& args]
+;                   (let [nargs (apply array (cons nil args))
+;                         that (js/Function.prototype.bind.apply orig-fn nargs)]
+;                     (patch-map-object that)
+;                     that))]
+;     (aset f "constructor" new-fn)))

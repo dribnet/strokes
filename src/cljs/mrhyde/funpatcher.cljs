@@ -78,7 +78,7 @@
         ; (.log js/console (str "patching: " (count args)))
         (let [nargs (map #(if (arg-filter %1) (clj->js %2) %2) (range) args)]
           ; (.log js/console (str "patched: " (type (nth nargs 0))))
-          (this-as ct (.apply orig-fn ct nargs)))))))
+          (this-as ct (.apply orig-fn ct (apply array nargs))))))))
 
 ; WARNING: THIS HAS BEEN DEEMED A BAD IDEA (though it did work once)
 (defn patch-tostring-sequential-isarray [o field-name]

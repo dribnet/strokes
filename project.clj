@@ -30,7 +30,7 @@
                                     :pretty-print true
                                     ;:output-dir ".cljsbuild/simple"
                                     :output-to "public/out/strokes_test_simple.js"}}
-                       {:source-paths ["test/cljs"]
+                       {:source-paths ["src/cljs" "test/cljs"]
                         :compiler  {:optimizations :advanced
                                     :externs ["public/d3/d3-externs.js"]
                                     :pretty-print true
