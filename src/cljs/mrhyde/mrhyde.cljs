@@ -31,17 +31,17 @@
   [x] (and (satisfies? IHyde x) (aget x hyde-proto-object-marker)))
 
 ; these three functions are mainly handy from the debug console
-(defn toclj
+(defn ^:export toclj
   "Convert js object to cljs equivalent"
   [x]
   (js->clj x :keywordize-keys true))
 
-(defn tojs
+(defn ^:export tojs
   "Convert cljs object to js equivalent"
   [x]
   (clj->js x))
 
-(defn cljread
+(defn ^:export cljread
   "Pass a string through the cljs reader and return the result"
   [x]
   (read-string x))

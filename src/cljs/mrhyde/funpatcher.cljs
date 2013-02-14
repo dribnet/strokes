@@ -80,6 +80,7 @@
           ; (.log js/console (str "patched: " (type (nth nargs 0))))
           (this-as ct (.apply orig-fn ct (apply array nargs))))))))
 
+
 ; WARNING: THIS HAS BEEN DEEMED A BAD IDEA (though it did work once)
 (defn patch-tostring-sequential-isarray [o field-name]
   ; (.log js/console (str "installing " o "," field-name))

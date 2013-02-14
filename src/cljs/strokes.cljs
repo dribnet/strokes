@@ -19,7 +19,7 @@
 (defn fetch-edn [url callback]
   (-> d3 (.xhr url "application/octet-stream" callback) (.response edn-parser-callback)))
 
-(defn bootstrap [& opts]
+(defn ^:export bootstrap [& opts]
   ; patch all seqs to also be read-only arrays for javascript interop
   (patch-known-vector-types)
   ; (patch-known-sequential-types)

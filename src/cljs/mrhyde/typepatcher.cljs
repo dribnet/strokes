@@ -28,10 +28,22 @@
       (aset reusable-descriptor "set" setfn)
       (.defineProperty js/Object obj nam reusable-descriptor))))))
 
+; generate js-getset-prop fn with closure around stored data
+(def install-js-hidden-getset-prop ((fn []
+  (let [reusable-descriptor (js-obj)]
+    (aset reusable-descriptor "configurable" false)
+    (aset reusable-descriptor "enumerable" false)
+    (fn internal-js-getset-prop [obj nam getfn setfn]
+      (aset reusable-descriptor "get" getfn)
+      (aset reusable-descriptor "set" setfn)
+      (.defineProperty js/Object obj nam reusable-descriptor))))))
+
 (def hyde-cache-key   "$cljs$mrhyde$cache")
 (def hyde-access-key  "$cljs$mrhyde$acccess")
 (def hyde-keylist-key "$cljs$mrhyde$keylist")
 (def hyde-keyset-key  "$cljs$mrhyde$keyset")
+(def cljs-partition-key  "cljs$lang$protocol_mask$partition0$")
+(def hyde-parition-key (str "$cljs$mrhyde$" cljs-partition-key))
 
 (defn hyde-array-ensure-cached [h]
   (if-not (goog.object.containsKey h hyde-cache-key)
@@ -310,7 +322,7 @@
 
 ; Add functionality to cljs seq prototype to make it more like a js array
 (defn patch-prototype-as-map [p o]
-  ; mark this prototype as a 'hyde array'
+  ; mark this prototype as a 'hyde object'
   (aset p hyde-proto-object-marker true))
 
 (defn add-hyde-protocol-to-seq [s]
@@ -468,7 +480,34 @@
     (if (= (first t) (aget cljs.core (second t)))
       (patch-map-type t))))
 
+; on any object, someone somewhere is getting the parition key
+(defn get-partition-key []
+  (this-as t
+    (aget t hyde-parition-key)))
 
+(defn set-partition-key [k]
+  (this-as t
+    (aset t hyde-parition-key k)
+    (aset js/window "side" "effect")
+    (if (= 16123663 k)
+      (.log js/console "matches"))
+    (.log js/console k)
+    (.log js/console t)
+      ; )
+    ; (when (map? t)
+    ;   (.log js/console (str "map: " k)))
+    ; (when (not (zero? (unsafe-bit-and k 1024)))
+    ;   (.log js/console (str "map: " k))))
+))
+
+(defn patch-obj-spy-on-partition []
+  (.log js/console set-partition-key)
+  ; (.__defineGetter__  (-> cljs.core.PersistentHashMap .-prototype) cljs-partition-key get-partition-key)
+  ; (.__defineSetter__  (-> cljs.core.PersistentHashMap .-prototype) cljs-partition-key set-partition-key)
+
+  (install-js-hidden-getset-prop 
+    (-> cljs.core.PersistentHashMap .-prototype) cljs-partition-key get-partition-key set-partition-key)
+)
 
 ; (defn get-member-name [o m]
 ;   (or (first (filter #(= (aget o %) m) (.keys js/Object o)))
