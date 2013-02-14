@@ -407,14 +407,14 @@
 
 (defn patch-sequential-type [t]
   (if (hyde-array? (aget t "prototype"))
-    (dp (str "already a hyde-array: " t))
+    nil ;(dp (str "already a hyde-array: " t))
     (do
      (patch-prototype-as-array (aget t "prototype") t false)
      (add-hyde-protocol-to-seq t))))
 
 (defn patch-vector-type [t]
   (if (hyde-array? (aget t "prototype"))
-    (dp (str "already a hyde-array: " t))
+    nil ; (dp (str "already a hyde-array: " t))
     (do
      (patch-prototype-as-array (aget t "prototype") t true)
      (add-hyde-protocol-to-seq t))))

@@ -113,14 +113,14 @@
         (assert (= m r1))
         (assert (not= m r2))
 
-        ; will work because object returned unchanged
-        (assert (= 1 (aget r1 "one")))
-        (assert (goog.object.containsKey r1 "one"))
-        ; and is actually a cljs object
+        ; would work because of map to obj mapping
+        ; (assert (= 1 (aget r1 "one")))
+        ; (assert (goog.object.containsKey r1 "one"))
+        ; it is actually a cljs object
         (assert (satisfies? ILookup r1))
         (assert (= 1 (:one r1)))
 
-        ; will work because of map to obj mapping
+        ; will work because object returned unchanged
         (assert (= 1 (aget r2 "one")))
         (assert (goog.object.containsKey r2 "one"))
         ; and is actually now a js object

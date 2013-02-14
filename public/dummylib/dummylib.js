@@ -1,5 +1,5 @@
 // for mrhyde testing, we first setup a dummy javascript library
-DummyLib = {
+var DummyLib = {
   wrapArgs0and2: function(a,b,c) {
     return [a, b, c];
   },

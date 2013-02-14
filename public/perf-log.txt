@@ -1,3 +1,24 @@
+strokes-0.3.0-3
+NativeCreateArray x 38,824,680 ops/sec ±0.38% (96 runs sampled)
+NativeCreateObject x 40,669,802 ops/sec ±0.27% (93 runs sampled)
+PreHyde-createListObject x 153,418 ops/sec ±0.59% (98 runs sampled)
+PreHyde-createVectorObject x 20,328,375 ops/sec ±0.67% (97 runs sampled)
+PreHyde-createMapObject x 7,408,230 ops/sec ±0.76% (93 runs sampled)
+PreHyde-accessListObject x 5,973,639 ops/sec ±0.19% (98 runs sampled)
+PreHyde-accessVectorObject x 1,506,433 ops/sec ±1.05% (94 runs sampled)
+PreHyde-accessMapObject x 18,692,987 ops/sec ±0.20% (99 runs sampled)
+Now patching and running again...
+This time init took: 165 unit(s)
+PostHyde-createListObject x 15,510 ops/sec ±7.44% (73 runs sampled)
+PostHyde-createVectorObject x 13,805,909 ops/sec ±1.76% (87 runs sampled)
+PostHyde-createMapObject x 7,771 ops/sec ±2.86% (90 runs sampled)
+PostHyde-accessListObject x 3,810,333 ops/sec ±0.24% (99 runs sampled)
+PostHyde-accessVectorObject x 1,089,620 ops/sec ±0.43% (89 runs sampled)
+PostHyde-accessMapObject x 14,882,520 ops/sec ±2.93% (88 runs sampled)
+PostHyde-nativeAccessListObject x 962,346 ops/sec ±1.68% (91 runs sampled)
+PostHyde-nativeAccessVectorObject x 1,421,422 ops/sec ±0.33% (96 runs sampled)
+PostHyde-nativeAccessMapObject x 7,049,834 ops/sec ±2.08% (99 runs sampled)
+
 strokes-0.0.2
 NativeCreateArray x 43,564,312 ops/sec ±0.50% (94 runs sampled)
 NativeCreateObject x 45,615,221 ops/sec ±0.71% (96 runs sampled)

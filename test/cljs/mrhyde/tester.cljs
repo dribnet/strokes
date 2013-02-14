@@ -17,8 +17,10 @@
       return f.call();
     } catch (e) {
       if(e == \"fail hard\") {
+          // console.log(\"Hard fail: \" + f);
           throw e;
       } else {
+          // console.log(\"Hard exception: \" + f + \" :: \" + e);
           return e;
       }
     }

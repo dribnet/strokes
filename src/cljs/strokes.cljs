@@ -49,12 +49,13 @@
 )
 
 ; let's add a bunch of handy d3 *fields* here
-
-(def timer (.. d3 -timer))
-(def arc (.. d3 -svg -arc))
-(def polygon (.. d3 -geom -polygon))
-(def voronoi (.. d3 -geom -voronoi))
-(def category10 (.. d3 -scale -category10))
-(def category20 (.. d3 -scale -category20))
-(def category20b (.. d3 -scale -category20b))
-(def category20c (.. d3 -scale -category20c))
+(if d3 (do 
+  (def timer (.. d3 -timer))
+  (def arc (.. d3 -svg -arc))
+  (def polygon (.. d3 -geom -polygon))
+  (def voronoi (.. d3 -geom -voronoi))
+  (def category10 (.. d3 -scale -category10))
+  (def category20 (.. d3 -scale -category20))
+  (def category20b (.. d3 -scale -category20b))
+  (def category20c (.. d3 -scale -category20c))
+))

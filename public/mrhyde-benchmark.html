@@ -65,7 +65,7 @@
 
     <applet code="nano" archive="benchmark/nano.jar"></applet>
     <script src="benchmark/benchmark.js"></script>
-    <script type="text/javascript" src="out/strokes_test.js"></script>
+    <script type="text/javascript" src="out/strokes_test_simple.js"></script>
     <script>
 
     // lazy global;
@@ -159,7 +159,7 @@
       addOnCycleEnd(suite);
       suite.on('complete', function () {
         console.log("Result map: ");
-        console.log(String(mrhyde.toclj(results)));
+        console.log(String(mrhyde.mrhyde.toclj(results)));
       });
       suite.run({ 'async': true });
     }
