@@ -1,10 +1,7 @@
 (ns blade.examples.tutorial1
   (:require [blade :refer [L]]))
 
-
-; demo-guard - this is only needed because the demo is packaged with the library
-(if (and L (this-as ct (aget ct "blade_demo")) (= js/blade_demo "tutorial1")) (do
-
+(blade/bootstrap)
 
 (def tile-url
   "http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/997/256/{z}/{x}/{y}.png")
@@ -41,6 +38,3 @@
     (-> popup (.setLatLng latlng)
               (.setContent (str "You clicked the map at " latlng))
               (.openOn mappy))))))
-
-
-)) ; end demo-guard

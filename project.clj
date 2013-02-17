@@ -39,7 +39,7 @@
                                     :output-to "public/out/strokes_test_advanced.js"}}
 
 
-                      ; examples
+                      ; strokes examples
                        {:source-paths ["examples/strokes/clocky"]
                         :compiler  {:optimizations :simple
                                     :externs ["public/d3/d3-externs.js"]
@@ -60,6 +60,12 @@
                                     :externs ["public/d3/d3-externs.js"]
                                     :pretty-print false
                                     :output-to "public/out/strokes-circle-pack.js"}}
+
+                      ; blade examples
+                       {:source-paths ["examples/blade/tutorial1"]
+                        :compiler  {:optimizations :simple
+                                    :pretty-print true
+                                    :output-to "public/out/blade-tutorial1.js"}}
 
                        ; {:source-path "test/cljs"
                        ;  :compiler  {:optimizations :advanced
