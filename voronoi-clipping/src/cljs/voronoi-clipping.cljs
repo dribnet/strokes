@@ -1,6 +1,6 @@
 (ns voronoi-example
   (:require [clojure.string :refer [join]]
-            [strokes :refer [d3 voronoi category10]]))
+            [strokes :refer [d3 voronoi polygon category10]]))
 
 (strokes/bootstrap)
 
@@ -11,17 +11,16 @@
 (def points [[200 200]
              [760 300]])
 
-(def bounds (-> d3 .-geom (.polygon [
+(def bounds (polygon [
       [padding, padding]
       [padding, (- height padding)]
       [(- width padding), (- height padding)]
-      [(- width padding), padding]])))
+      [(- width padding), padding]]))
 
 (def colorfn (category10))
 
 (def svg (-> d3 (.select "body") (.append "svg")
-      (.attr "width" width)
-      (.attr "height" height)))
+      (.attr {:width width :height height})))
 
 (-> svg (.selectAll "path")
       (.data (map #(.clip bounds %) (voronoi points)))
@@ -35,5 +34,5 @@
     (.enter)
       (.append "circle")
       (.style "fill" #(colorfn %2))
-      (.attr "transform" #(str "translate(" % ")"))
-      (.attr "r" 5))
+      (.attr {:transform #(str "translate(" % ")")
+              :r 5}))
