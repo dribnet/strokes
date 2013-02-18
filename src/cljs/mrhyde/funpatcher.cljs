@@ -57,6 +57,19 @@
           ; (.log js/console (str "patched: " (type (nth nargs 0))))
           (this-as ct (.apply orig-fn ct nargs)))))))
 
+; patch a js function convert specified map args to js objects via clj->js
+(defn patch-args-map-to-obj [o field-name & fields]
+  (let [orig-fn (get-store-cur-js-fn o field-name)
+        arg-filter (if (empty? fields) #(identity true) (set fields))]
+    (aset o field-name
+      (fn [& args]
+        ; (.log js/console (str "patching: " (count args)))
+        (let [nargs (map (fn [c x] 
+                           (if (and (arg-filter c) (map? x)) (clj->js x) x))
+                         (range) args)]
+          ; (.log js/console (str "patched: " (type (nth nargs 0))))
+          (this-as ct (.apply orig-fn ct nargs)))))))
+
 ; patch a js function, converting specified seqs to js arrays
 (defn patch-args-seq-to-array [o field-name & fields]
   (let [orig-fn (get-store-cur-js-fn o field-name)
