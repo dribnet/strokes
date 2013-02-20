@@ -2,10 +2,11 @@
 
 Howdy, we're open for business. Please watch your step.
 
-This repo contains a small set of examples of how to implement a new or existing [d3 visualization](https://github.com/mbostock/d3/wiki/Gallery) with the clojurescript [strokes library](https://github.com/dribnet/strokes). 
+This repo contains a handful set of examples of how to implement a new or existing [d3 visualization](https://github.com/mbostock/d3/wiki/Gallery) with the clojurescript [strokes library](https://github.com/dribnet/strokes). 
 
 Current examples:
 
+ * [simple venn diagram](http://s.trokes.org/4994892)
  * [voronoi clipping](http://s.trokes.org/4760896)
  * [rotating voronoi](http://s.trokes.org/4744126)
  * [(your own example here?)](http://s.trokes.org/)
