@@ -1,5 +1,5 @@
-(defproject voronoi-example "0.0.1-SNAPSHOT"
-  :description "voronoi-example"
+(defproject venn-simple "0.0.1-SNAPSHOT"
+  :description "venn-simple"
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [net.drib/strokes "0.3.2"]]
   :min-lein-version "2.0.0"
@@ -8,6 +8,6 @@
   :plugins [[lein-cljsbuild "0.3.0"]]
 
   :cljsbuild {:builds [{:source-paths ["src/cljs"]
-                        :compiler { :output-to "public/out/voronoi-clipping.js"
+                        :compiler { :output-to "public/out/venn-simple.js"
                                     :pretty-print true 
                                     :optimizations :simple}}]})
