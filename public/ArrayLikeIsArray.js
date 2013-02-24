@@ -1,8 +1,8 @@
 /**
- * Provides isArray.js support for for libraries that verify an object
- * is an array via either Object.prototype.toString or Array.isArray.
+ * Provides ArrayLike support for for libraries that verify an object
+ * is an Array via either Object.prototype.toString or Array.isArray.
  *
- * For more information: https://github.com/dribnet/isArray.js
+ * For more information: https://github.com/dribnet/ArrayLike.js
  */
 
 // this method patches (or implements) Array.isArray
@@ -11,10 +11,10 @@
   var isArray = ar.isArray;
   // toString is only used if Array.isArray does not exist
   var toString = Object.prototype.toString;
-  ar["$originalToString"] = isArray;
+  // ar["$originalIsArray"] = isArray;
   ar.isArray = function(obj) {
     var that = this;
-    if(obj && obj.isArray === '[object Array]') {
+    if(obj && obj.__ArrayLike) {
       return true;
     }
     else if (isArray) {
@@ -31,10 +31,10 @@
 // and stores the original function so it can be restored
 (function(op) {
   var toString = op.toString;
-  op["$originalToString"] = toString;
+  // op["$originalToString"] = toString;
   op.toString = function(args) {
     var that = this;
-    if(that && that.isArray === '[object Array]') {
+    if(that && that.__ArrayLike) {
       return '[object Array]';
     }
     else {

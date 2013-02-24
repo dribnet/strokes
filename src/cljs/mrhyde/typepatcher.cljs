@@ -293,9 +293,9 @@
   (dotimes [n MAXLEN]
     (install-js-getset-prop p n (gen-seq-getter n) (gen-seq-setter n)))
 
-  ; add a marker that this object wants to be treated as an array by other libraries
-  ; (see https://github.com/dribnet/isArray.js)
-  (-> p .-isArray (set! "[object Array]"))
+  ; add a marker for js libraries that this object implements Array methods
+  ; (see https://github.com/dribnet/ArrayLike.js)
+  (-> p .-__ArrayLike (set! true))
 
   ; squirrel away native print
   (-> p .-toCljString (set! (-> p .-toString)))
