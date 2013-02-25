@@ -1,7 +1,7 @@
 (defproject general-update-pattern "0.0.1-SNAPSHOT"
   :description "general-update-pattern"
   :dependencies [[org.clojure/clojure "1.4.0"]
-                 [net.drib/strokes "0.3.3-SNAPSHOT"]]
+                 [net.drib/strokes "0.4.0"]]
   :min-lein-version "2.0.0"
   :source-paths ["src/gup1" "src/gup2" "src/gup3"]
 
