@@ -9,7 +9,7 @@
 (defn dp [& args]
   (.log js/console (apply str args)) )
 
-; generate get-set-prop fn  with closure around stored data
+; generate get-prop fn  with closure around stored data
 (def install-js-get-prop ((fn []
   (let [reusable-descriptor (js-obj)]
     (aset reusable-descriptor "configurable" true)
@@ -17,6 +17,23 @@
     (fn internal-js-getset-prop [obj nam getfn]
       (aset reusable-descriptor "get" getfn)
       (.defineProperty js/Object obj nam reusable-descriptor))))))
+
+; generate hidden get-prop fn  with closure around stored data
+(def install-js-hidden-get-prop ((fn []
+  (let [reusable-descriptor (js-obj)]
+    (aset reusable-descriptor "configurable" true)
+    (aset reusable-descriptor "enumerable" false)
+    (fn internal-js-getset-prop [obj nam getfn]
+      (aset reusable-descriptor "get" getfn)
+      (.defineProperty js/Object obj nam reusable-descriptor))))))
+
+; for object obj hide all props in seq (make non-enumerable)
+(def hide-js-props ((fn []
+  (let [reusable-descriptor (js-obj)]
+    (aset reusable-descriptor "enumerable" false)
+    (fn internal-js-getset-prop [obj s]
+      (doseq [nam s]
+        (.defineProperty js/Object obj nam reusable-descriptor)))))))
 
 ; generate js-getset-prop fn with closure around stored data
 (def install-js-getset-prop ((fn []
@@ -31,12 +48,17 @@
 ; generate js-getset-prop fn with closure around stored data
 (def install-js-hidden-getset-prop ((fn []
   (let [reusable-descriptor (js-obj)]
-    (aset reusable-descriptor "configurable" false)
+    (aset reusable-descriptor "configurable" true)
     (aset reusable-descriptor "enumerable" false)
     (fn internal-js-getset-prop [obj nam getfn setfn]
       (aset reusable-descriptor "get" getfn)
       (aset reusable-descriptor "set" setfn)
       (.defineProperty js/Object obj nam reusable-descriptor))))))
+
+; add a non-enumerable property
+(defn aset-hidden [o nam p]
+  (aset o nam p)
+  (hide-js-props o [nam]))
 
 (def hyde-cache-key   "$cljs$mrhyde$cache")
 (def hyde-access-key  "$cljs$mrhyde$acccess")
@@ -47,7 +69,7 @@
 
 (defn hyde-array-ensure-cached [h]
   (if-not (goog.object.containsKey h hyde-cache-key)
-    (aset h hyde-cache-key (apply array h))))
+    (aset-hidden h hyde-cache-key (apply array h))))
 
 ;;;; ARRAY METHODS
 
@@ -178,8 +200,8 @@
       ; ensure cache (transient) exists
       (if-not (goog.object.containsKey t hyde-cache-key)
         (let [c (transient t)]
-          (aset t hyde-access-key c)
-          (aset t hyde-cache-key c)))
+          (aset-hidden t hyde-access-key c)
+          (aset-hidden t hyde-cache-key c)))
       ; now use it
       (let [c (aget t hyde-cache-key)]
         (assoc! c k v)))))
@@ -187,17 +209,17 @@
 ; this can be called standalone or auto-run from cljs map initialzation
 (defn patch-map [m]
   ; (.log js/console (str "keys: " (keys m)))
-  (aset m hyde-access-key m)
+  (aset-hidden m hyde-access-key m)
+  ; hide all existing keys
+  (hide-js-props m (.keys js/Object m))
   (doseq [k (keys m)]
-    ; TODO: we need a better way to get prototype and could fallback to m
-    (let [p (.-__proto__ m)]
-      (if (and (keyword? k) (not (goog.object.containsKey m (name k))))
-        (install-js-getset-prop p (name k) (gen-map-getter k) (gen-map-setter k))
-  )))
+    (if (and (keyword? k) (not (goog.object.containsKey m (name k))))
+      (install-js-getset-prop m (name k) (gen-map-getter k) (gen-map-setter k)))
+  )
   (if (some keyword? (keys m)) (do
-    (aset m hyde-keylist-key false)
-    (aset m hyde-keyset-key false)
-    (aset m hyde-keylist-key (.keys js/Object m))))
+    (aset-hidden m hyde-keylist-key false)
+    (aset-hidden m hyde-keyset-key false)
+    (aset-hidden m hyde-keylist-key (.keys js/Object m))))
   m)
 
 (def have-patched-js-with-key-lookup (atom false))
@@ -261,6 +283,7 @@
                     (patch-map-object that)
                     that))]
 
+    ; (.log js/console (str "patching map type " s "+" orig-keys))
     ; set all properties of the new-fn based on the old one
     (doseq [k orig-keys]
       ;(.log js/console (str "remapping " k))
@@ -286,48 +309,51 @@
 ; Add functionality to cljs seq prototype to make it more like a js array
 (defn patch-prototype-as-array [p o is-vect]
   ; mark this prototype as a 'hyde array'
-  (aset p hyde-proto-array-marker true)
+  (aset-hidden p hyde-proto-array-marker true)
   ; array length call
-  (install-js-get-prop p "length" #(this-as t (count (take MAXLEN t))))
+  (install-js-hidden-get-prop p "length" #(this-as t (count (take MAXLEN t))))
   ; access by index... would be great if there were a smarter solution
   (dotimes [n MAXLEN]
-    (install-js-getset-prop p n (gen-seq-getter n) (gen-seq-setter n)))
+    (install-js-hidden-getset-prop p n (gen-seq-getter n) (gen-seq-setter n)))
 
   ; add a marker for js libraries that this object implements Array methods
   ; (see https://github.com/dribnet/ArrayLike.js)
-  (-> p .-__ArrayLike (set! true))
+  (aset-hidden p "__ArrayLike" true)
 
   ; squirrel away native print
-  (-> p .-toCljString (set! (-> p .-toString)))
+  (aset-hidden p "toCljString" (-> p .-toString))
+
   ; install mutator methods
-  (-> p .-pop (set! hyde-array-pop))
-  (-> p .-push (set! hyde-array-push))
-  (-> p .-reverse (set! hyde-array-reverse))
-  (-> p .-shift (set! hyde-array-shift))
-  (-> p .-sort (set! hyde-array-sort))
-  (-> p .-splice (set! hyde-array-splice))
-  (-> p .-unshift (set! hyde-array-unshift))
+  (aset-hidden p "pop" hyde-array-pop)
+  (aset-hidden p "push" hyde-array-push)
+  (aset-hidden p "reverse" hyde-array-reverse)
+  (aset-hidden p "shift" hyde-array-shift)
+  (aset-hidden p "sort" hyde-array-sort)
+  (aset-hidden p "splice" hyde-array-splice)
+  (aset-hidden p "unshift" hyde-array-unshift)
   ; install accessor methods
-  (-> p .-concat (set! hyde-array-concat))
-  (-> p .-join (set! hyde-array-pop))
-  (-> p .-slice (set! (if is-vect hyde-array-vector-slice hyde-array-slice)))
-  (-> p .-toSource (set! hyde-array-to-source))
-  (-> p .-toString (set! hyde-array-to-string))
-  (-> p .-indexOf (set! hyde-array-index-of))
-  (-> p .-lastIndexOf (set! hyde-array-last-index-of))
+  (aset-hidden p "concat" hyde-array-concat)
+  (aset-hidden p "join" hyde-array-pop)
+  (aset-hidden p "slice" (if is-vect hyde-array-vector-slice hyde-array-slice))
+  (aset-hidden p "toSource" hyde-array-to-source)
+  (aset-hidden p "toString" hyde-array-to-string)
+  (aset-hidden p "indexOf" hyde-array-index-of)
+  (aset-hidden p "lastIndexOf" hyde-array-last-index-of)
   ; install iteration methods
-  (-> p .-forEach (set! hyde-array-for-each))
-  (-> p .-every (set! hyde-array-every))
-  (-> p .-some (set! hyde-array-some))
-  (-> p .-filter (set! hyde-array-filter))
-  (-> p .-map (set! hyde-array-map))
-  (-> p .-reduce (set! hyde-array-reduce))
-  (-> p .-reduceRight (set! hyde-array-reduce-right)))
+  (aset-hidden p "forEach" hyde-array-for-each)
+  (aset-hidden p "every" hyde-array-every)
+  (aset-hidden p "some" hyde-array-some)
+  (aset-hidden p "filter" hyde-array-filter)
+  (aset-hidden p "map" hyde-array-map)
+  (aset-hidden p "reduce" hyde-array-reduce)
+  (aset-hidden p "reduceRight" hyde-array-reduce-right)
+)
 
 ; Add functionality to cljs seq prototype to make it more like a js array
 (defn patch-prototype-as-map [p o]
   ; mark this prototype as a 'hyde object'
-  (aset p hyde-proto-object-marker true))
+  (aset-hidden p hyde-proto-object-marker true)
+)
 
 (defn add-hyde-protocol-to-seq [s]
   (extend-type s
@@ -347,7 +373,7 @@
 (defn lazy-init-hyde-setset [m]
   (if (and (not (aget m hyde-keyset-key)) (aget m hyde-keylist-key))
     ; translate keylist into keymap
-    (aset m hyde-keyset-key (filtered-keylist-set (aget m hyde-keylist-key)))))
+    (aset-hidden m hyde-keyset-key (filtered-keylist-set (aget m hyde-keylist-key)))))
 
 (defn add-hyde-protocol-to-map [m]
   (extend-type m
@@ -369,13 +395,17 @@
         (if cache
           ; make a persistent copy, and then store right away again as new transient!
           (let [p (persistent! cache)]
-            (aset this hyde-cache-key (transient p))
+            (aset-hidden this hyde-cache-key (transient p))
             ; persistent object mashed up with new keys
             (merge p new-map))
           ; else
           (merge this new-map))
       ))
-  ))
+  )
+  ; hide all existing keys
+  (let [p (aget m "prototype")]
+    (hide-js-props p (.keys js/Object p)))
+)
 
 (defn from-cache-if-has-cache [x]
   (if (and (hyde? x) (has-cache? x))
@@ -491,7 +521,7 @@
 
 (defn set-partition-key [k]
   (this-as t
-    (aset t hyde-parition-key k)
+    (aset-hidden t hyde-parition-key k)
     (aset js/window "side" "effect")
     (if (= 16123663 k)
       (.log js/console "matches"))
