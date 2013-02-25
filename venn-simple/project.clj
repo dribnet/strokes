@@ -1,7 +1,7 @@
 (defproject venn-simple "0.0.1-SNAPSHOT"
   :description "venn-simple"
   :dependencies [[org.clojure/clojure "1.4.0"]
-                 [net.drib/strokes "0.3.2"]]
+                 [net.drib/strokes "0.3.3-SNAPSHOT"]]
   :min-lein-version "2.0.0"
   :source-paths ["src/clj" "src/cljs"]
 
