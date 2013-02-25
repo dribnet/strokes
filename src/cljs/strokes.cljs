@@ -28,8 +28,6 @@
   (patch-known-mappish-types)
 
   (if d3 (do
-    ; tell anyone that asks that clj sequential types are really arrays
-    ; (patch-tostring-hydearray-is-array)
     ; filter d3.selection.attr inputs: v might be keyword function
     (patch-args-keyword-to-fn (-> d3 .-selection .-prototype) "attr" 1)
     ; filter d3.selection.text inputs: argument mighe be a keyword function
@@ -39,24 +37,8 @@
     ; filter d3.layout.pack.value inputs: v might be keyword function
     (patch-args-keyword-to-fn (-> d3 .-layout .-pack .-prototype) "children" 0)
 
-    ; multi-value maps are awesome. unfortunately, code visits all keys.
-    ; let's support them anyway. see http://bl.ocks.org/mbostock/3305515
-    (patch-args-map-to-obj (-> d3 .-selection .-prototype) "attr" 0)
-    (patch-args-map-to-obj (-> d3 .-selection .-prototype) "style" 0)
-    (patch-args-map-to-obj (-> d3 .-selection .-prototype) "classed" 0)
-    (patch-args-map-to-obj (-> d3 .-selection .-prototype) "property" 0)
-    (patch-args-map-to-obj (-> d3 .-selection .-prototype) "on" 0)
-    (patch-args-map-to-obj (-> d3 .-transition .-prototype) "attr" 0)
-    (patch-args-map-to-obj (-> d3 .-transition .-prototype) "style" 0)
-
     ; have mouse return cljs data structure
     ; (patch-return-value-to-clj d3 "mouse")
-
-    ; todo: new patch here - something like:
-    ; (patch-return-value-recurse-from-cache-as-function (-> d3 .-layout) "pack")
-    ; (patch-args-recurse-from-cache (-> d3 .-selection .-prototype) "data")
-
-    ; (-> d3 .-edn (set! d3-edn)) 
   ))
 )
 
