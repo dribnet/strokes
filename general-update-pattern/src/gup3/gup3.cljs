@@ -17,29 +17,39 @@
 (defn update [data]
   ; DATA JOIN
   ; Join new data with old elements, if any.
-  (let [text (-> svg (.selectAll "text") (.data data))]
+  (let [text (-> svg (.selectAll "text") (.data data identity))]
     ; UPDATE
     ; Update old elements as needed
-    (-> text (.attr {:class "update"}))
+    (-> text (.attr {:class "update"})
+      (.transition)
+        (.duration 750)
+        (.attr {:x #(* %2 32)}))
 
     ; ENTER
     ; Create new elments as needed
     (-> text (.enter) (.append "text")
-      (.attr {:class "enter"
-              :x     #(* %2 32)
-              :dy    ".35em"}))
-
-    ; ENTER + UPDATE
-    ; Appending to the enter selection expands the update selection to include
-    ; entering elements; so, operations on the update selection after appending to
-    ; the enter selection will apply to both entering and updating nodes.
-    (-> text (.text identity))
+        (.attr {:class "enter"
+                :x     #(* %2 32)
+                :y     -60
+                :dy    ".35em"})
+        (.style {:fill-opacity 1e-6})
+        (.text identity)
+      (.transition)
+        (.duration 750)
+        (.attr {:y 0})
+        (.style {:fill-opacity 1}))
 
     ; EXIT
     ; Remove old elements as needed.
-    (-> text (.exit) (.remove))))
+    (-> text (.exit)
+        (.attr {:class "exit"})
+      (.transition)
+        (.duration 750)
+        (.attr {:y 60})
+        (.style {:fill-opacity 1e-6})
+        (.remove))))
 
-; The initial display - all letters
+; The initial display - all 26 letters
 (update alphabet)
 
 ; Grab a random sample of letters from the alphabet, in alphabetical order.
@@ -52,12 +62,3 @@
     update))
   ; 2 seconds between swaps
   2000)
-
-; (-> svg (.append "circle")
-;       (.attr {:cx 350 :cy 200 :r 200 :class "left"}))
-
-; (-> svg (.append "circle")
-;       (.attr {:cx 550 :cy 200 :r 200 :class "right"}))
-
-; (-> svg (.append "circle")
-;       (.attr {:cx 450 :cy 300 :r 200 :class "bottom"}))

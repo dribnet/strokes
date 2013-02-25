@@ -17,7 +17,7 @@
 (defn update [data]
   ; DATA JOIN
   ; Join new data with old elements, if any.
-  (let [text (-> svg (.selectAll "text") (.data data))]
+  (let [text (-> svg (.selectAll "text") (.data data identity))]
     ; UPDATE
     ; Update old elements as needed
     (-> text (.attr {:class "update"}))
@@ -26,14 +26,14 @@
     ; Create new elments as needed
     (-> text (.enter) (.append "text")
       (.attr {:class "enter"
-              :x     #(* %2 32)
-              :dy    ".35em"}))
+              :dy    ".35em"})
+      (.text identity))
 
     ; ENTER + UPDATE
     ; Appending to the enter selection expands the update selection to include
     ; entering elements; so, operations on the update selection after appending to
     ; the enter selection will apply to both entering and updating nodes.
-    (-> text (.text identity))
+    (-> text (.attr {:x #(* %2 32)}))
 
     ; EXIT
     ; Remove old elements as needed.
@@ -52,12 +52,3 @@
     update))
   ; 2 seconds between swaps
   2000)
-
-; (-> svg (.append "circle")
-;       (.attr {:cx 350 :cy 200 :r 200 :class "left"}))
-
-; (-> svg (.append "circle")
-;       (.attr {:cx 550 :cy 200 :r 200 :class "right"}))
-
-; (-> svg (.append "circle")
-;       (.attr {:cx 450 :cy 300 :r 200 :class "bottom"}))
