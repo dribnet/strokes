@@ -6,6 +6,7 @@ This repo contains a handful set of examples of how to implement a new or existi
 
 Current examples:
 
+ * [General update pattern tutorial](http://s.trokes.org/5027817) progressing to [key funcitons](http://s.trokes.org/5027818) and [transitions!](http://s.trokes.org/5027819)
  * [simple venn diagram](http://s.trokes.org/4994892)
  * [voronoi clipping](http://s.trokes.org/4760896)
  * [rotating voronoi](http://s.trokes.org/4744126)
