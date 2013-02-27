@@ -17,12 +17,31 @@
 (def path-fn (-> d3 .-geo .path (.projection proj-fn)))
 
 (def status-node (-> d3 (.select "#status")))
+(.focus (.getElementById js/document "input"))
+(def input-node (-> d3 (.select "#input")))
+
+(def zipdots-sel (atom nil))
+
+(defn update-selection [s]
+  (let [len (count s)]
+    (-> @zipdots-sel (.attr "class" (fn [d]
+      (let [zip (aget d "zip")
+            sub (.substr zip 0 len)]
+        (if (and (> len 0) (= s sub))
+          "selected"
+          "unselected")))))))
+
+(defn key-fn []
+  (if @zipdots-sel
+    (update-selection (-> input-node (.text)))))
+
+(-> input-node (.on "keyup" key-fn))
 
 (def svg (-> d3 (.select "#map") (.append "svg")
     (.attr {:width width
             :height height})))
 
-(defn render [maproot ziproot]
+(defn first-render [maproot ziproot]
   ; clear "loading" text
   (-> status-node (.remove))
 
@@ -32,52 +51,20 @@
       (.append "path")
       (.attr "d" path-fn))
 
-  ; (-> svg (.append "g") (.attr "id" "zipdots") (.selectAll "line")
-  ;     (.data ziproot)
-  ;   (.enter)
-  ;     (.append "line")
-  ;     (.attr {:x #(first  (proj-fn [(.-lon %) (.-lat %)]))
-  ;             :y #(second (proj-fn [(.-lon %) (.-lat %)]))
-  ;             :class "unselected"}))
+  (reset! zipdots-sel
+    (-> svg (.append "g") (.attr "id" "zipdots") (.selectAll "text")
+        (.data ziproot)
+      (.enter)
+        (.append "text")
+        (.text ".")
+        (.attr {:x #(first  (proj-fn [(.-lon %) (.-lat %)]))
+                :y #(second (proj-fn [(.-lon %) (.-lat %)]))
+                :class "unselected"}))))
 
-  ; (-> svg (.append "g") (.attr "id" "zipdots") (.selectAll "line")
-  ;     (.data ziproot)
-  ;   (.enter)
-  ;     (.append "line")
-  ;     (.each (fn [d i]
-  ;       (this-as t
-  ;         (let [[x y] (proj-fn [(.-lon d) (.-lat d)])]
-  ;           (-> d3 (.select t)
-  ;             (.attr 
-  ;               {:x1 x
-  ;                :y1 y
-  ;                :x2 (+ x 1)
-  ;                :y2 y
-  ;                :class "unselected"})))))))
-
-  (-> svg (.append "g") (.attr "id" "zipdots") (.selectAll "text")
-      (.data ziproot)
-    (.enter)
-      (.append "text")
-      (.text ".")
-      (.attr {:x #(first  (proj-fn [(.-lon %) (.-lat %)]))
-              :y #(second (proj-fn [(.-lon %) (.-lat %)]))
-              :class "unselected"}))
-
-  ; (-> svg (.append "g") (.attr "id" "zipdots") (.selectAll "rect")
-  ;     (.data ziproot)
-  ;   (.enter)
-  ;     (.append "rect")
-  ;     (.attr {:x #(first  (proj-fn [(.-lon %) (.-lat %)]))
-  ;             :y #(second (proj-fn [(.-lon %) (.-lat %)]))
-  ;             :width 1
-  ;             :height 1
-  ;             :class "unselected"}))
-  )
 
 (-> d3 (.json "us-states.geojson" (fn [error1, maproot]
   (-> d3 (.tsv "zips.tsv" (fn [error2, ziproot]
     (if-let [error (or error1 error2)]
       (-> status-node (.html (aget error "response")))
-        (render maproot ziproot)
+        (first-render maproot ziproot)
       )))))))

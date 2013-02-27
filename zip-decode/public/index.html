@@ -32,6 +32,10 @@ text {
   fill: #999a63;
   stroke: #999a63;
 }
+.selected {
+  fill: #cbcbcb;
+  stroke: #cbcbcb;
+}
 
 </style>
 
@@ -41,8 +45,9 @@ text {
     <!-- todo: put something cute here ... -->
     Loading...</div>
   <div id="map"></div>
-  <p style="font-size: 300%" contentEditable="true">
-  </p>
+<!-- <input id="input" type="text" style="font-size: 300%" tabindex="0">
+ -->
+<p id="input" style="font-size: 300%" tabindex="0" contentEditable="true"></p>
   </center>
 
 	<script type="text/javascript" src="d3/d3.js"></script>
