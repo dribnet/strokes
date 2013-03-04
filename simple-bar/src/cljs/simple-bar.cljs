@@ -12,15 +12,17 @@
 (def w (- 960 (m 1) (m 3)))
 (def h (- 500  (m 0) (m 2)))
 
-(def x (-> d3 .-scale (.linear)        ; data ↦ width
+; x is a fn: data ↦ width
+(def x (-> d3 .-scale (.linear)
   (.domain [0 (apply max data)])
   (.range [0 w])))
 
-(def y (-> d3 .-scale (.ordinal)       ; index ↦ y
+; y is a fn: index ↦ y
+(def y (-> d3 .-scale (.ordinal)
   (.domain (vec (range (count data))))
   (.rangeRoundBands [0 h] 0.2)))
 
-(def svg (-> d3 (.select "body") (.append "svg")
+(def svg (-> d3 (.select "#animated") (.append "svg")
     (.attr {:width  (+ w (m 1) (m 3))
             :height (+ h (m 0) (m 2))})
   (.append "g")
@@ -67,8 +69,8 @@
                       (.delay 250))]
           (-> t1 (.select "rect")
               (.attr "width" x)
-              (.style "fill" "indianred")
-              (.style "stroke-opactiy" 0))
+              (.style {:fill   "indianred"
+                       :stroke-opacity 0}))
           (-> t1 (.select "text")
               (.attr "x" x)
               (.style "fill" "white"))))))))
@@ -80,8 +82,8 @@
                 (.attr "transform" #(str "translate(" (* %2 60) ")")))]
     (-> t0 (.select "rect")
         (.attr "width" 60)
-        (.style "fill" "white")
-        (.style "stroke-opactiy" 1))
+        (.style {:fill   "white"
+                 :stroke-opacity 1}))
     (-> t0 (.select "text")
         (.attr "x" 60)
         (.style "fill" "black"))))
@@ -89,4 +91,34 @@
 ; initially click funciton is data-to-bar
 (cur-click-fn data-to-bar)
 
-;;; let's make a version without animation
+;;;;;;;;;; let's make a version without animation...
+
+(def svg2 (-> d3 (.select "#static") (.append "svg")
+    (.attr {:width  (+ w (m 1) (m 3))
+            :height (+ h (m 0) (m 2))})
+  (.append "g")
+    (.attr {:transform (str "translate(" (m 3) "," (m 0) ")")})))
+
+; Data ↦ Element
+(def bar2 (-> svg2 (.selectAll "g.bar")
+    (.data data)
+  (.enter) (.append "g")
+    (.attr {:class "bar"
+            :transform #(str "translate(0," (y %2) ")")})))
+
+; Data Attributes ↦ Element Attributes
+(-> bar2 (.append "rect")
+    (.attr {:width   #(x %)
+            :height  (.rangeBand y)})
+    (.style {:fill   "indianred"
+             :stroke-opacity 0}))
+
+; Data Attributes ↦ Element Attributes
+(-> bar2 (.append "text")
+    (.attr {:x  x
+            :y  (/ (.rangeBand y) 2)
+            :dx -6
+            :dy ".35em"
+            :text-anchor "end"})
+    (.style "fill" "white")
+    (.text identity))
