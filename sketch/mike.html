@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>D3 + Leaflet</title>
+<link rel="stylesheet" href="leaflet/leaflet.css" />
+<style>
+
+#map {
+  width: 960px;
+  height: 500px;
+}
+
+path {
+  fill: #000;
+  fill-opacity: .2;
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+path:hover {
+  fill: brown;
+  fill-opacity: .7;
+}
+
+</style>
+
+<header>
+  <aside>June 19, 2012</aside>
+  <a href="../" rel="author">Mike Bostock</a>
+</header>
+
+<h1>D3 + Leaflet</h1>
+
+<p id="map">
+
+<p><aside>Images © 2012 CloudMade, OpenStreetMap contributors, CC-BY-SA.</aside>
+
+<p>This is a quick demonstration of using <a href="http://d3js.org">D3</a> to render GeoJSON shapes in conjunction with <a href="http://leaflet.cloudmade.com/">Leaflet</a>. The implementation is straightforward, but Leaflet is regretfully missing <a href="http://leaflet.cloudmade.com/reference.html">documentation</a> and <a href="http://leaflet.cloudmade.com/examples.html">examples</a> for custom overlays, so hopefully this will help you get started. (Edit: the documentation has since been updated and there is now a helpful section titled “Implementing Custom Layers”.)
+
+<h2><a href="#init" name="init">#</a>Initializing the Map and SVG Overlay</h2>
+
+<p>We’ll start with a basic map using Cloudmade’s “Pale Dawn” tiles:
+
+<pre><code>var map = new L.Map("map", {
+      center: [37.8, -96.9],
+      zoom: 4
+    })
+    .addLayer(new L.TileLayer("http://{s}.tile.cloudmade.com/…/998/256/{z}/{x}/{y}.png"));</code></pre>
+
+<aside>Cloudmade tiles require an <a href="http://cloudmade.com/register">API key</a>. I’ve elided mine from the code snippet, so it won’t work if you simply copy-paste.</aside>
+
+<p>The map is placed inside a paragraph (<code>p</code>) element with the id “map”. An associated stylesheet specifies the dimensions:
+
+<pre><code class="css">#map {
+  width: 960px;
+  height: 500px;
+}</code></pre>
+
+<p>Next, we add an SVG element to Leaflet’s <i>overlay pane</i>. Leaflet automatically repositions the overlay pane when the map pans. Note that the SVG element is initialized with no width or height; the dimensions must be set dynamically because they change on zoom. More on that in a bit.
+
+<pre><code>var svg = d3.select(map.getPanes().overlayPane).append("svg"),
+    g = svg.append("g").attr("class", "leaflet-zoom-hide");</code></pre>
+
+<p>Inside the SVG, you’ll also need a G (group) element. This will be used to translate the SVG elements so that the top-left corner of the SVG, ⟨0,0⟩, corresponds to Leaflet’s layer origin. The <code>leaflet-zoom-hide</code> class is needed so that the overlay is hidden during Leaflet’s zoom animation; alternatively, you could disable the animation using the <code>zoomAnimation</code> option when constructing the map.
+
+<h2><a href="#project" name="project">#</a>Loading and Projecting GeoJson</h2>
+
+<p>Next, we load the GeoJSON file using <a href="https://github.com/mbostock/d3/wiki/Requests#wiki-d3_json">d3.json</a>:
+
+<pre><code>d3.json("us-states.json", function(collection) {
+  // code here
+});</code></pre>
+
+<p>The load is asynchronous, so the remaining code in this example is within the callback function. The passed <code>collection</code> is the contents of the <code>us-states.json</code> file: a single FeatureCollection with features for each of the 50 United States and Puerto Rico.
+
+<p>D3 and Leaflet use different APIs for rendering shapes and projecting points. Fortunately, it’s easy to adapt Leaflet’s API to fit D3 by implementing a custom projection. A <i>projection</i> is simply a function that takes a longitude and latitude as input and returns <i>x</i> and <i>y</i> pixel coordinates.
+
+<aside>D3 uses two-element arrays for both points and locations, whereas Leaflet uses typed <code>LatLng</code> and <code>Point</code> objects. This code adapts Leaflet’s <code>latLngToLayerPoint</code> method to accept two-element arrays.</aside>
+
+<pre><code>function project(x) {
+  var point = map.latLngToLayerPoint(new L.LatLng(x[1], x[0]));
+  return [point.x, point.y];
+}</code></pre>
+
+<p>Now that we have a projection, we can create a <a href="https://github.com/mbostock/d3/wiki/Geo-Paths#wiki-path">d3.geo.path</a> to convert GeoJSON to SVG:
+
+<pre><code>var path = d3.geo.path().projection(project);</code></pre>
+
+<p>We can also create path elements for each of the features using D3’s <a href="../join/">data join</a>:
+
+<pre><code>var feature = g.selectAll("path")
+    .data(collection.features)
+  .enter().append("path");</code></pre>
+
+<p>The path elements are initially empty; later, we’ll initialize the path data by setting the <code>d</code> attribute:
+
+<pre><code>feature.attr("d", path);</code></pre>
+
+<p>The <a href="https://github.com/mbostock/d3/wiki/Selections#wiki-attr">selection.attr</a> method computes the path data for each feature. The path elements are bound to the associated GeoJSON feature, so these features are fed to the path generator (a d3.geo.path), which calls our custom projection, which in turn uses Leaflet’s projection. Still following?
+
+<h2><a href="#fit" name="fit">#</a>Fitting SVG to a Layer</h2>
+
+<p>One additional wrench: how big should the SVG element be? Unfortunately, it can’t simply be 960×500 because the user can zoom and pan; the size depends on the displayed geographic features and the current zoom level!
+
+<p>It can be difficult to compute a bounding box with arbitrary projections, but fortunately Leaflet uses a cylindrical projection by default (spherical Mercator), letting us compute the <a href="https://github.com/mbostock/d3/wiki/Geo-Paths#wiki-bounds">bounding box</a> of our features and use our projection to convert the longitude and latitude to pixels:
+
+<pre><code>var bounds = d3.geo.bounds(collection),
+    bottomLeft = project(bounds[0]),
+    topRight = project(bounds[1]);</code></pre>
+
+<p>Now we can set the dimensions of the SVG with sufficient padding to display features above or to the left of the origin. The layer origin is arbitrary, so sometimes you need to draw above and to the left of the origin; without this extra padding, the top-left corner would be clipped and some features would be invisible.
+
+<pre><code>svg .attr("width", topRight[0] - bottomLeft[0])
+    .attr("height", bottomLeft[1] - topRight[1])
+    .style("margin-left", bottomLeft[0] + "px")
+    .style("margin-top", topRight[1] + "px");
+
+g   .attr("transform", "translate(" + -bottomLeft[0] + "," + -topRight[1] + ")");</code></pre>
+
+<p>Lastly, the above code is hooked up to Leaflet’s <code>viewreset</code> event, so that the SVG can be repositioned and rerendered whenever the map zooms. <a href="https://github.com/mbostock/bost.ocks.org/blob/gh-pages/mike/leaflet/index.html#L131-171">View-source</a> to see the full code.
+
+<p>Happy mapping!
+
+<footer>
+  <aside>June 19, 2012</aside>
+  <a href="../" rel="author">Mike Bostock</a>
+</footer>
+
+<!-- <script src="http://d3js.org/d3.v2.min.js?2.9.3"></script> -->
+<script src="d3/d3.js"></script>
+<script src="leaflet/leaflet-src.js"></script>
+<script>
+
+var map = new L.Map("map", {
+      center: [37.8, -96.9],
+      zoom: 4
+    })
+    .addLayer(new L.TileLayer("http://{s}.tile.cloudmade.com/1a1b06b230af4efdbb989ea99e9841af/998/256/{z}/{x}/{y}.png"));
+
+var svg = d3.select(map.getPanes().overlayPane).append("svg"),
+    g = svg.append("g").attr("class", "leaflet-zoom-hide");
+
+d3.json("us-states.json", function(collection) {
+  var bounds = d3.geo.bounds(collection),
+      path = d3.geo.path().projection(project);
+
+  var feature = g.selectAll("path")
+      .data(collection.features)
+    .enter().append("path");
+
+  map.on("viewreset", reset);
+  reset();
+
+  // Reposition the SVG to cover the features.
+  function reset() {
+    var bottomLeft = project(bounds[0]),
+        topRight = project(bounds[1]);
+
+    svg .attr("width", topRight[0] - bottomLeft[0])
+        .attr("height", bottomLeft[1] - topRight[1])
+        .style("margin-left", bottomLeft[0] + "px")
+        .style("margin-top", topRight[1] + "px");
+
+    g   .attr("transform", "translate(" + -bottomLeft[0] + "," + -topRight[1] + ")");
+
+    feature.attr("d", path);
+  }
+
+  // Use Leaflet to implement a D3 geographic projection.
+  function project(x) {
+    var point = map.latLngToLayerPoint(new L.LatLng(x[1], x[0]));
+    return [point.x, point.y];
+  }
+});
+
+</script>

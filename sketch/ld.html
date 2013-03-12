@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>D3 + Leaflet</title>
+<link rel="stylesheet" href="leaflet/leaflet.css" />
+<style>
+
+html,body { height: 100%; margin: 0px; padding: 0px; }
+#full { background: #0f0; height: 100% }
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+path {
+  fill: #000;
+  fill-opacity: .2;
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+path:hover {
+  fill: brown;
+  fill-opacity: .7;
+}
+
+.la-circ {
+  fill: brown;
+  fill-opacity: .5;
+
+  -webkit-transition-property: -webkit-transform, all;
+  -webkit-transition-duration: 100ms;
+
+  /*-webkit-transition: all 1s ease-in-out;*/
+
+/*  -webkit-transition-property: r;
+  -webkit-transition-duration: 1.0s;
+*//*  -o-transition-property: width, background-color;
+  -o-transition-duration: 1s, 1s;
+  -moz-transition-property: width, background-color;
+  -moz-transition-duration: 1s, 1s;
+  -ms-transition-property: width, background-color;
+  -ms-transition-duration: 1s, 1s;
+*/
+}
+
+</style>
+
+<div id="map">
+
+<script src="d3/d3.js"></script>
+<script src="leaflet/leaflet-src.js"></script>
+<script src="ld.js"></script>
