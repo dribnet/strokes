@@ -15,36 +15,49 @@
 (def hide-keys-indices (zipmap hide-keys (range)))
 
 ; returns decision from keys
-; {:all-off true/false, turn-on: [1,2,...]}
+; {:color-on: [1,2,...]
+;  :color-off: [1,2,...]
+;  :visible: [1,2,...]
+;  :invisible: [1,2,...]}
 (defn key-decision [code shift]
   ; where is clojure.core.char? oh well, sorry.
   (cond 
     (< 48 code 59)
-      {:all-off shift :turn-on [(- code 48)]}
+      (if shift
+        ; shift+number = hide
+        {:invisible [(- code 48)]}
+        ; number = show
+        {:visible [(- code 48)]})
     (contains? hide-keys-indices code)
       (if shift
-        {:visible [(get hide-keys-indices code)]}
-        {:invisible [(get hide-keys-indices code)]})
+        ; shift+letter = highlight off
+        {:color-on [(get hide-keys-indices code)]}
+        ; letter = highlight
+        {:color-off [(get hide-keys-indices code)]})
     :else (case [code shift]
       ; map '0' to '10'
-      [48 false]  {:all-off false :turn-on [10]}
-      [48 true]   {:all-off true  :turn-on [10]}
-      [192 true]  {:all-off true}
-      [192 false] {:all-off false :turn-on v10 :visible v10}
+      [48 false]  {:visible [10]}
+      [48 true]   {:invisible [10]}
+      ; ` key hides or shows everything
+      [192 true]  {:invisible v10}
+      [192 false] {:visible v10}
+      ; A key highlights or unhighlights everything
+      [65 true]  {:color-on v10}
+      [65 false] {:color-off v10}
       (do 
-        ; -> debug show unknown keys... (.log js/console code) 
+        ; -> debug show unknown keys... 
+        (.log js/console code) 
         nil))))
 
 (-> d3 (.select "body") (.on "keyup" (fn [e]
   (when-let [d (key-decision (-> d3 .-event .-keyCode)
       (-> d3 .-event .-shiftKey))]
-    (if (:all-off d)
-      (-> d3 (.selectAll all-classes)
-        (.classed "highlight" false)
-        (.classed "invisible" false)))
-    (doseq [n (:turn-on d)]
+    (doseq [n (:color-on d)]
       (-> d3 (.selectAll (str ".high" n))
         (.classed "highlight" true))) 
+    (doseq [n (:color-off d)]
+      (-> d3 (.selectAll (str ".high" n))
+        (.classed "highlight" false))) 
     (doseq [n (:invisible d)]
       (-> d3 (.selectAll (str ".high" n))
         (.classed "invisible" true))) 
