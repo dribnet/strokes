@@ -1,4 +1,4 @@
-(ns venn-simple
+(ns highlighter
   (:require [strokes :refer [d3]]
             [clojure.string :refer [join]]))
 
@@ -45,8 +45,7 @@
       [65 true]  {:color-on v10}
       [65 false] {:color-off v10}
       (do 
-        ; -> debug show unknown keys... 
-        (.log js/console code) 
+        ; -> debug show unknown keys... (.log js/console code) 
         nil))))
 
 (-> d3 (.select "body") (.on "keyup" (fn [e]
