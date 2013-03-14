@@ -1,5 +1,4 @@
 [
-  [ {:name "title" :pos [0 0] :scale 1.0}]
   [ {:name "A" :pos [-411 -296] :scale 0.1}
     {:name "C" :pos [ 261 -146] :scale 0.4} ]
   [ {:name "B" :pos [-411 -296] :scale 0.1}

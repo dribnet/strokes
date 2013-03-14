@@ -6,25 +6,26 @@
 
 (def span (-> d3 (.select "#hostspan")))
 
-(def titledata [{:name "title" :pos [0 0] :scale 0.6}])
+(def titledata [{:name "title" :pos [0 0] :scale 1.0}])
 
 (def pagedata (atom [titledata]))
 
 ; destructuring the parameter directly confuses d3's apply somehow
-(defn pos-scale-to-str [d]
+(defn pos-scale-to-str [d i]
   (let [{:keys [pos scale] :or {pos [0 0] scale 1.0}} d]
     ; (.log js/console (str "pos and scale: " pos "," scale))
-    (str "-webkit-transform: translate3d(" (first pos) "px," (second pos) "px,0px) scale(" scale ");")))
+    (str "-webkit-transform: translate3d(" (first pos) "px," 
+      (second pos) "px,0px) scale(" scale ");z-index:" i ";")))
 
 (def curpage (atom 0))
 (def stage-exit 2000)
 (def curflow (atom stage-exit))
 
-(defn pos-scale-to-str-birth [d]
-  (pos-scale-to-str (update-in d [:pos 0] + @curflow)))
+(defn pos-scale-to-str-birth [d i]
+  (pos-scale-to-str (update-in d [:pos 0] + @curflow) i))
 
-(defn pos-scale-to-str-death [d]
-  (pos-scale-to-str (update-in d [:pos 0] - @curflow)))
+(defn pos-scale-to-str-death [d i]
+  (pos-scale-to-str (update-in d [:pos 0] - @curflow) i))
 
 (defn update [data]
   ; DATA JOIN
@@ -70,11 +71,12 @@
   ;(.log js/console (str "page is " @curpage))
 
 (defn key-fn []
-  (case (-> d3 .-event .-keyCode)
-    37 (step -1)
-    39 (step 1)
-    :else))
-    ;(.log js/console (str "The key is " ))
+  (let [key (-> d3 .-event .-keyCode)]
+    (cond
+      (or (= key 188) (= key 37)) (step -1) ; key , or <-
+      (or (= key 190) (= key 39)) (step 1)  ; key . or ->
+      :else
+        (.log js/console (str "The key is " key)))))
 
 (-> d3 (.select "body") (.on "keyup" key-fn))
 
