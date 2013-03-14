@@ -1,19 +1,10 @@
 (ns b3
-  (:require [strokes :refer [d3]]))
+  (:require [clojure.string]
+            [strokes :refer [d3]]))
 
 (strokes/bootstrap)
 
 (def span (-> d3 (.select "#hostspan")))
-
-(def curpagedata [
-  [ {:name "A" :pos [-411 -296] :scale 0.1}
-    {:name "C" :pos [ 261 -146] :scale 0.4} ]
-  [ {:name "B" :pos [-411 -296] :scale 0.1}
-    {:name "C" :pos [-261 -146] :scale 0.3}
-    {:name "A" :pos [ 261 -146] :scale 0.4} ]
-  [ {:name "C" :pos [-411 -296] :scale 0.1}
-    {:name "B" :pos [ 261 -146] :scale 0.4} ]
-])
 
 (def titledata [{:name "title" :pos [0 0] :scale 0.6}])
 
@@ -21,7 +12,8 @@
 
 ; destructuring the parameter directly confuses d3's apply somehow
 (defn pos-scale-to-str [d]
-  (let [{:keys [pos scale]} d]
+  (let [{:keys [pos scale] :or {pos [0 0] scale 1.0}} d]
+    ; (.log js/console (str "pos and scale: " pos "," scale))
     (str "-webkit-transform: translate3d(" (first pos) "px," (second pos) "px,0px) scale(" scale ");")))
 
 (def curpage (atom 0))
@@ -73,6 +65,7 @@
   (if (> n 0) (reset! curflow stage-exit))
   (if (< n 0) (reset! curflow (- 0 stage-exit)))
   (swap! curpage #(mod (+ % n) (count @pagedata)))
+  (-> js/window .-location .-hash (set! (str @curpage)))
   (update (nth @pagedata @curpage)))
   ;(.log js/console (str "page is " @curpage))
 
@@ -92,5 +85,8 @@
     (.log js/console (str "error: " error))
     (do 
       (swap! pagedata concat root)
-      (step 1)))))
+      (let [pageid (clojure.string/replace (-> js/window .-location .-hash) "#" "")]
+        (if pageid 
+          (step (int pageid))
+          (step 1)))))))
 
