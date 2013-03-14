@@ -6,55 +6,79 @@
 (def span (-> d3 (.select "#hostspan")))
 
 (def pagedata [
-  {:name "A" :pos [-411 -296] :scale 0.1}
-  {:name "B" :pos [-261 -146] :scale 0.3}
-  {:name "C" :pos [ 261 -146] :scale 0.4}
+  [ {:name "A" :pos [-411 -296] :scale 0.1}
+    {:name "C" :pos [ 261 -146] :scale 0.4} ]
+  [ {:name "B" :pos [-411 -296] :scale 0.1}
+    {:name "C" :pos [-261 -146] :scale 0.3}
+    {:name "A" :pos [ 261 -146] :scale 0.4} ]
+  [ {:name "C" :pos [-411 -296] :scale 0.1}
+    {:name "B" :pos [ 261 -146] :scale 0.4} ]
 ])
-
-(def fakedata ["A" "B" "C"])
 
 ; destructuring the parameter directly confuses d3's apply somehow
 (defn pos-scale-to-str [d]
   (let [{:keys [pos scale]} d]
     (str "-webkit-transform: translate3d(" (first pos) "px," (second pos) "px,0px) scale(" scale ");")))
 
-(let [pages (-> span (.selectAll "iframe") (.data pagedata #(:name %)))]
-  ; UPDATE
-  ; Update old elements as needed
-  ; (-> text (.attr {:style "update"}))
+(def curpage (atom 0))
+(def stage-exit 2000)
+(def curflow (atom stage-exit))
 
-  ; ENTER
-  ; Create new elments as needed
-  (-> pages (.enter) (.append "iframe")
-    (.attr {:id #(:name %)
-            :width 1024
-            :height 968
-            :src #(str (:name %) ".html")
-            :style pos-scale-to-str})))
+(defn pos-scale-to-str-birth [d]
+  (pos-scale-to-str (update-in d [:pos 0] + @curflow)))
 
-  ; ENTER + UPDATE
-  ; Appending to the enter selection expands the update selection to include
-  ; entering elements; so, operations on the update selection after appending to
-  ; the enter selection will apply to both entering and updating nodes.
-  ; (-> text (.text identity))
+(defn pos-scale-to-str-death [d]
+  (pos-scale-to-str (update-in d [:pos 0] - @curflow)))
 
-  ; EXIT
-  ; Remove old elements as needed.
-  ; (-> text (.exit) (.remove)))
+(defn update [data]
+  ; DATA JOIN
+  ; Join new data with old elements, if any.
+  (let [pages (-> span (.selectAll "iframe") (.data data #(:name %)))]
+    ; UPDATE
+    ; Update old elements as needed
+    (-> pages
+      (.attr {:id #(:name %)
+              :width 1024
+              :height 968
+              :src #(str (:name %) ".html")})
+      (.transition)
+        (.duration 750)
+        (.attr {:style pos-scale-to-str}))
 
+    ; ENTER
+    ; Create new elments as needed
+    (-> pages (.enter) (.append "iframe")
+      (.attr {:id #(:name %)
+              :width 1024
+              :height 968
+              :src #(str (:name %) ".html")
+              :style pos-scale-to-str-birth})
+      (.transition)
+        (.duration 750)
+        (.attr {:style pos-scale-to-str}))
 
+    ; EXIT
+    ; Remove old elements as needed.
+    (-> pages (.exit)
+      (.transition)
+        (.duration 750)
+        (.attr {:style pos-scale-to-str-death})
+        (.remove))))
 
-; (-> span (.append "iframe")
-;   (.attr {:id "A"
-;           :width 1024
-;           :height 968
-;           :src "A.html"
-;           :style "-webkit-transform: translate3d(-411px,-296px,0px) scale(0.1);"}))
+(defn step [n]
+  (if (> n 0) (reset! curflow stage-exit))
+  (if (< n 0) (reset! curflow (- 0 stage-exit)))
+  (swap! curpage #(mod (+ % n) (count pagedata)))
+  (update (nth pagedata @curpage)))
+  ;(.log js/console (str "page is " @curpage))
 
-; (-> span (.append "iframe")
-;   (.attr {:id "B"
-;           :width 1024
-;           :height 968
-;           :src "B.html"
-;           :style "-webkit-transform: translate3d(-261px,-146px,0px) scale(0.3);"}))
+(defn key-fn []
+  (case (-> d3 .-event .-keyCode)
+    37 (step -1)
+    39 (step 1)
+    :else))
+    ;(.log js/console (str "The key is " ))
 
+(-> d3 (.select "body") (.on "keyup" key-fn))
+
+(update (nth pagedata @curpage))
