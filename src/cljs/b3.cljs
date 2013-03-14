@@ -5,7 +5,7 @@
 
 (def span (-> d3 (.select "#hostspan")))
 
-(def pagedata [
+(def curpagedata [
   [ {:name "A" :pos [-411 -296] :scale 0.1}
     {:name "C" :pos [ 261 -146] :scale 0.4} ]
   [ {:name "B" :pos [-411 -296] :scale 0.1}
@@ -14,6 +14,10 @@
   [ {:name "C" :pos [-411 -296] :scale 0.1}
     {:name "B" :pos [ 261 -146] :scale 0.4} ]
 ])
+
+(def titledata [{:name "title" :pos [0 0] :scale 0.6}])
+
+(def pagedata (atom [titledata]))
 
 ; destructuring the parameter directly confuses d3's apply somehow
 (defn pos-scale-to-str [d]
@@ -68,8 +72,8 @@
 (defn step [n]
   (if (> n 0) (reset! curflow stage-exit))
   (if (< n 0) (reset! curflow (- 0 stage-exit)))
-  (swap! curpage #(mod (+ % n) (count pagedata)))
-  (update (nth pagedata @curpage)))
+  (swap! curpage #(mod (+ % n) (count @pagedata)))
+  (update (nth @pagedata @curpage)))
   ;(.log js/console (str "page is " @curpage))
 
 (defn key-fn []
@@ -81,4 +85,12 @@
 
 (-> d3 (.select "body") (.on "keyup" key-fn))
 
-(update (nth pagedata @curpage))
+(update titledata)
+
+(strokes/fetch-edn "slides.edn" (fn [error, root]
+  (if-not (or (zero? error) (nil? error))
+    (.log js/console (str "error: " error))
+    (do 
+      (swap! pagedata concat root)
+      (step 1)))))
+
