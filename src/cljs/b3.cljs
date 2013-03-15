@@ -75,8 +75,9 @@
     (cond
       (or (= key 188) (= key 37)) (step -1) ; key , or <-
       (or (= key 190) (= key 39)) (step 1)  ; key . or ->
-      :else
-        (.log js/console (str "The key is " key)))))
+      )))
+      ; :else
+      ;   (.log js/console (str "The key is " key)))))
 
 (-> d3 (.select "body") (.on "keyup" key-fn))
 
