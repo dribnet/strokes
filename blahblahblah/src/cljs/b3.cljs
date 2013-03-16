@@ -80,7 +80,7 @@
 
 (update titledata)
 
-(strokes/fetch-edn "slides.edn" (fn [error, root]
+(strokes/fetch-edn (str "slides.edn?" timestr) (fn [error, root]
   (if-not (or (zero? error) (nil? error))
     (.log js/console (str "error: " error))
     (do 
