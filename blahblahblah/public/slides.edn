@@ -1,0 +1,9 @@
+[
+  [ {:name "A" :pos [-411 -296] :scale 0.1}
+    {:name "C" :pos [ 261 -146] :scale 0.4} ]
+  [ {:name "B" :pos [-411 -296] :scale 0.1}
+    {:name "C" :pos [-261 -146] :scale 0.3}
+    {:name "A" :pos [ 261 -146] :scale 0.4} ]
+  [ {:name "C" :pos [-411 -296] :scale 0.1}
+    {:name "B" :pos [ 261 -146] :scale 0.4} ]
+]
