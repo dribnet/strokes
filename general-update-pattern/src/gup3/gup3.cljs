@@ -54,9 +54,9 @@
 
 ; Grab a random sample of letters from the alphabet, in alphabetical order.
 (.setInterval js/window (fn []
-  (-> alphabet
+  (->> alphabet
     shuffle
-    (subvec (rand-int 26))
+    (take (rand-int 26))
     sort
     vec
     update))
