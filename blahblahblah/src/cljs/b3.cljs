@@ -20,6 +20,7 @@
 (def curpage (atom 0))
 (def stage-exit 2000)
 (def curflow (atom stage-exit))
+(def timestr (str (.now js/Date)))
 
 (defn pos-scale-to-str-birth [d i]
   (pos-scale-to-str (update-in d [:pos 0] + @curflow) i))
@@ -34,10 +35,6 @@
     ; UPDATE
     ; Update old elements as needed
     (-> pages
-      (.attr {:id #(:name %)
-              :width 1024
-              :height 968
-              :src #(str (:name %) ".html")})
       (.transition)
         (.duration 750)
         (.attr {:style pos-scale-to-str}))
@@ -48,7 +45,7 @@
       (.attr {:id #(:name %)
               :width 1024
               :height 968
-              :src #(str (:name %) ".html")
+              :src #(str (:name %) ".html?" timestr)
               :style pos-scale-to-str-birth})
       (.transition)
         (.duration 750)
