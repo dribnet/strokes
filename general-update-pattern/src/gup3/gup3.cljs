@@ -7,9 +7,9 @@
 (def alphabet (vec "abcdefghijklmnopqrstuwvxyz"))
 
 (def width 960)
-(def height 500)
+(def height 160)
 
-(def svg (-> d3 (.select "body") (.append "svg")
+(def svg (-> d3 (.select "#gup3-node") (.append "svg")
       (.attr {:width width :height height})
     (.append "g")
       (.attr {:transform (str "translate(32," (/ height 2) ")")})))
