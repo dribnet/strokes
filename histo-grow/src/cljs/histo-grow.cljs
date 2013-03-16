@@ -21,7 +21,7 @@
 (def width  (- 960 (:left margin) (:right margin)))
 (def height (- 500 (:top margin)  (:bottom margin)))
 
-(def svg (-> d3 (.select "body") (.append "svg")
+(def svg (-> d3 (.select "#histo-node") (.append "svg")
       (.attr {:width  (+ width (:left margin) (:right margin))
               :height (+ height (:top margin) (:bottom margin))})
     (.append "g")
