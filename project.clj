@@ -23,20 +23,20 @@
                                     :externs ["public/d3/d3-externs.js" "public/dummylib/dummylib-externs.js"]
                                     :pretty-print true
                                     :print-input-delimiter true
-                                    :output-to "public/out/strokes_test_whitespace.js"}}
+                                    :output-to "public/out/mrhyde_test_whitespace.js"}}
                        {:source-paths ["src/cljs" "test/cljs"]
                         :compiler  {:optimizations :simple
                                     :externs ["public/d3/d3-externs.js" "public/dummylib/dummylib-externs.js"]
                                     :pretty-print true
                                     ;:output-dir ".cljsbuild/simple"
-                                    :output-to "public/out/strokes_test_simple.js"}}
+                                    :output-to "public/out/mrhyde_test_simple.js"}}
                        {:source-paths ["src/cljs" "test/cljs"]
                         :compiler  {:optimizations :advanced
                                     :externs ["public/d3/d3-externs.js" "public/dummylib/dummylib-externs.js"]
                                     :pretty-print true
                                     ; :output-dir ".cljsbuild/advanced"
                                     :print-input-delimiter true
-                                    :output-to "public/out/strokes_test_advanced.js"}}
+                                    :output-to "public/out/mrhyde_test_advanced.js"}}
 
 
                       ; strokes examples

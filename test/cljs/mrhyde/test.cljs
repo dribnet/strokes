@@ -1,11 +1,10 @@
 (ns mrhyde.test
     (:require [mrhyde.tester :refer [add-test run-all-tests]]
               [mrhyde.mrhyde :refer [hyde? has-cache? from-cache]]
+              [mrhyde.core :refer [bootstrap]]
               [mrhyde.typepatcher :refer [
                               recurse-from-hyde-cache
-                              patch-known-vector-types
-                              patch-known-sequential-types
-                              patch-known-mappish-types]]
+                              patch-known-sequential-types]]
               [mrhyde.funpatcher :refer [
                               patch-return-value-to-clj
                               patch-args-keyword-to-fn
@@ -17,12 +16,10 @@
 (defn init []
   ; patch the dummy library
   (if DummyLib (do
+    ; standard - patch vectors and maps
+    (bootstrap)
     ; patch all seqs to also be read-only arrays for javascript interop
-    (patch-known-vector-types)
     (patch-known-sequential-types)
-
-    ; patch maps to include key based accessors on js object
-    (patch-known-mappish-types)
 
     ;;; start patching library function calls
 
