@@ -24,7 +24,7 @@
   (.domain (apply array (range (count data))))
   (.rangeRoundBands (array 0 h) 0.2)))
 
-(def svg1 (-> d3 (.select "#static") (.append "svg")
+(def svg1 (-> d3 (.select "#strokesless") (.append "svg")
     (.attr (clj->js {:width  (+ w (m 1) (m 3))
             :height (+ h (m 0) (m 2))}))
   (.append "g")

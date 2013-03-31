@@ -1,7 +1,7 @@
 (defproject simple-bar "0.0.1-SNAPSHOT"
   :description "simple-bar"
   :dependencies [[org.clojure/clojure "1.4.0"]
-                 [net.drib/strokes "0.4.0"]]
+                 [net.drib/strokes "0.4.1"]]
   :min-lein-version "2.0.0"
   :source-paths ["src/clj" "src/cljs"]
 
