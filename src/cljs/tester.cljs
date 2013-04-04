@@ -37,6 +37,9 @@
   "<p>"
   (to-json jso2)
   "<p>"
-  (to-json jso3)))
+  (to-json jso3)
+  "<p>"
+  (to-json jso4)
+  ))
 
 (aset (-> js/document .-body) "innerHTML" body)
