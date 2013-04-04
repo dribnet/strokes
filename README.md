@@ -19,3 +19,9 @@ As a general pattern, it seems like a very wasteful way to make a javascript obj
 ```
 
 This would be a nice succinct syntax and would happen at compile-time. I've got this working for the cljs reader, but not the clj reader as I believe would be required to affect the source code directly (and is much trickier to implement).
+
+## Hacking
+
+    lein cljsbuild auto
+    open public/index.html
+    edit src/clj/reader/tags.clj & src/cljs/tester.cljs
