@@ -25,9 +25,9 @@
 (tags/js-test)
 
 ; // this is the goal... but it doesn't yet work
-; (def jso4 #js {:a 1
-;                :b 2
-;                :c {:nested "key/value"}})
+(def jso4 #js {:a 1
+               :b 2
+               :c {:nested "key/value"}})
 
 ; puts the objects on the page for all to see
 (def to-json (.-stringify js/JSON))

@@ -9,4 +9,4 @@
   :cljsbuild {:builds [{:source-paths ["src/cljs" "src/clj"]
                         :compiler { :output-to "public/out/tester.js"
                                     :pretty-print true 
-                                    :optimizations :simple}}]})
+                                    :optimizations :whitespace}}]})
