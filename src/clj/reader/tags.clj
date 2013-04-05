@@ -1,9 +1,8 @@
 (ns reader.tags
   (:require [cljs.tagged-literals :as t]))
 
-; identity is just here for testing
-; (not sure yet what I will replace it with)
-(alter-var-root #'t/*cljs-data-readers* assoc 'js
+; runtime translation via clj->js
+(alter-var-root #'t/*cljs-data-readers* assoc 'jsr
                 (fn [form]
                   (list 'cljs.core/clj->js form)))
 
