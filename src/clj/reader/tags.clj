@@ -7,5 +7,6 @@
                   (list 'cljs.core/clj->js form)))
 
 ; this macro is just here as a way of confirming dependencies
-(defmacro js-test []
-  `(.log js/console :js-test-macro-expansion))
+; (defmacro js-test []
+;   `(.log js/console :js-test-macro-expansion))
+
