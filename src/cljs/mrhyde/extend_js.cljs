@@ -1,7 +1,7 @@
 ;;Namespace that extends JavaScript's object and array to play nicely
 ;;with Clojure's semantics and act as transient collections.
 
-(ns util.extend-js
+(ns mrhyde.extend-js
   (:require [goog.object :as gobject])
   (:refer-clojure :exclude [assoc!
                             map filter remove]))
