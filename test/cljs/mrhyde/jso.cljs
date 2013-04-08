@@ -66,7 +66,7 @@
 
   (dp "by key:" (:b jso)) ;;=> 2
 
-  (dp "get-in: " (get-in jso [:c :nested])) ;;=> "key/value"
+  (dp "get-in: " (to-json (get-in jso [:c :nested]))) ;;=> "[null]"
 
   (let [{:keys [a b]} jso]
     (dp a " and " b)

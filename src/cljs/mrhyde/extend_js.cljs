@@ -1,5 +1,6 @@
 ;;Namespace that extends JavaScript's object and array to play nicely
 ;;with Clojure's semantics and act as transient collections.
+;;(this code by Kevin Lynagh / http://keminglabs.com)
 
 (ns mrhyde.extend-js
   (:require [goog.object :as gobject])
@@ -73,9 +74,6 @@
   [f coll]
   (cljs.core.map f coll))
 
-
-
-
 ;;Make JavaScript objects and arrays place nicely with ClojureScript by implementing lookup protocols and acting like Clojure's transient collections
 
 (defn strkey [x]
@@ -137,53 +135,3 @@
   (-assoc! [a k v]
     (aset a (strkey k) v)
     a))
-
-
-;;jQuery extensions taken from Chris's jayq.
-; (extend-type js/jQuery
-;   ISeqable
-;   (-seq [this] (when (.get this 0)
-;                  this))
-;   ISeq
-;   (-first [this] (.get this 0))
-;   (-rest [this] (if (> (count this) 1)
-;                   (.slice this 1)
-;                   (list)))
-
-;   ICounted
-;   (-count [this] (.-length this))
-
-;   IIndexed
-;   (-nth
-;     ([this n]
-;        (when (< n (count this))
-;          (.slice this n (inc n))))
-;     ([this n not-found]
-;        (if (< n (count this))
-;          (.slice this n (inc n))
-;          (if (undefined? not-found)
-;            nil
-;            not-found))))
-
-;   ISequential
-
-;   ILookup
-;   (-lookup
-;     ([this k]
-;        (or (.slice this k (inc k)) nil))
-;     ([this k not-found]
-;        (-nth this k not-found)))
-
-;   IReduce
-;   (-reduce
-;     ([this f]
-;        (ci-reduce this f))
-;     ([this f start]
-;        (ci-reduce this f start)))
-
-;   IFn
-;   (-invoke
-;     ([this k]
-;        (-lookup this k))
-;     ([this k not-found]
-;        (-lookup this k not-found))))
