@@ -28,6 +28,8 @@
     (patch-args-keyword-to-fn (-> d3 .-layout .-pack .-prototype) "value" 0)
     ; filter d3.layout.pack.value inputs: v might be keyword function
     (patch-args-keyword-to-fn (-> d3 .-layout .-pack .-prototype) "children" 0)
+    ; filter d3.selection.data inputs: keyfn might be keyword function
+    (patch-args-keyword-to-fn (-> d3 .-selection .-prototype) "data" 1)
   ))
 )
 
