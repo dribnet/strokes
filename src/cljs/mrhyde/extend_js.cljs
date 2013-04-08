@@ -119,6 +119,44 @@
         (map #(vector % (aget o %))
              (sort keys))))))
 
+(extend-type function
+  ILookup
+  (-lookup
+    ([o k]
+       (aget o (strkey k)))
+    ([o k not-found]
+       (let [s (strkey k)]
+         (if (goog.object.containsKey o s)
+           (aget o s)
+           not-found))))
+
+  IEmptyableCollection
+  (-empty [_]
+    (js-obj))
+
+  ITransientCollection
+  (-conj! [o [k v]]
+    (assoc! o k v))
+  (-persistent! [_]
+    (throw (js/Error. "JavaScript function isn't a real transient, don't try to make it persistent.")))
+
+  ITransientAssociative
+  (-assoc! [o k v]
+    (aset o (strkey k) v)
+    o)
+
+  ITransientMap
+  (-dissoc! [o key]
+    (gobject/remove o key)
+    o)
+
+  ISeqable
+  (-seq [o]
+    (let [keys (gobject/getKeys o)]
+      (when (pos? (alength keys))
+        (map #(vector % (aget o %))
+             (sort keys))))))
+
 (extend-type array
   IEmptyableCollection
   (-empty [a]
