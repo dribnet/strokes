@@ -1,4 +1,4 @@
-(ns reader.ctclj)
+(ns mrhyde.jso)
 
 ; this macro is just here as a way of confirming dependencies
 (defmacro js-test []

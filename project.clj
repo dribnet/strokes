@@ -9,7 +9,7 @@
 
   :plugins [[lein-cljsbuild "0.3.0"]]
 
-  :cljsbuild {:builds [{:source-paths ["src/cljs"]
+  :cljsbuild {:builds [{:source-paths ["src/cljs" "src/clj"]
                         :jar true
                         :compiler { :output-to "public/out/strokes.js"
                                     :externs ["public/d3/d3-externs.js"]
@@ -18,7 +18,7 @@
                                     :optimizations :simple}}
 
                        ; tests
-                       {:source-paths ["src/cljs" "test/cljs"]
+                       {:source-paths ["src/cljs" "src/clj" "test/cljs"]
                         :compiler  {:optimizations :whitespace
                                     :externs ["public/d3/d3-externs.js" "public/dummylib/dummylib-externs.js"]
                                     :pretty-print true

@@ -11,7 +11,7 @@
                               patch-args-clj-to-js]]
       ))
 
-(def DummyLib js/DummyLib)
+(def DummyLib (this-as ct (aget ct "DummyLib")))
 
 (defn init []
   ; patch the dummy library

@@ -140,50 +140,50 @@
 
 
 ;;jQuery extensions taken from Chris's jayq.
-(extend-type js/jQuery
-  ISeqable
-  (-seq [this] (when (.get this 0)
-                 this))
-  ISeq
-  (-first [this] (.get this 0))
-  (-rest [this] (if (> (count this) 1)
-                  (.slice this 1)
-                  (list)))
+; (extend-type js/jQuery
+;   ISeqable
+;   (-seq [this] (when (.get this 0)
+;                  this))
+;   ISeq
+;   (-first [this] (.get this 0))
+;   (-rest [this] (if (> (count this) 1)
+;                   (.slice this 1)
+;                   (list)))
 
-  ICounted
-  (-count [this] (.-length this))
+;   ICounted
+;   (-count [this] (.-length this))
 
-  IIndexed
-  (-nth
-    ([this n]
-       (when (< n (count this))
-         (.slice this n (inc n))))
-    ([this n not-found]
-       (if (< n (count this))
-         (.slice this n (inc n))
-         (if (undefined? not-found)
-           nil
-           not-found))))
+;   IIndexed
+;   (-nth
+;     ([this n]
+;        (when (< n (count this))
+;          (.slice this n (inc n))))
+;     ([this n not-found]
+;        (if (< n (count this))
+;          (.slice this n (inc n))
+;          (if (undefined? not-found)
+;            nil
+;            not-found))))
 
-  ISequential
+;   ISequential
 
-  ILookup
-  (-lookup
-    ([this k]
-       (or (.slice this k (inc k)) nil))
-    ([this k not-found]
-       (-nth this k not-found)))
+;   ILookup
+;   (-lookup
+;     ([this k]
+;        (or (.slice this k (inc k)) nil))
+;     ([this k not-found]
+;        (-nth this k not-found)))
 
-  IReduce
-  (-reduce
-    ([this f]
-       (ci-reduce this f))
-    ([this f start]
-       (ci-reduce this f start)))
+;   IReduce
+;   (-reduce
+;     ([this f]
+;        (ci-reduce this f))
+;     ([this f start]
+;        (ci-reduce this f start)))
 
-  IFn
-  (-invoke
-    ([this k]
-       (-lookup this k))
-    ([this k not-found]
-       (-lookup this k not-found))))
+;   IFn
+;   (-invoke
+;     ([this k]
+;        (-lookup this k))
+;     ([this k not-found]
+;        (-lookup this k not-found))))

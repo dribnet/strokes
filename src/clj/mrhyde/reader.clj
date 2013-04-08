@@ -1,4 +1,4 @@
-(ns reader.tags
+(ns mrhyde.reader
   (:require [cljs.tagged-literals :as t]))
 
 ; runtime translation via clj->js
