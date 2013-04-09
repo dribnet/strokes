@@ -23,27 +23,34 @@
 ;   (if (coll? x) 
 ;     (vec (concat ["col"] (map #(inwards %) x)) "x")))
 
-(defmacro intest [x]
+(defn intest-fn [x]
   (if (coll? x)
-    (vec (map #(intest %) x))
-    "x"))
+    (vec (map #(intest-fn %) x))
+    x))
+
+(defmacro intest [x]
+  (intest-fn x))
+
+(defn inwards-fn [x]
+  (if (coll? x)
+    (concat (list 'cljs.core/array) (map #(inwards-fn %) x))
+    x))
 
 (defmacro inwards [x]
-  (if (coll? x)
-    (concat (list 'cljs.core/array) (map #(inwards %) x))
-    "x"))
+  (inwards-fn x))
 
-(defmacro ct-clj [x]
+(defn jso-fn [x]
   (cond
-    (keyword? x) (name x)
     (symbol? x) (str x)
-    ; (map? x) (let [m (js-obj)]
-    ;            (doseq [[k v] x]
-    ;              (aset m (-key->js k) (-clj->js v)))
-    ;            m)
-    ; (coll? x) (concat (list 'cljs.core/array) x)
-    (coll? x) (concat (list 'cljs.core/array) (map #(ct-clj %) x))
+    (keyword? x) (name x)
+    (map? x) (concat (list 'cljs.core/js-obj) 
+                (map #(jso-fn %) (reduce into [] x)))
+    (coll? x) (concat (list 'cljs.core/array)
+                (map #(jso-fn %) x))
     :else x))
+
+(defmacro jso [x]
+  (jso-fn x))
 
 (defmacro ct-name [k]
   (name k))

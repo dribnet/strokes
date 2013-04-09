@@ -1,13 +1,13 @@
 (ns mrhyde.jso
   (:require-macros 
-    [mrhyde.jso :refer [inwards ct-name ct-clj ct-clj-key]]
+    [mrhyde.jso :refer [jso ct-name]]
     [mrhyde.reader])
   (:require 
     [cljs.reader :as reader :refer [read-string]]
     [mrhyde.extend-js]))
 
 ; just warming up with the usual syntax
-(def jso
+(def jso1
   (clj->js {:a 1
             :b [2 4 [6 6]]
             :c {:nested [nil]}}))
@@ -40,13 +40,15 @@
             (ct-name :c) (js-obj
                   (ct-name :nested) (array nil))))
 
-(def jso6 (inwards [2 4 [6 6]]))
+(def jso6 (jso {:a 1
+                :b [2 4 [6 6]]
+                :c {:nested [nil]}}))
 
 ; puts the objects on the page for all to see
 (def to-json (.-stringify js/JSON))
 
 (def body (str 
-  (to-json jso)
+  (to-json jso1)
   "<p>"
   (to-json jso2)
   "<p>"
