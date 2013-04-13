@@ -1,4 +1,4 @@
-(defproject net.drib/strokes "0.4.1"
+(defproject net.drib/strokes "0.5.0-SNAPSHOT"
   :description "strokes: d3 from clojurescript"
   :url "https://github.com/dribnet/strokes"
   :license {:name "Eclipse Public License"
