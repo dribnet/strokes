@@ -49,9 +49,7 @@ To use from Clojure/ClojureScript add this to your `project.clj`:
 
     [net.drib/strokes "0.4.0"]
 
-For more information see the Hello World example, below.
-
-Or warmup by hacking on the above examples which currently live in this repo:
+For more information see the Hello World example, below.  Or warm up by hacking on the above examples which currently live in this repo:
 
     lein cljsbuild auto
 
@@ -59,15 +57,14 @@ Then open public/strokes-{foo}.html and play around with cljs file in examples.
 
 ## A Hello World example
 
-The following example should be enough to get you started in your own project (without forking this repo):
+The following example should be enough to get you started in your own project (without the need to fork this repo):
 
     lein new trystrokes
     cd trystrokes
 
-
 `project.clj`:
 
-     ;; ...
+     ;; (...
      :dependencies [[org.clojure/clojure "1.4.0"]
                     [net.drib/strokes "0.4.0"]]
      :min-lein-version "2.0.0"
@@ -115,9 +112,11 @@ The following example should be enough to get you started in your own project (w
           (.attr "cx" 50)
           (.attr "cy" 50)))
 
-**NOTE**: The externs for the D3 library is also needed and can be copied e.g. from this repository to `public/d3/d3-externs.js`.  You should also copy the D3 source (FIXME: can one use a CDN instead?) to `public/d3/d3.js`.
+**NOTE**: The externs for the D3 library is also needed and can be
+  copied e.g. from this repository to `public/d3/d3-externs.js`. You
+  should also copy the D3 source (FIXME: can one use a CDN instead?)
+  to `public/d3/d3.js`.
 
-Then `lein cljsbuild once` and view `public/hello.html` in your browser.  You should see a circle.
-
-
-Several more complex examples can be found in this repository.
+Then `lein cljsbuild once`, put the public directory on a server
+somewhere and view `public/hello.html` in your browser. You should see
+a circle appear in the upper left corner.
