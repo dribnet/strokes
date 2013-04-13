@@ -32,64 +32,70 @@ proven useful on the leaflet and angular libraries. In addition,
 treated as native JavaScript objects as well as several helpful
 functions patching JavaScript functions to provide smoother interop.
 
+## Getting Started 
+
+To use strokes from your ClojureScript project, 
+add this dependency to your `project.clj`:
+
+    [net.drib/strokes "0.4.1"]
+
 ---
 
-### Check out the [separate repo of strokes examples](https://github.com/dribnet/strokes-examples).
+#### To see more examples, check out the [separate repo of strokes examples](https://github.com/dribnet/strokes-examples) to see several example projects. A great start is the [venn-simple](https://github.com/dribnet/strokes-examples/tree/master/venn-simple) project which generates this [simple self-contained sketch](http://s.trokes.org/dribnet/4994892) in 20 lines of ClojureScript.
 
 ---
 
-There are also a few examples in this repo:
+Or just follow along with this hello world example below.
 
- * [circle packing](http://s.trokes.org/4584997)
- * [quadtree](http://s.trokes.org/4409139)
- * [convex hull](http://s.trokes.org/4369073)
- * [clocky](http://s.trokes.org/4326896)
- 
-To use from Clojure/ClojureScript add this to your `project.clj`:
+### Hello World example
 
-    [net.drib/strokes "0.4.0"]
-
-For more information see the Hello World example, below.  Or warm up by hacking on the above examples which currently live in this repo:
-
-    lein cljsbuild auto
-
-Then open public/strokes-{foo}.html and play around with cljs file in examples.
-
-## A Hello World example
-
-The following example should be enough to get you started in your own project (without the need to fork this repo):
+The following example should be enough to get you started in your own project without needing to fork this repo:
 
     lein new trystrokes
     cd trystrokes
 
 `project.clj`:
 
-     ;; (...
-     :dependencies [[org.clojure/clojure "1.4.0"]
-                    [net.drib/strokes "0.4.0"]]
-     :min-lein-version "2.0.0"
-     :source-paths ["src/clj" "src/cljs"]
-     :plugins [[lein-cljsbuild "0.3.0"]]
+```clj
+    (defproject trystrokes "0.0.1-SNAPSHOT"
+      :description "FIXME: write description"
+      :dependencies [[org.clojure/clojure "1.4.0"]
+                     [net.drib/strokes "0.4.1"]]
+      :min-lein-version "2.0.0"
+      :source-paths ["src/clj" "src/cljs"]
 
-     :cljsbuild {:builds [{:source-paths ["examples/strokes/hello"]
-                           :compiler  {:optimizations :simple
-                                       :externs ["public/d3/d3-externs.js"]
-                                       :pretty-print false
-                                       :output-to "public/out/hello.js"}}]})
+      :plugins [[lein-cljsbuild "0.3.0"]]
 
+      :cljsbuild {:builds [{:source-paths ["src/cljs"]
+                            :compiler { :output-to "public/out/trystrokes.js"
+                                        :pretty-print true 
+                                        :optimizations :simple}}]})
+```
 
-`public/hello.html`:
+`public/trystrokes.html`:
 
+```html
     <!DOCTYPE html>
-    <title>Hello!</title>
+    <title>Hello strokes!</title>
+    <style>
+      circle {
+        fill: firebrick;
+        fill-opacity: 0.7;
+      }
+      circle:hover {
+        fill-opacity: 1.0;
+      }
+    </style>
     <body>
-    <script src="d3/d3.js"></script>
-    <script type="text/javascript" src="out/hello.js"></script>
+      <script src="http://d3js.org/d3.v3.min.js"></script>
+      <script src="out/trystrokes.js"></script>
     </body>
+```
 
-`examples/strokes/hello/hello.cljs`:
+`src/cljs/trystrokes/core.cljs`:
 
-    (ns strokes.examples.hello
+```clj
+    (ns trystrokes.core
       (:require [strokes :refer [d3]]))
 
     (strokes/bootstrap)
@@ -106,17 +112,13 @@ The following example should be enough to get you started in your own project (w
     (let [svg (gen-svg)]
       (-> svg
           (.append "circle")
-          (.style "stroke" "grey")
-          (.style "fill" "white")
           (.attr "r" 40)
           (.attr "cx" 50)
           (.attr "cy" 50)))
+```
 
-**NOTE**: The externs for the D3 library is also needed and can be
-  copied e.g. from this repository to `public/d3/d3-externs.js`. You
-  should also copy the D3 source (FIXME: can one use a CDN instead?)
-  to `public/d3/d3.js`.
+Then `lein cljsbuild once` and open `public/hello.html` in your browser.
+You should see a circle appear in the upper left corner.
 
-Then `lein cljsbuild once`, put the public directory on a server
-somewhere and view `public/hello.html` in your browser. You should see
-a circle appear in the upper left corner.
+You can also use the command `lean cljsbuild auto` to rebuild on every
+save of `core.cljs` - just reload in the browser to iteratively develop.
