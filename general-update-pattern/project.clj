@@ -1,11 +1,12 @@
 (defproject general-update-pattern "0.0.1-SNAPSHOT"
   :description "general-update-pattern"
-  :dependencies [[org.clojure/clojure "1.4.0"]
-                 [net.drib/strokes "0.4.1"]]
-  :min-lein-version "2.0.0"
-  :source-paths ["src/gup1" "src/gup2" "src/gup3"]
 
-  :plugins [[lein-cljsbuild "0.3.0"]]
+  :dependencies [[org.clojure/clojure "1.5.1"]
+                 [net.drib/strokes "0.5.0-SNAPSHOT"]]
+  :plugins [[lein-cljsbuild "0.3.2"]]
+  :min-lein-version "2.0.0"
+
+  :source-paths ["src/gup1" "src/gup2" "src/gup3"]
 
   :cljsbuild {:builds [
                        ; update
