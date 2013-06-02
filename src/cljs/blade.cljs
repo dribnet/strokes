@@ -3,5 +3,5 @@
 
 (def L (this-as ct (aget ct "L")))
 
-(defn bootstrap [& opts]
-  (mrhyde/boostrap))
+(defn ^:export bootstrap [& opts]
+  (mrhyde/bootstrap))
