@@ -510,7 +510,8 @@
 (defn patch-known-mappish-types [] 
   (patch-sequential-type cljs.core.LazySeq) ; <-- TODO BUG - this should not be necessary!
   (doseq [t [[cljs.core.ObjMap, "ObjMap"]
-             [cljs.core.PersistentHashMap, "PersistentHashMap"]]]
+             [cljs.core.PersistentHashMap, "PersistentHashMap"]
+             [cljs.core.PersistentArrayMap, "PersistentArrayMap"]]]
     (if (= (first t) (aget cljs.core (second t)))
       (patch-map-type t))))
 

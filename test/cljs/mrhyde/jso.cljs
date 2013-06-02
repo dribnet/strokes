@@ -82,8 +82,8 @@
 
 (defn ^:export runtest []
   (aset (-> js/document .-body) "innerHTML" body)
-  (dp "jso:")
-  (do-result jso)
+  (dp "jso1:")
+  (do-result jso1)
   (dp "jso2:")
   (do-result jso2)
   (dp "jso3:")
