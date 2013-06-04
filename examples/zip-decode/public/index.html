@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>zip-decode</title>
+<style>
+
+html { 
+  background-color: #333333
+}
+body {
+  font-family: Helvetica, Arial, sans-serif; font-size: 16px;
+  color: #cbcbcb;
+}
+a {
+  text-decoration: none; color: #999a63
+}
+#map {
+  width: 1200px; height: 600px;
+}
+
+svg {
+  background-color: #333333
+}
+text {
+  fill: #cbcbcb; font-size: 3px;
+}
+#states {
+  fill: none;
+  stroke: #555555;
+  stroke-width: 0.5px;
+}
+.unselected {
+  fill: #999a63;
+  stroke: #999a63;
+}
+.selected {
+  fill: #cbcbcb;
+  stroke: #cbcbcb;
+}
+.debug {
+  stroke: #ffff00;
+}
+
+</style>
+
+<body>
+  <center>
+  <div id="status">
+    <!-- todo: put something cute here ... -->
+    Loading...</div>
+  <div id="map"></div>
+<!-- <input id="input" type="text" style="font-size: 300%" tabindex="0">
+ -->
+<p id="input" style="font-size: 300%" tabindex="0" contentEditable="true"></p>
+  </center>
+
+	<script type="text/javascript" src="d3/d3.js"></script>
+	<script type="text/javascript" src="out/zip-decode.js"></script>
+</body>

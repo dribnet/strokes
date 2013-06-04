@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>highlighter</title>
+<style>
+
+body {
+  font: 100 18px "Helvetica Neue";
+  margin: 40px 40px 40px 40px;
+}
+
+/* this will be added to .high1 .. high10 */
+.highlight {
+  background: yellow;
+}
+
+.invisible {
+  opacity: 0;
+}
+
+/* this will make the transitions ease in/out */
+.high1,.high2,.high3,.high4 {
+  -webkit-transition: background 0.2s ease;
+  -moz-transition: background 0.2s ease;
+  -o-transition: background 0.2s ease;
+  -ms-transition: background 0.2s ease;  
+  -webkit-transition: opacity 0.4s ease;
+  -moz-transition: opacity 0.4s ease;
+  -o-transition: opacity 0.4s ease;
+  -ms-transition: opacity 0.4s ease;  
+}
+
+/* code styles */
+.string, .regexp {
+  color: #d14;
+  /*color: #f39;*/
+}
+
+.built_in, .keyword {
+  color: #00c;
+}
+
+.comment {
+  color: #777;
+  font-style: oblique;
+}
+
+.literal, .number {
+  color: #369;
+}
+
+.attribute, .class, .special {
+  color: #1181B8;
+}
+
+
+</style>
+
+<body>
+  <body>
+    <center>
+    <h2>
+      try keys: 1 2 3 ! @ # Q q W w E e `~ a A<br>
+    </h2>
+    </center>
+<pre style="font-size:20px;"><code class="clojure">
+(def data <span class="high1">[63 39 31 53 25 32 175 69 51]</span>)
+
+; data ↦ width
+(def x (-> d3 .-scale (.linear)
+  (.domain <span class="high1">[0 <span class="high3">(apply max data)</span>]</span>)
+  (.range <span class="high1">[0 w]</span>)))
+
+; index ↦ y
+(def y (-> d3 .-scale (.ordinal)
+  (.domain <span class="high1">(vec <span class="high3">(range (count data))</span>)</span>)
+  (.rangeRoundBands <span class="high1">[0 h]</span> 0.2)))
+
+; Data ↦ Element
+(def rect (-> svg (.selectAll "rect")
+   (.data <span class="high1">data</span>))
+
+; Data Attributes ↦ Element Attributes
+(-> rect (.enter) (.append "rect")
+    (.attr <span class="high2">{:width  #(x %)
+            :y      #(y %2)
+            :height (.rangeBand y)}</span>))
+</code></pre>
+  <script type="text/javascript" src="highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+	<script type="text/javascript" src="d3/d3.js"></script>
+	<script type="text/javascript" src="out/highlighter.js"></script>
+
+</body>
