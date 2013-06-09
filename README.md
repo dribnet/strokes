@@ -5,8 +5,6 @@ What might be right for you, may not be right for some.*
 
 **strokes is an interop library for using [d3.js](http://d3js.org/) from clojurescript**
 
-The primary design decision is to remove as much of the interop glue
-and clj->js->clj data marshalling from application code as possible.
 D3 is a wonderfully functional library and seems well suited for
 playing nice with clojurescript, provided the usual data wrangling
 issues can be made to go away. This is achieved in strokes via

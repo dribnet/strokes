@@ -1,7 +1,7 @@
 (defproject example "0.0.1-SNAPSHOT"
   :description "strokes example template"
   :dependencies [[org.clojure/clojure "1.5.1"]
-                 [net.drib/strokes "0.5.0-SNAPSHOT"]]
+                 [net.drib/strokes "0.5.0"]]
   :min-lein-version "2.0.0"
   :source-paths ["src/clj" "src/cljs"]
 

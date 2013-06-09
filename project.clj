@@ -1,10 +1,10 @@
-(defproject net.drib/strokes "0.5.0-SNAPSHOT"
+(defproject net.drib/strokes "0.5.0"
   :description "strokes: d3 from clojurescript"
   :url "https://github.com/dribnet/strokes"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
-                 [net.drib/mrhyde "0.5.0-SNAPSHOT"]  ]
+                 [net.drib/mrhyde "0.5.0"]  ]
   :min-lein-version "2.0.0"
   :source-paths ["src/cljs"]
 
@@ -32,7 +32,7 @@
                                     :output-to "public/out/strokes_test_advanced.js"}}
 
 
-                      ; strokes examples
+                      ; strokes "internal" examples
                        {:source-paths ["examples/strokes/clocky"]
                         :compiler  {:optimizations :simple
                                     :pretty-print false
