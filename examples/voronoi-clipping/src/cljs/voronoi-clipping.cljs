@@ -11,11 +11,10 @@
 (def points [[200 200]
              [760 300]])
 
-(def bounds (polygon [
-      [padding, padding]
-      [padding, (- height padding)]
-      [(- width padding), (- height padding)]
-      [(- width padding), padding]]))
+(def vor-obj (-> (voronoi) (.clipExtent [
+                [padding, padding]
+                [(- width padding), (- height padding)
+              ]])))
 
 (def colorfn (category10))
 
@@ -23,7 +22,7 @@
       (.attr {:width width :height height})))
 
 (-> svg (.selectAll "path")
-      (.data (map #(.clip bounds %) (voronoi points)))
+      (.data (vor-obj points))
     (.enter)
       (.append "path")
       (.style "fill" #(colorfn %2))
