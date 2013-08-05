@@ -13,8 +13,8 @@
 
 (def vor-obj (-> (voronoi) (.clipExtent [
                 [padding, padding]
-                [(- width padding), (- height padding)
-              ]])))
+                [(- width padding), (- height padding)]
+              ])))
 
 (def colorfn (category10))
 

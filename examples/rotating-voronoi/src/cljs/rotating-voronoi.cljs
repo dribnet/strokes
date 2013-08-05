@@ -21,11 +21,10 @@
   ; (apply vector (doall (map deref @points))))
   (apply array (map deref @points)))
 
-(def bounds (polygon [
-      [(/ (- width) 2) (/ (- height) 2)]
-      [(/ (- width) 2) (/ (+ height) 2)]
-      [(/ (+ width) 2) (/ (+ height) 2)]
-      [(/ (+ width) 2) (/ (- height) 2)] ]))
+(def vor-obj (-> (voronoi) (.clipExtent [
+                [(/ (- width) 2) (/ (- height) 2)]
+                [(/ (+ width) 2) (/ (+ height) 2)]
+              ])))
 
 (def circles [
     [  0      0 120 46 (- 0.001)]
@@ -96,7 +95,7 @@
 
 (timer (fn []
   (let [pts (get-points)
-        vnoi (map #(.clip bounds %) (voronoi pts))]
+        vnoi (vor-obj pts)]
     (-> circles
       (.attr "transform" #(str "translate(" (nth pts %2) ")")))
     (-> path (.attr "d" (fn [pt i] (line (resample (nth vnoi i)))))))
