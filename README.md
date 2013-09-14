@@ -32,7 +32,7 @@ Online examples:
 To use strokes from your ClojureScript project, 
 add this dependency to your `project.clj`:
 
-    [net.drib/strokes "0.5.0"]
+    [net.drib/strokes "0.5.1"]
 
 Or to get started in this repo, try [venn-simple](examples/venn-simple) 
 or any of the other examples. Simply 
