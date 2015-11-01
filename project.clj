@@ -3,9 +3,9 @@
   :url "https://github.com/dribnet/strokes"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.5.1"]
-                 [org.clojure/clojurescript "0.0-1878"]
-                 [net.drib/mrhyde "0.5.3"]]
+  :dependencies [[org.clojure/clojure "1.7.0"]
+                 [org.clojure/clojurescript "1.7.145"]
+                 [net.drib/mrhyde "0.5.4-SNAPSHOT"]]
   :min-lein-version "2.0.0"
   :source-paths ["src/cljs"]
 
