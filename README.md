@@ -21,11 +21,11 @@ template to start hacking your own projects.
 
 Online examples:
 
- * [General update pattern tutorial](http://s.trokes.org/5027817) progressing to [key functions](http://s.trokes.org/5027818) and [transitions](http://s.trokes.org/5027819)
- * [simple venn diagram](http://s.trokes.org/4994892)
- * [voronoi clipping](http://s.trokes.org/4760896)
- * [rotating voronoi](http://s.trokes.org/4744126)
- * [(your own example here?)](http://s.trokes.org/)
+ * [General update pattern tutorial](http://bl.ocks.org/5027817) progressing to [key functions](http://bl.ocks.org/5027818) and [transitions](http://bl.ocks.org/5027819)
+ * [simple venn diagram](http://bl.ocks.org/4994892)
+ * [voronoi clipping](http://bl.ocks.org/4760896)
+ * [rotating voronoi](http://bl.ocks.org/4744126)
+ * [(your own example here?)](http://bl.ocks.org/)
 
 ## Getting Started 
 
@@ -42,4 +42,4 @@ cd examples/venn-simple
 lein cljsbuild auto
 ```
 
-Then open public/hello.html to see [three circles](http://s.trokes.org/4994892) in your web browser. Then to get hacking, you can then edit the [venn-simple source file](examples/venn-simple/src/cljs/venn-simple.cljs), save, and refresh your browser to see the changes.
+Then open public/hello.html to see [three circles](http://bl.ocks.org/4994892) in your web browser. Then to get hacking, you can then edit the [venn-simple source file](examples/venn-simple/src/cljs/venn-simple.cljs), save, and refresh your browser to see the changes.
